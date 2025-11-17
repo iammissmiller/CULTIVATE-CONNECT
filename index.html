@@ -1157,7 +1157,8 @@ h4 {
             <a class="nav__link" data-scroll="#ecosystem" href="#ecosystem">Modes</a>
             <a class="nav__link" data-scroll="#howtouse" href="#howtouse">how to use</a>
             <a class="nav__link" data-scroll="#purpose" href="#purpose">Purpose</a>
-            <a class="nav__link nav__cta" data-scroll="#cta" href="#cta">Login</a>
+            <a class="btn btn--ghost login-btn" href="#">Login</a>
+
         </div>
     </nav>
 
@@ -1168,7 +1169,7 @@ h4 {
                 <span id="hero-rotator-text"></span>
             </div>
             <div class="hero__actions">
-    <a class="btn btn--ghost" href="#purpose">Login</a>
+    <a class="btn btn--ghost login-btn" href="#">Login</a>
 </div>
 
         </div>
@@ -1419,6 +1420,14 @@ startRotation();
             flowObserver.observe(flow);
 
             // LOGIN POPUP
+// OPEN LOGIN POPUP
+document.querySelectorAll(".login-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        loginModal.classList.add("active");
+    });
+});
+
 const loginModal = document.getElementById("login-modal");
 const closeLogin = document.getElementById("close-login");
 
