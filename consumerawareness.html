@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cultivate Connect — Consumer Awareness</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  /* THEME */
+  :root{
+    --bg: #F7EFC2;
+    --card: #E7D7A7;
+    --card-2: #FFF7E8;
+    --accent: #C2A875;
+    --accent-dark: #B8945B;
+    --muted: #6b5b3a;
+    --soft: rgba(194,168,117,0.12);
+    --shadow-md: 0 10px 24px rgba(0,0,0,0.07);
+    --radius: 12px;
+    font-family: Inter, "Segoe UI", system-ui;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:white;color:var(--muted);overflow-x:hidden;}
+
+  .app{display:flex;}
+
+  /* SIDEBAR */
+  .sidebar{
+    width:80px;
+    background:white;
+    border-right:1px solid rgba(0,0,0,0.1);
+    height:100vh;
+    position:fixed;
+    left:0;top:0;
+    padding:20px 10px;
+    box-shadow:0 4px 24px rgba(0,0,0,0.08);
+    transition:0.3s;
+    overflow-y:auto;
+  }
+  .sidebar:hover{width:240px;}
+
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+  .logo{
+    width:45px;height:45px;border-radius:12px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:18px;color:white;
+  }
+  .brand-title{display:none;font-weight:700;font-size:15px;}
+  .sidebar:hover .brand-title{display:block;}
+
+  .nav{display:flex;flex-direction:column;gap:10px;}
+  .nav-item{
+    display:flex;align-items:center;gap:14px;padding:10px;
+    border-radius:10px;cursor:pointer;transition:0.2s;
+  }
+  .nav-item:hover{background:var(--soft);}
+  .icon{
+    width:40px;height:40px;border-radius:10px;
+    background:var(--card-2);display:flex;align-items:center;justify-content:center;
+    color:var(--accent-dark);font-size:18px;
+  }
+  .label{display:none;font-weight:600;}
+  .sidebar:hover .label{display:block;}
+
+  /* MAIN AREA */
+  .main{
+    margin-left:80px;
+    padding:20px;
+    width:100%;
+    transition:0.3s;
+  }
+  .sidebar:hover ~ .main{margin-left:240px;}
+
+  /* TITLE */
+  .page-header{
+    margin-bottom:18px;
+  }
+  .page-title{
+    font-size:22px;font-weight:800;color:var(--accent-dark);
+  }
+  .page-sub{font-size:14px;color:#5a4d37;margin-top:6px;}
+
+  /* HERO (Compact) */
+  .hero{
+    background:linear-gradient(135deg,#F7EFC2,#F0E1C0);
+    padding:20px;
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-md);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+  }
+  .hero img{width:120px;border-radius:12px;}
+  .hero p{width:80%;font-size:14px;margin-top:6px;}
+
+  /* NEW CONTENT SECTION */
+  .section{
+    background:var(--card-2);
+    padding:20px;
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-md);
+    margin-bottom:20px;
+  }
+  .section h2{
+    font-size:18px;
+    margin-bottom:10px;
+    color:var(--accent-dark);
+    font-weight:700;
+  }
+  .content-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:16px;
+    margin-top:10px;
+  }
+  .box{
+    background:white;
+    padding:18px;
+    border-radius:var(--radius);
+    border:1px solid rgba(0,0,0,0.05);
+    box-shadow:var(--shadow-md);
+  }
+  .box h3{
+    font-size:15px;
+    margin-bottom:8px;
+    color:var(--accent-dark);
+  }
+  .box p{
+    font-size:13px;
+    color:#5a4d37;
+  }
+
+  /* DO & DONT POINTS */
+  .dosdont{
+    margin-top:20px;
+    background:#ffffff;
+    padding:18px;
+    border-radius:var(--radius);
+    border:1px solid rgba(0,0,0,0.06);
+    box-shadow:var(--shadow-md);
+  }
+  .dosdont h3{
+    color:var(--accent-dark);
+    margin-bottom:10px;
+    font-size:16px;
+  }
+  .dosdont ul{
+    margin-left:16px;
+    margin-bottom:10px;
+  }
+  .dosdont li{
+    font-size:14px;
+    margin-bottom:6px;
+  }
+
+  /* HIGHLIGHT STRIP */
+  .highlight{
+    background:var(--accent-dark);
+    color:white;
+    padding:12px;
+    border-radius:var(--radius);
+    margin-top:12px;
+    text-align:center;
+    font-weight:600;
+  }
+
+  /* RESPONSIVE */
+  @media(max-width:700px){
+    .hero{flex-direction:column;text-align:center;}
+    .hero img{display:none;}
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">CC</div>
+      <div class="brand-title">Cultivate Connect</div>
+    </div>
+
+    <div class="nav">
+      <div class="nav-item"><div class="icon"><i class="fas fa-home"></i></div><div class="label">Dashboard</div></div>
+      <div class="nav-item"><div class="icon"><i class="fas fa-shopping-cart"></i></div><div class="label">Buy</div></div>
+      <div class="nav-item"><div class="icon"><i class="fas fa-lightbulb"></i></div><div class="label">Tips</div></div>
+      <div class="nav-item"><div class="icon"><i class="fas fa-bullhorn"></i></div><div class="label">Awareness</div></div>
+      <div class="nav-item"><div class="icon"><i class="fas fa-question-circle"></i></div><div class="label">Help</div></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <div class="page-header">
+      <div class="page-title">Consumer Awareness</div>
+      <div class="page-sub">Important safety information for smart buying decisions.</div>
+    </div>
+
+    <!-- HERO -->
+    <div class="hero">
+      <div>
+        <h2 style="font-size:20px;">Be an Informed Consumer</h2>
+        <p>Learn how to identify genuine products, avoid fraud, and ensure safe food choices.</p>
+      </div>
+      <img src="https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=400&q=60">
+    </div>
+
+    <!-- MAIN SECTION -->
+    <div class="section">
+      <h2>Key Consumer Safety Information</h2>
+
+      <div class="content-grid">
+
+        <div class="box">
+          <h3>1. Identify Fake Organic Labels</h3>
+          <p>Always check for certification codes, government-approved marks, and printed batch numbers.</p>
+        </div>
+
+        <div class="box">
+          <h3>2. Check for Proper Packaging</h3>
+          <p>Look for sealed, undamaged packaging and verify manufacturing & expiry details.</p>
+        </div>
+
+        <div class="box">
+          <h3>3. Avoid Overly Shiny Produce</h3>
+          <p>Unnaturally glossy items may indicate chemical polishing or harmful preservatives.</p>
+        </div>
+
+        <div class="box">
+          <h3>4. Know Your Consumer Rights</h3>
+          <p>You have the right to return faulty goods, ask questions, and demand proper quality.</p>
+        </div>
+
+      </div>
+
+      <!-- ⭐ NEW ADDED DO's & DON'Ts SECTION -->
+      <div class="dosdont">
+        <h3>Do’s & Don’ts for Safe Purchasing</h3>
+
+        <strong>✔ Do’s:</strong>
+        <ul>
+          <li>Always compare prices before buying.</li>
+          <li>Check product freshness and manufacturing details.</li>
+          <li>Buy from trusted or verified sellers.</li>
+          <li>Inspect packaging for tampering or damage.</li>
+        </ul>
+
+        <strong>✘ Don’ts:</strong>
+        <ul>
+          <li>Do not buy items without labels or expiry dates.</li>
+          <li>Avoid products with unusually low prices (may be fake).</li>
+          <li>Do not trust verbal claims without proof.</li>
+          <li>Avoid produce with artificial shine or strong chemical smell.</li>
+        </ul>
+      </div>
+
+      <!-- HIGHLIGHT STRIP -->
+      <div class="highlight">
+        ✔ Your safety depends on informed choices. Learn → Compare → Buy Smart.
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>

@@ -1157,8 +1157,7 @@ h4 {
             <a class="nav__link" data-scroll="#ecosystem" href="#ecosystem">Modes</a>
             <a class="nav__link" data-scroll="#howtouse" href="#howtouse">how to use</a>
             <a class="nav__link" data-scroll="#purpose" href="#purpose">Purpose</a>
-            <a class="btn btn--ghost login-btn" href="#">Login</a>
-
+            <a class="nav__link nav__cta" data-scroll="#cta" href="#cta">Login</a>
         </div>
     </nav>
 
@@ -1169,7 +1168,7 @@ h4 {
                 <span id="hero-rotator-text"></span>
             </div>
             <div class="hero__actions">
-    <a class="btn btn--ghost login-btn" href="#">Login</a>
+    <a class="btn btn--ghost" href="#purpose">Login</a>
 </div>
 
         </div>
@@ -1302,11 +1301,13 @@ h4 {
     <p class="modal__subtitle">Log in to continue your journey</p>
 
     <form class="modal__form">
-      <label>Email</label>
-      <input type="email" placeholder="Enter your email" required>
+        <label>Username</label>
+        <input id="login-username" type="text" placeholder="Enter your username" required>
+
 
       <label>Password</label>
-      <input type="password" placeholder="Enter your password" required>
+    <input id="login-password" type="password" placeholder="Enter your password" required>
+
 
       <button type="submit" class="btn" style="width:100%; margin-top:2rem;">Login</button>
     </form>
@@ -1314,8 +1315,12 @@ h4 {
 </div>
 
 
+<script src="users.js"></script>
+<script src="userData.js"></script>
+
 
     <script>
+
         const nav = document.getElementById('nav');
         
         const rotatorText = document.getElementById("hero-rotator-text");
@@ -1420,14 +1425,6 @@ startRotation();
             flowObserver.observe(flow);
 
             // LOGIN POPUP
-// OPEN LOGIN POPUP
-document.querySelectorAll(".login-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-        e.preventDefault();
-        loginModal.classList.add("active");
-    });
-});
-
 const loginModal = document.getElementById("login-modal");
 const closeLogin = document.getElementById("close-login");
 
@@ -1440,6 +1437,47 @@ window.addEventListener("click", event => {
         loginModal.classList.remove("active");
     }
 });
+// LOGIN FORM SUBMIT HANDLER
+document.querySelector(".modal__form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const username = document.getElementById("login-username").value.trim();
+    const password = document.getElementById("login-password").value.trim();
+
+    // Load users from localStorage
+    const users = JSON.parse(localStorage.getItem("cc_users")) || [];
+
+    // Check if valid user
+    const validUser = users.find(
+        u => u.username === username && u.password === password
+    );
+
+    if (!validUser) {
+        alert("Invalid username or password");
+        return;
+    }
+
+    // Save active user
+    localStorage.setItem("cc_active_user", JSON.stringify(validUser));
+
+    // Redirect based on role
+    if (validUser.role === "farmer") {
+        window.location.href = "farmer.html";
+    } else if (validUser.role === "consumer") {
+        window.location.href = "consumer.html"; // create later
+    } else if (validUser.role === "investor") {
+        window.location.href = "investor.html"; // create later
+    }
+});
+
+// OPEN LOGIN MODAL
+document.querySelectorAll('.nav__cta, .btn--ghost').forEach(btn => {
+    btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        loginModal.classList.add("active");
+    });
+});
+
 
         }
     </script>

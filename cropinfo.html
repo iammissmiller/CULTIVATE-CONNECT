@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroAid — Crop Information Hub (Farmer Mode)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Combined CSS Theme */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+      min-height: 100vh;
+      color: #0f172a;
+      display: flex;
+    }
+
+    /* Vertical Sidebar Styles */
+    .sidebar {
+      width: 70px;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      position: fixed;
+      left: 0;
+      top: 0;
+      transition: width 0.3s ease;
+      box-shadow: 3px 0 15px rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      overflow-y: auto;
+      overflow-x: hidden;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 80px;
+    }
+
+    .sidebar:hover {
+      width: 250px;
+    }
+
+    .sidebar-nav {
+      padding: 20px 0;
+      width: 100%;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 15px 0;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .sidebar:hover .nav-item {
+      justify-content: flex-start;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-left: 4px solid #81c784;
+    }
+
+    .nav-item.active {
+      background-color: rgba(255, 255, 255, 0.15);
+      border-left: 4px solid #4caf50;
+    }
+
+    .nav-icon {
+      font-size: 22px;
+      width: 30px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      margin-right: 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar:hover .nav-icon {
+      margin-right: 20px;
+    }
+
+    .nav-icon i {
+      color: #fff !important;
+      display: block;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    .nav-text {
+      white-space: nowrap;
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      transition: opacity 0.2s ease, width 0.2s ease;
+      font-weight: 500;
+    }
+
+    .sidebar:hover .nav-text {
+      opacity: 1;
+      width: auto;
+    }
+
+    /* Main Content Styles */
+    .main-content {
+      flex: 1;
+      margin-left: 70px;
+      padding: 30px 40px;
+      transition: margin-left 0.3s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar:hover ~ .main-content {
+      margin-left: 250px;
+    }
+
+    /* Header Styles */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 20px 0;
+      border-bottom: 2px solid #e0e0e0;
+      width: 100%;
+      background: transparent;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-start;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    .welcome-text {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0ea5a4, #16a34a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2e7d32;
+    }
+
+    .page-subtitle {
+      color: #666;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    /* Panel and Card Styles */
+    .panel {
+      background: white;
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .search {
+      flex: 1;
+      display: flex;
+    }
+
+    .search input {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #c8e6c9;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .search input:focus {
+      border-color: #4caf50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+    }
+
+    .select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #c8e6c9;
+      background: transparent;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .select:focus {
+      border-color: #4caf50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .chip {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      font-size: 13px;
+      color: #2e7d32;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .chip:hover {
+      background: #c8e6c9;
+    }
+
+    /* Crop Cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, white, #fbfff9);
+      border-radius: 10px;
+      padding: 10px;
+      border: 1px solid rgba(13, 52, 30, 0.04);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .card img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .crop-name {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .btns {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: none;
+      background: #4caf50;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn:hover {
+      background: #388e3c;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid #c8e6c9;
+      color: #2e7d32;
+    }
+
+    .btn.ghost:hover {
+      background: #e8f5e9;
+    }
+
+    .compare-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    .compare-label input[type="checkbox"] {
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Right Column Styles */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .widget {
+      background: linear-gradient(90deg, #fff, #fbfffc);
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .widget h4 {
+      margin: 0;
+      font-size: 15px;
+      color: #2e7d32;
+    }
+
+    .map-placeholder {
+      height: 180px;
+      border-radius: 8px;
+      border: 1px dashed #c8e6c9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      background: linear-gradient(180deg, #f7fff8, #ffffff);
+      margin-top: 8px;
+    }
+
+    /* Compare Section */
+    .compare {
+      margin-top: 12px;
+    }
+
+    .compare-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .compare-item {
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      color: #2e7d32;
+    }
+
+    /* Modal Styles */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal {
+      width: 860px;
+      max-width: 96%;
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 16px;
+    }
+
+    .stat {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    footer {
+      margin-top: 18px;
+      padding-top: 18px;
+      text-align: center;
+      color: #666;
+      font-size: 13px;
+      border-top: 1px solid #e0e0e0;
+      line-height: 1.6;
+    }
+
+    .main-footer {
+      margin-top: 40px;
+      padding: 10px 20px;
+      text-align: center;
+      color: #666;
+      font-size: 13px;
+      border-top: 2px solid #e0e0e0;
+      background: rgba(255, 255, 255, 0.5);
+      width: 100%;
+    }
+
+    /* New right sidebar styles */
+    .info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #e8f5e9;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .info-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #e8f5e9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2e7d32;
+      flex-shrink: 0;
+    }
+
+    .info-content h5 {
+      margin: 0 0 6px 0;
+      font-size: 14px;
+      color: #2e7d32;
+    }
+
+    .info-content p {
+      margin: 0;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #4caf50;
+      border-radius: 3px;
+    }
+
+    .tip-list {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .tip-list li {
+      margin-bottom: 8px;
+    }
+
+    /* Mobile Menu Toggle */
+    .mobile-menu-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1100;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 980px) {
+      .container {
+        padding-left: 90px;
+      }
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .aside {
+        order: 2;
+      }
+      .cards {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .filters {
+        flex-wrap: wrap;
+      }
+      .search input {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 0;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      
+      .sidebar.mobile-open {
+        width: 250px;
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 20px 15px;
+      }
+      
+      .mobile-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 15px 0;
+        padding-top: 50px;
+      }
+
+      .header-right {
+        width: 100%;
+        justify-content: space-between;
+        margin-left: 0;
+      }
+      
+      .search {
+        margin-top: 12px;
+        max-width: 100%;
+      }
+      
+      .cards {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+      
+      .title {
+        font-size: 24px;
+      }
+      
+      .page-subtitle {
+        font-size: 13px;
+      }
+      
+      .card img {
+        height: 80px;
+      }
+      
+      .btns {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .compare-label {
+        margin-left: 0;
+        width: 100%;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 15px 10px;
+      }
+      
+      .header {
+        padding-top: 40px;
+        padding-bottom: 15px;
+      }
+
+      .header-right {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .main-footer {
+        padding: 20px 15px;
+        font-size: 12px;
+      }
+      
+      .cards {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+      
+      .modal-content {
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+      
+      .crop-name {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <!-- Vertical Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-nav">
+      <a href="farmer.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-home"></i></div>
+        <div class="nav-text">Dashboard</div>
+      </a>
+      <a href="cropinfo.html" class="nav-item active">
+        <div class="nav-icon"><i class="fa-solid fa-seedling"></i></div>
+        <div class="nav-text">Crop Information Hub</div>
+      </a>
+      <a href="weather.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-cloud-sun"></i></div>
+        <div class="nav-text">Weather Update</div>
+      </a>
+      <a href="Govt_scheme.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        <div class="nav-text">Govt Schemes & News</div>
+      </a>
+      <a href="farmer-update.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-bullhorn"></i></div>
+        <div class="nav-text">Updation Page</div>
+      </a>
+      <a href="nearbyshop.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-store"></i></div>
+        <div class="nav-text">Nearby Shops & Stuff</div>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="header">
+      <div class="brand">
+        <h1 class="title">Crop Information Hub</h1>
+        <p class="page-subtitle">Farmer Mode — recommendations by season & region</p>
+      </div>
+      <div class="header-right">
+        <div class="welcome-text">Welcome, Farmer</div>
+        <button class="btn" id="savedBtn">Saved Crops (<span id="savedCount">0</span>)</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section>
+        <div class="panel">
+          <div class="controls">
+            <div class="search">
+              <input id="searchInput" placeholder="Search crops, e.g. Rice, Maize, Tomato" />
+            </div>
+            <div class="filters">
+              <select id="regionSel" class="select">
+                <option value="all">All Regions</option>
+                <option value="north">North</option>
+                <option value="south">South</option>
+                <option value="east">East</option>
+                <option value="west">West</option>
+              </select>
+              <select id="seasonSel" class="select">
+                <option value="all">All Seasons</option>
+                <option value="kharif">Kharif</option>
+                <option value="rabi">Rabi</option>
+                <option value="zaid">Zaid</option>
+              </select>
+              <select id="soilSel" class="select">
+                <option value="all">All Soils</option>
+                <option value="loamy">Loamy</option>
+                <option value="sandy">Sandy</option>
+                <option value="clay">Clay</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="chips" id="smartChips">
+            <!-- dynamic suggested chips -->
+          </div>
+
+          <div class="cards" id="cardsContainer">
+            <!-- crop cards injected here -->
+          </div>
+
+          <footer>© 2025 Cultivate Connect — Where Technology Meets the Fields</footer>
+        </div>
+      </section>
+
+      <aside class="aside">
+        <div class="panel">
+          <div class="summary">
+            <div class="widget">
+              <h4>Today's Farming Tips</h4>
+              <div class="info-item">
+                <div class="info-icon">
+                  <i class="fa-solid fa-cloud-sun"></i>
+                </div>
+                <div class="info-content">
+                  <h5>Weather Advisory</h5>
+                  <p>Light rain expected in 2 days. Good time for sowing seeds and irrigation planning.</p>
+                </div>
+              </div>
+              
+              <div class="info-item">
+                <div class="info-icon">
+                  <i class="fa-solid fa-seedling"></i>
+                </div>
+                <div class="info-content">
+                  <h5>Seasonal Crop</h5>
+                  <p>This is the ideal time for Rabi crops like Wheat, Mustard, and Gram in your region.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="widget" style="margin-top:10px">
+              <h4>Soil Health Monitor</h4>
+              <div class="info-item">
+                <div class="info-content">
+                  <h5>Nitrogen Level</h5>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 65%"></div>
+                  </div>
+                  <p style="margin-top: 5px; font-size: 12px;">Medium - Consider adding organic compost</p>
+                </div>
+              </div>
+              
+              <div class="info-item">
+                <div class="info-content">
+                  <h5>pH Balance</h5>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 80%; background: #4caf50"></div>
+                  </div>
+                  <p style="margin-top: 5px; font-size: 12px;">Optimal - Good for most crops</p>
+                </div>
+              </div>
+              
+              <div class="info-item">
+                <div class="info-content">
+                  <h5>Moisture Content</h5>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 45%; background: #ff9800"></div>
+                  </div>
+                  <p style="margin-top: 5px; font-size: 12px;">Low - Irrigation recommended</p>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px" class="widget">
+              <h4>Quick Farming Tips</h4>
+              <ul class="tip-list">
+                <li>Rotate crops to maintain soil fertility</li>
+                <li>Use organic manure to improve soil health</li>
+                <li>Check for pests during early morning</li>
+                <li>Water plants at root zone to prevent diseases</li>
+                <li>Harvest in cool morning hours for better yield</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+    
+    <!-- Comparison Section at Bottom -->
+    <div class="panel" style="width:100%; margin-top: 20px;">
+      <h4 style="margin:0 0 12px 0; color: #2e7d32; font-size: 18px;">Compare Crops</h4>
+      <div style="font-size:13px;color:#666;margin-bottom:12px; line-height: 1.6;">Select up to 3 crops from cards to compare.</div>
+      <div class="compare-list" id="compareList"></div>
+      <div style="margin-top:12px;display:flex;gap:8px; flex-wrap: wrap;">
+        <button class="btn" id="doCompare">Compare</button>
+        <button class="btn ghost" id="clearCompare">Clear</button>
+      </div>
+      <div id="compareOutput" style="display:none;margin-top:16px"></div>
+    </div>
+
+    <!-- Modal: Crop details -->
+    <div class="modal-backdrop" id="modalBackdrop">
+      <div class="modal" role="dialog" aria-modal="true">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h3 id="modalTitle">Crop Title</h3>
+          <button class="btn ghost" id="closeModal">Close</button>
+        </div>
+        <div class="modal-grid">
+          <div>
+            <img id="modalImg" src="" alt="" style="width:100%;height:180px;object-fit:cover;border-radius:8px;margin-bottom:12px" />
+            <p id="modalDesc" style="color:#666;line-height:1.5"></p>
+
+            <h4>Growing Guide</h4>
+            <ul id="growingGuide" style="margin-top:6px;color:#666;line-height:1.6"></ul>
+
+            <h4 style="margin-top:10px">Pests & Diseases</h4>
+            <div id="pests" style="color:#666;line-height:1.6"></div>
+
+            <h4 style="margin-top:10px">Government Schemes</h4>
+            <div id="schemes" style="color:#666;line-height:1.6"></div>
+          </div>
+
+          <aside style="padding-left:6px">
+            <div style="background:#fbfff9;border-radius:8px;padding:10px;margin-bottom:10px">
+              <div style="font-size:13px;color:#666">Best season</div>
+              <div id="bestSeason" style="font-weight:700;margin-top:6px"></div>
+            </div>
+
+            <div style="background:#fbfff9;border-radius:8px;padding:10px;margin-bottom:10px">
+              <div style="font-size:13px;color:#666">Soil & Climate</div>
+              <div id="soilClimate" style="font-weight:700;margin-top:6px"></div>
+            </div>
+
+            <div style="background:#fbfff9;border-radius:8px;padding:10px">
+              <div style="font-size:13px;color:#666">Market Snapshot</div>
+              <div id="marketPrice" style="margin-top:8px;font-weight:700"></div>
+            </div>
+
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="btn" id="saveCropModal">Save</button>
+              <button class="btn ghost" id="shareBtn">Share</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Footer -->
+    <footer class="main-footer">
+      <p>&copy; 2024 AgroAid — Crop Information Hub. All rights reserved.</p>
+      <p style="margin-top: 8px; font-size: 12px;">Empowering farmers with smart agricultural solutions</p>
+    </footer>
+  </main>
+
+  <script>
+    // Sample dataset (in a real app this would come from APIs)
+    const CROPS = [
+      {id:1,name:'Rice',season:'kharif',regions:['north','east','south','west'],soil:'loamy',img:'https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',desc:'Staple cereal crop. Requires standing water during early growth.',yield:4000,duration:'120-150 days',diseases:'Blast, Sheath Blight',schemes:'PMFBY, MSP for paddy',price:22},
+      {id:2,name:'Wheat',season:'rabi',regions:['north','west','east'],soil:'clay',img:'https://5.imimg.com/data5/WK/VV/MY-8008107/wheat-grain-500x500.jpg',desc:'Cool-season cereal; best in well drained soils.',yield:3000,duration:'110-140 days',diseases:'Rusts, Blight',schemes:'Subsidy on seeds & ferts',price:28},
+      {id:3,name:'Maize',season:'kharif',regions:['north','south','east','west'],soil:'loamy',img:'https://images.jdmagicbox.com/quickquotes/images_main/dry-maize-seed-orange-2224551934-yhioqvgs.jpg',desc:'Versatile cereal for food and feed.',yield:3500,duration:'90-120 days',diseases:'Stem borer, Leaf blight',schemes:'Market linkage programs',price:18},
+      {id:4,name:'Tomato',season:'zaid',regions:['south','west','north'],soil:'sandy',img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYRLgNAXbn5AiOpXiskF2G-xbcbjRJIXHxlw&s',desc:'High value vegetable; needs regular irrigation.',yield:45000,duration:'60-90 days',diseases:'Bacterial spot, Blight',schemes:'Cold storage subsidy',price:40},
+      {id:5,name:'Cotton',season:'kharif',regions:['west','south'],soil:'sandy',img:'https://agritech.tnau.ac.in/agriculture/cotton-bud-on-plant%20(1).jpg',desc:'Cash crop grown in warm climates.',yield:800,duration:'150-180 days',diseases:'Bollworm',schemes:'Input subsidy',price:30},
+      {id:6,name:'Sugarcane',season:'kharif',regions:['north','south','west'],soil:'loamy',img:'https://images.squarespace-cdn.com/content/v1/53ffc0fbe4b0e9e8825f8b00/1624337170981-FP5EI0NVZLGQHUQ0S6OO/shutterstock_390975046.jpg',desc:'Perennial grass crop used for sugar production. Requires abundant water.',yield:70000,duration:'10-12 months',diseases:'Red rot, Smut',schemes:'Sugar industry support, MSP',price:32},
+      {id:7,name:'Potato',season:'rabi',regions:['north','east','west'],soil:'loamy',img:'https://images.ctfassets.net/0dkgxhks0leg/RKiZ605RAV8kjDQnxFCWP/b03b8729817c90b29b88d536bfd37ac5/9-Unusual-Uses-For-Potatoes.jpg',desc:'Cool-season tuber crop. Popular in temperate regions.',yield:25000,duration:'80-100 days',diseases:'Late blight, Early blight',schemes:'Cold storage facilities',price:25},
+      {id:8,name:'Onion',season:'rabi',regions:['north','west','south'],soil:'sandy',img:'https://www.jiomart.com/images/product/original/590003515/onion-1-kg-product-images-o590003515-p590003515-0-202511020955.jpg?im=Resize=(1000,1000)',desc:'Bulb crop requiring well-drained soil. Essential kitchen ingredient.',yield:20000,duration:'90-120 days',diseases:'Purple blotch, Thrips',schemes:'Storage infrastructure support',price:35}
+    ];
+
+    // Utility & state
+    const state = {filtered:CROPS.slice(),saved:[],compare:[]};
+
+    // Init UI
+    const cardsContainer = document.getElementById('cardsContainer');
+    const searchInput = document.getElementById('searchInput');
+    const regionSel = document.getElementById('regionSel');
+    const seasonSel = document.getElementById('seasonSel');
+    const soilSel = document.getElementById('soilSel');
+    const smartChips = document.getElementById('smartChips');
+    const smartSuggestion = document.getElementById('smartSuggestion');
+    const planCrop = document.getElementById('planCrop');
+    const savedCount = document.getElementById('savedCount');
+
+    // Modal elements
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalImg = document.getElementById('modalImg');
+    const modalDesc = document.getElementById('modalDesc');
+    const growingGuide = document.getElementById('growingGuide');
+    const pests = document.getElementById('pests');
+    const schemes = document.getElementById('schemes');
+    const bestSeason = document.getElementById('bestSeason');
+    const soilClimate = document.getElementById('soilClimate');
+    const marketPrice = document.getElementById('marketPrice');
+    const saveCropModal = document.getElementById('saveCropModal');
+
+    // Compare
+    const compareList = document.getElementById('compareList');
+    const doCompare = document.getElementById('doCompare');
+    const clearCompare = document.getElementById('clearCompare');
+
+    // Initialize data-driven UI
+    function renderCards(list){
+      cardsContainer.innerHTML = '';
+      list.forEach(c=>{
+        const div = document.createElement('div');div.className='card';
+        div.innerHTML = `
+          <img src="${c.img}" alt="${c.name} image" />
+          <div class="crop-name"><div style="font-weight:700">${c.name}</div><div style="font-size:12px;color:#666">${c.duration}</div></div>
+          <div class="meta">Season: ${c.season.toUpperCase()} &bull; Soil: ${c.soil}</div>
+          <div style="font-size:13px;color:#666;margin-top:6px">${c.desc.slice(0,100)}...</div>
+          <div class="btns">
+            <button class="btn" data-id="${c.id}" onclick="openModal(${c.id})"><i class="fa-solid fa-circle-info"></i> Learn</button>
+            <button class="btn ghost" data-id="${c.id}" onclick="toggleSave(${c.id})"><i class="fa-solid fa-bookmark"></i> Save</button>
+            <label class="compare-label"><input type="checkbox" data-id="${c.id}" onchange="toggleCompare(${c.id},this)"> Compare</label>
+          </div>
+        `;
+        cardsContainer.appendChild(div);
+      });
+
+      // populate plan select
+      planCrop.innerHTML = '<option value="">Select crop to plan</option>' + list.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')
+    }
+
+    // Filtering logic
+    function applyFilters(){
+      const q = searchInput.value.trim().toLowerCase();
+      const region = regionSel.value;const season=seasonSel.value;const soil=soilSel.value;
+      let res = CROPS.filter(c=>{
+        if(q && !c.name.toLowerCase().includes(q)) return false;
+        if(region!='all' && !c.regions.includes(region)) return false;
+        if(season!='all' && c.season !== season) return false;
+        if(soil!='all' && c.soil !== soil) return false;
+        return true;
+      });
+      state.filtered = res;renderCards(res);
+      renderSmartChips(res);
+    }
+
+    function renderSmartChips(list){
+      // show top 4 suggested crops as chips
+      smartChips.innerHTML = '';
+      const top = list.slice(0,4);
+      top.forEach(c=>{
+        const el = document.createElement('div');el.className='chip';el.textContent = c.name;el.onclick = ()=>{searchInput.value=c.name;applyFilters()}
+        smartChips.appendChild(el);
+      })
+    }
+
+    // Modal functions
+    window.openModal = function(id){
+      const c = CROPS.find(x=>x.id===id);
+      modalTitle.textContent = c.name;
+      modalImg.src = c.img;modalDesc.textContent = c.desc;
+      growingGuide.innerHTML = `
+        <li>Land prep: Deep ploughing and leveling</li>
+        <li>Seed rate: (example) follow seed supplier guidelines</li>
+        <li>Irrigation: ${c.soil==='sandy'?'Frequent shallow irrigation':'Normal schedule'}</li>
+        <li>Fertilizer: Balanced NPK application at critical stages</li>
+      `;
+      pests.textContent = c.diseases;
+      schemes.textContent = c.schemes;
+      bestSeason.textContent = c.season.toUpperCase();
+      soilClimate.textContent = `${c.soil} soil • Suitable for regional climates`;
+      marketPrice.textContent = `₹ ${c.price} / kg (avg)`;
+      saveCropModal.dataset.id = c.id;
+      modalBackdrop.style.display = 'flex';
+    }
+
+    document.getElementById('closeModal').onclick = ()=> modalBackdrop.style.display='none';
+    modalBackdrop.addEventListener('click',(e)=>{if(e.target===modalBackdrop) modalBackdrop.style.display='none'});
+    saveCropModal.onclick = ()=>{toggleSave(parseInt(saveCropModal.dataset.id));modalBackdrop.style.display='none'};
+
+    // Save logic (localStorage)
+    function loadSaved(){
+      const s = JSON.parse(localStorage.getItem('agro_saved')||'[]');state.saved = s;savedCount.textContent = s.length;
+    }
+    function toggleSave(id){
+      if(state.saved.includes(id)){state.saved = state.saved.filter(x=>x!==id)}else{state.saved.push(id)}
+      localStorage.setItem('agro_saved',JSON.stringify(state.saved));loadSaved();
+      alert('Saved crops updated');
+    }
+
+    // Compare
+    function toggleCompare(id, checkbox){
+      const exists = state.compare.includes(id);
+      if(checkbox.checked){ if(state.compare.length<3 && !exists) state.compare.push(id); else {checkbox.checked=false; alert('Max 3 crops for compare')} }
+      else { state.compare = state.compare.filter(x=>x!==id) }
+      renderCompareList();
+    }
+    function renderCompareList(){
+      compareList.innerHTML = '';
+      state.compare.forEach(id=>{
+        const c = CROPS.find(x=>x.id===id);
+        const el = document.createElement('div');el.className='compare-item';el.textContent=c.name;compareList.appendChild(el)
+      })
+    }
+    doCompare.onclick = ()=>{
+      if(state.compare.length<2) return alert('Select at least 2 crops');
+      const rows = state.compare.map(id=>CROPS.find(x=>x.id===id));
+      // simple side-by-side comparison
+      let html = '<div style="background:#fff;border-radius:8px;padding:12px;border:1px solid #c8e6c9"><h4 style="margin:0 0 12px 0">Comparison Results</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px">';
+      rows.forEach(r=>{
+        html += `<div style="background:#e8f5e9;border-radius:8px;padding:12px;border:1px solid #c8e6c9"><h4 style="margin:0 0 8px 0;color:#2e7d32">${r.name}</h4><div class="meta" style="margin-bottom:6px">Season: ${r.season.toUpperCase()}</div><div style="margin-bottom:4px">Duration: ${r.duration}</div><div style="margin-bottom:4px">Yield: ${r.yield} kg/ha</div><div style="margin-top:8px;font-weight:700;color:#4caf50">Price: ₹${r.price}/kg</div></div>`
+      })
+      html += '</div></div>';
+      const outputEl = document.getElementById('compareOutput');
+      outputEl.style.display='block';
+      outputEl.innerHTML = html;
+      outputEl.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+    clearCompare.onclick = ()=>{state.compare=[];renderCompareList();Array.from(document.querySelectorAll('input[type=checkbox]')).forEach(cb=>cb.checked=false);document.getElementById('compareOutput').style.display='none'};
+
+    // Events
+    [searchInput,regionSel,seasonSel,soilSel].forEach(el=>el.addEventListener('input',applyFilters));
+
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+    });
+
+    // Close sidebar when clicking on a nav item on mobile
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+          document.getElementById('sidebar').classList.remove('mobile-open');
+        }
+      });
+    });
+
+    // Initial render
+    renderCards(CROPS);
+    loadSaved();
+
+    // Expose some functions for inline handlers
+    window.toggleSave = toggleSave;
+    window.toggleCompare = toggleCompare;
+
+    // Accessibility: keyboard close modal
+    document.addEventListener('keydown',e=>{if(e.key==='Escape') modalBackdrop.style.display='none'})
+  </script>
+</body>
+</html>

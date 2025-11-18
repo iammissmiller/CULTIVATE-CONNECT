@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cultivate Connect - Government Schemes & News</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Vertical Sidebar Styles */
+        .sidebar {
+            width: 70px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.2);
+            position: fixed;
+            left: 0;
+            top: 0;
+            transition: width 0.3s ease;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .sidebar:hover {
+            width: 250px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #81c784;
+        }
+
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid #4caf50;
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            width: 30px;
+            margin-right: 20px;
+            text-align: center;
+        }
+
+        .nav-text {
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            font-weight: 500;
+        }
+
+        .sidebar:hover .nav-text {
+            opacity: 1;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 70px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .page-title {
+            color: #2e7d32;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        /* Cards Container */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header i {
+            font-size: 20px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .scheme-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .scheme-item:last-child {
+            border-bottom: none;
+        }
+
+        .scheme-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2e7d32;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .scheme-status {
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .scheme-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .scheme-link {
+            display: inline-block;
+            font-size: 14px;
+            color: #4caf50;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .scheme-link:hover {
+            color: #2e7d32;
+            text-decoration: underline;
+        }
+
+        /* News Section */
+        .news-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        .news-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .news-list {
+            list-style: none;
+        }
+
+        .news-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 15px;
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-date {
+            min-width: 70px;
+            text-align: center;
+            padding: 8px 5px;
+            background-color: #4caf50;
+            color: white;
+            border-radius: 6px;
+        }
+
+        .news-date .day {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .news-date .month {
+            font-size: 12px;
+        }
+
+        .news-content h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .news-content p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .deadline-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .deadline-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .deadline-item:last-child {
+            border-bottom: none;
+        }
+
+        .deadline-info h4 {
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+
+        .deadline-info p {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .deadline-date {
+            text-align: center;
+            padding: 8px 12px;
+            background-color: #ffebee;
+            color: #c62828;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2e7d32;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #4caf50;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Eligibility Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            color: #2e7d32;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #757575;
+        }
+
+        .eligibility-section {
+            margin-bottom: 20px;
+        }
+
+        .eligibility-section h3 {
+            font-size: 18px;
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .eligibility-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .eligibility-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .eligibility-list li:last-child {
+            border-bottom: none;
+        }
+
+        .eligibility-list li i {
+            color: #4caf50;
+            margin-right: 10px;
+            margin-top: 4px;
+        }
+
+        .apply-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .apply-btn {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .apply-btn:hover {
+            background: #388e3c;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 991px) {
+            .news-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.mobile-open {
+                width: 250px;
+                transform: translateX(0);
+            }
+            
+            /* Show nav text when sidebar is open on mobile */
+            .sidebar.mobile-open .nav-text {
+                opacity: 1;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+                transition: margin-left 0.3s ease;
+            }
+            
+            .mobile-menu-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                margin-bottom: 20px;
+                padding-top: 50px;
+            }
+            
+            .page-title {
+                font-size: 24px;
+            }
+            
+            .page-subtitle {
+                font-size: 13px;
+            }
+        }
+
+        /* Small Mobile Styles */
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 10px;
+            }
+            
+            .header {
+                padding-top: 40px;
+            }
+            
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                font-size: 20px;
+            }
+            
+            .card-header {
+                padding: 12px 15px;
+            }
+            
+            .card-body {
+                padding: 15px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Vertical Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-nav">
+      <a href="farmer.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-home"></i></div>
+        <div class="nav-text">Dashboard</div>
+      </a>
+      <a href="cropinfo.html" class="nav-item active">
+        <div class="nav-icon"><i class="fa-solid fa-seedling"></i></div>
+        <div class="nav-text">Crop Information Hub</div>
+      </a>
+      <a href="weather.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-cloud-sun"></i></div>
+        <div class="nav-text">Weather Update</div>
+      </a>
+      <a href="Govt_scheme.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        <div class="nav-text">Govt Schemes & News</div>
+      </a>
+      <a href="farmer-update.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-bullhorn"></i></div>
+        <div class="nav-text">Updation Page</div>
+      </a>
+      <a href="nearbyshop.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-store"></i></div>
+        <div class="nav-text">Nearby Shops & Stuff</div>
+      </a>
+    </div>
+  </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <div>
+                <h1 class="page-title">Government Schemes & News</h1>
+                <p class="page-subtitle">Stay updated with the latest government schemes and agricultural news</p>
+            </div>
+        </div>
+
+        <h2 class="section-title"><i class="fas fa-file-invoice"></i> Government Schemes</h2>
+        
+        <div class="cards-container">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <h3>Financial Support Schemes</h3>
+                </div>
+                <div class="card-body">
+                    <div class="scheme-item">
+                        <div class="scheme-title">
+                            PM-KISAN Samman Nidhi
+                            <span class="scheme-status">Active</span>
+                        </div>
+                        <div class="scheme-desc">₹6,000 per year in three equal installments to all landholding farmer families.</div>
+                        <a class="scheme-link" onclick="openEligibilityModal('pm-kisan')">Check Eligibility & Apply →</a>
+                    </div>
+                    
+                    <div class="scheme-item">
+                        <div class="scheme-title">
+                            Kisan Credit Card (KCC)
+                            <span class="scheme-status">Active</span>
+                        </div>
+                        <div class="scheme-desc">Access to affordable credit for cultivation and other agricultural needs.</div>
+                        <a class="scheme-link" onclick="openEligibilityModal('kisan-credit')">Check Eligibility & Apply →</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Insurance & Risk Management</h3>
+                </div>
+                <div class="card-body">
+                    <div class="scheme-item">
+                        <div class="scheme-title">
+                            PM Fasal Bima Yojana
+                            <span class="scheme-status">Active</span>
+                        </div>
+                        <div class="scheme-desc">Affordable crop insurance against natural calamities at low premium rates.</div>
+                        <a class="scheme-link" onclick="openEligibilityModal('fasal-bima')">Check Eligibility & Apply →</a>
+                    </div>
+                    
+                    <div class="scheme-item">
+                        <div class="scheme-title">
+                            Restructured Weather Based Crop Insurance
+                            <span class="scheme-status">Active</span>
+                        </div>
+                        <div class="scheme-desc">Protection against adverse weather conditions affecting crop yields.</div>
+                        <a class="scheme-link" onclick="openEligibilityModal('weather-insurance')">Check Eligibility & Apply →</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-tint"></i>
+                    <h3>Irrigation & Infrastructure</h3>
+                </div>
+                <div class="card-body">
+                    <div class="scheme-item">
+                        <div class="scheme-title">
+                            Pradhan Mantri Krishi Sinchayee Yojana
+                            <span class="scheme-status">Active</span>
+                        </div>
+                        <div class="scheme-desc">"Per Drop More Crop" - promoting efficient water use through micro-irrigation.</div>
+                        <a class="scheme-link" onclick="openEligibilityModal('krishi-sinchayee')">Check Eligibility & Apply →</a>
+                    </div>
+                    
+                    <div class="scheme-item">
+                        <div class="scheme-title">
+                            Micro Irrigation Fund
+                            <span class="scheme-status">Active</span>
+                        </div>
+                        <div class="scheme-desc">Subsidies for drip and sprinkler irrigation systems.</div>
+                        <a class="scheme-link" onclick="openEligibilityModal('micro-irrigation')">Check Eligibility & Apply →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="news-container">
+            <div class="news-card">
+                <div class="card-header">
+                    <i class="fas fa-newspaper"></i>
+                    <h3>Latest Agricultural News</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="news-list">
+                        <li class="news-item">
+                            <div class="news-date">
+                                <div class="day">15</div>
+                                <div class="month">OCT</div>
+                            </div>
+                            <div class="news-content">
+                                <h3>New Subsidy on Solar Pumps Announced</h3>
+                                <p>Government increases subsidy for solar agricultural pumps from 30% to 50% for small farmers.</p>
+                            </div>
+                        </li>
+                        <li class="news-item">
+                            <div class="news-date">
+                                <div class="day">12</div>
+                                <div class="month">OCT</div>
+                            </div>
+                            <div class="news-content">
+                                <h3>MSP for Rabi Crops Increased</h3>
+                                <p>Cabinet approves 5-7% increase in Minimum Support Price for wheat, pulses, and oilseeds.</p>
+                            </div>
+                        </li>
+                        <li class="news-item">
+                            <div class="news-date">
+                                <div class="day">08</div>
+                                <div class="month">OCT</div>
+                            </div>
+                            <div class="news-content">
+                                <h3>New Soil Health Card Drive Launched</h3>
+                                <p>Government to issue new soil health cards to 50 million farmers by March 2024.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="deadline-card">
+                <div class="card-header">
+                    <i class="fas fa-clock"></i>
+                    <h3>Upcoming Deadlines</h3>
+                </div>
+                <div class="card-body">
+                    <div class="deadline-item">
+                        <div class="deadline-info">
+                            <h4>PM-KISAN Installment</h4>
+                            <p>2nd Installment Application</p>
+                        </div>
+                        <div class="deadline-date">30 NOV</div>
+                    </div>
+                    <div class="deadline-item">
+                        <div class="deadline-info">
+                            <h4>Kharif Crop Insurance</h4>
+                            <p>PMFBY Enrollment</p>
+                        </div>
+                        <div class="deadline-date">15 DEC</div>
+                    </div>
+                    <div class="deadline-item">
+                        <div class="deadline-info">
+                            <h4>Soil Health Card</h4>
+                            <p>Application for Testing</p>
+                        </div>
+                        <div class="deadline-date">20 JAN</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional Schemes -->
+        <h2 class="section-title" style="margin-top: 40px;"><i class="fas fa-list"></i> More Government Schemes</h2>
+        
+        <div class="cards-container">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-tractor"></i>
+                    <h3>Equipment & Mechanization</h3>
+                </div>
+                <div class="card-body">
+                    <div class="scheme-item">
+                        <div class="scheme-title">
+                            Sub-Mission on Agricultural Mechanization
+                            <span class="scheme-status">Active</span>
+                        </div>
+                        <div class="scheme-desc">Subsidies for purchasing agricultural machinery and equipment.</div>
+                        <a class="scheme-link" onclick="openEligibilityModal('agricultural-mechanization')">Check Details →</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-leaf"></i>
+                    <h3>Organic Farming</h3>
+                </div>
+                <div class="card-body">
+                    <div class="scheme-item">
+                        <div class="scheme-title">
+                            Paramparagat Krishi Vikas Yojana
+                            <span class="scheme-status">Active</span>
+                        </div>
+                        <div class="scheme-desc">Promotes organic farming through cluster approach and PGS certification.</div>
+                        <a class="scheme-link" onclick="openEligibilityModal('paramparagat-krishi')">Check Details →</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-female"></i>
+                    <h3>Women in Agriculture</h3>
+                </div>
+                <div class="card-body">
+                    <div class="scheme-item">
+                        <div class="scheme-title">
+                            Mahila Kisan Sashaktikaran Pariyojana
+                            <span class="scheme-status">Active</span>
+                        </div>
+                        <div class="scheme-desc">Empowering women farmers through training, resources and financial support.</div>
+                        <a class="scheme-link" onclick="openEligibilityModal('mahila-kisan')">Check Details →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Eligibility Modal -->
+    <div class="modal" id="eligibility-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-scheme-title">Scheme Details</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div id="modal-content-body">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Scheme eligibility data
+        const schemeData = {
+            'pm-kisan': {
+                title: 'PM-KISAN Samman Nidhi',
+                description: '₹6,000 per year in three equal installments to all landholding farmer families.',
+                eligibility: [
+                    'All landholding farmer families (subject to certain exclusion criteria)',
+                    'Small and marginal farmers with cultivable land up to 2 hectares',
+                    'Farmer families that cultivate the land themselves',
+                    'Families with at least one member engaged in farming activities',
+                    'Valid bank account and Aadhaar card required'
+                ],
+                applyLink: 'https://pmkisan.gov.in/',
+                documents: [
+                    'Aadhaar Card',
+                    'Land ownership documents',
+                    'Bank account details',
+                    'Identity proof',
+                    'Recent passport-size photograph'
+                ]
+            },
+            'kisan-credit': {
+                title: 'Kisan Credit Card (KCC)',
+                description: 'Access to affordable credit for cultivation and other agricultural needs.',
+                eligibility: [
+                    'All farmers - individual/joint borrowers who are owner cultivators',
+                    'Tenant farmers, oral lessees & sharecroppers',
+                    'Self Help Groups (SHGs) or Joint Liability Groups (JLGs) of farmers',
+                    'Minimum age: 18 years, Maximum age: 75 years',
+                    'Should have a good credit history'
+                ],
+                applyLink: 'https://www.kcc.applyonline.in/',
+                documents: [
+                    'Proof of identity (Aadhaar, Voter ID, etc.)',
+                    'Proof of residence',
+                    'Land records/proof of cultivation rights',
+                    'Passport size photographs',
+                    'Bank account details'
+                ]
+            },
+            'fasal-bima': {
+                title: 'PM Fasal Bima Yojana',
+                description: 'Affordable crop insurance against natural calamities at low premium rates.',
+                eligibility: [
+                    'All farmers growing notified crops in notified areas',
+                    'Loanee farmers (those who have taken crop loans) are covered compulsorily',
+                    'Non-loanee farmers can also opt for the scheme voluntarily',
+                    'Farmers should have insurable interest in the insured crop',
+                    'Crops should be notified by the State Government'
+                ],
+                applyLink: 'https://pmfby.gov.in/',
+                documents: [
+                    'Aadhaar Card',
+                    'Land records/proof of cultivation',
+                    'Bank account details',
+                    'Crop details and area sown certificate',
+                    'Previous insurance policy (if any)'
+                ]
+            },
+            'weather-insurance': {
+                title: 'Restructured Weather Based Crop Insurance',
+                description: 'Protection against adverse weather conditions affecting crop yields.',
+                eligibility: [
+                    'All farmers growing notified crops in notified areas',
+                    'Available for both loanee and non-loanee farmers',
+                    'Farmers in areas prone to specific weather risks',
+                    'Should have insurable interest in the notified crop',
+                    'Crops should be notified under the scheme'
+                ],
+                applyLink: 'https://wbcisfc.gov.in/',
+                documents: [
+                    'Aadhaar Card',
+                    'Proof of land ownership/lease agreement',
+                    'Bank account details',
+                    'Crop sowing certificate',
+                    'Weather station details (if applicable)'
+                ]
+            },
+            'krishi-sinchayee': {
+                title: 'Pradhan Mantri Krishi Sinchayee Yojana',
+                description: '"Per Drop More Crop" - promoting efficient water use through micro-irrigation.',
+                eligibility: [
+                    'Individual farmers, group of farmers, and farmer producer organizations',
+                    'Should have assured source of water for irrigation',
+                    'Land should be suitable for micro-irrigation',
+                    'Priority given to small and marginal farmers',
+                    'Farmers in water-stressed areas'
+                ],
+                applyLink: 'https://pmksy.gov.in/',
+                documents: [
+                    'Aadhaar Card',
+                    'Land ownership documents',
+                    'Soil health card',
+                    'Water source details',
+                    'Bank account details'
+                ]
+            },
+            'micro-irrigation': {
+                title: 'Micro Irrigation Fund',
+                description: 'Subsidies for drip and sprinkler irrigation systems.',
+                eligibility: [
+                    'Individual farmers with landholding',
+                    'Farmer Producer Organizations (FPOs)',
+                    'Cooperatives and Self Help Groups',
+                    'Priority given to small and marginal farmers',
+                    'Farmers in water-scarce regions'
+                ],
+                applyLink: 'https://pmksy.gov.in/microirrigation/',
+                documents: [
+                    'Aadhaar Card',
+                    'Land records',
+                    'Bank account details',
+                    'Technical feasibility report',
+                    'Cost estimate from approved vendor'
+                ]
+            },
+            'agricultural-mechanization': {
+                title: 'Sub-Mission on Agricultural Mechanization',
+                description: 'Subsidies for purchasing agricultural machinery and equipment.',
+                eligibility: [
+                    'Individual farmers, groups, and custom hiring centers',
+                    'Farmers\' cooperatives and FPOs',
+                    'Rural entrepreneurs establishing farm machinery banks',
+                    'Priority to small and marginal farmers',
+                    'Women farmers and SC/ST farmers'
+                ],
+                applyLink: 'https://farmech.dac.gov.in/FarmerGuide/Index.aspx',
+                documents: [
+                    'Aadhaar Card',
+                    'Land ownership/possession certificate',
+                    'Bank account details',
+                    'Quotation from authorized dealer',
+                    'Proof of identity and address'
+                ]
+            },
+            'paramparagat-krishi': {
+                title: 'Paramparagat Krishi Vikas Yojana',
+                description: 'Promotes organic farming through cluster approach and PGS certification.',
+                eligibility: [
+                    'Farmers willing to practice organic farming',
+                    'Should form or join a cluster of at least 50 farmers',
+                    'Minimum contiguous area of 50 acres for cluster formation',
+                    'Commitment to follow organic farming practices for 3 years',
+                    'Willingness to participate in training programs'
+                ],
+                applyLink: 'https://pgsindia-ncof.gov.in/',
+                documents: [
+                    'Aadhaar Card',
+                    'Land records',
+                    'Cluster formation details',
+                    'Bank account details',
+                    'Consent letter for organic farming conversion'
+                ]
+            },
+            'mahila-kisan': {
+                title: 'Mahila Kisan Sashaktikaran Pariyojana',
+                description: 'Empowering women farmers through training, resources and financial support.',
+                eligibility: [
+                    'Women farmers, individually or in groups',
+                    'Women from small and marginal farmer families',
+                    'Women members of Self Help Groups (SHGs)',
+                    'Women farmers from SC/ST communities',
+                    'Age between 18-60 years'
+                ],
+                applyLink: 'https://rkvy.nic.in/',
+                documents: [
+                    'Aadhaar Card',
+                    'Proof of identity and address',
+                    'Land records (if applicable)',
+                    'Bank account details',
+                    'Proof of involvement in farming activities'
+                ]
+            }
+        };
+
+        // Mobile menu toggle functionality
+        document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-open');
+            
+            // Update main content margin when sidebar is open on mobile
+            if (window.innerWidth <= 768) {
+                if (sidebar.classList.contains('mobile-open')) {
+                    document.querySelector('.main-content').style.marginLeft = '250px';
+                } else {
+                    document.querySelector('.main-content').style.marginLeft = '0';
+                }
+            }
+        });
+
+        // Close sidebar when clicking on a nav item on mobile
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('mobile-open');
+                    document.querySelector('.main-content').style.marginLeft = '0';
+                }
+            });
+        });
+
+        // Modal functionality
+        const modal = document.getElementById('eligibility-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+
+        // Open eligibility modal
+        function openEligibilityModal(schemeId) {
+            const scheme = schemeData[schemeId];
+            if (!scheme) return;
+            
+            document.getElementById('modal-scheme-title').textContent = scheme.title;
+            
+            const modalBody = document.getElementById('modal-content-body');
+            modalBody.innerHTML = `
+                <div class="eligibility-section">
+                    <h3>Scheme Description</h3>
+                    <p>${scheme.description}</p>
+                </div>
+                
+                <div class="eligibility-section">
+                    <h3>Eligibility Criteria</h3>
+                    <ul class="eligibility-list">
+                        ${scheme.eligibility.map(item => `<li><i class="fas fa-check-circle"></i> ${item}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="eligibility-section">
+                    <h3>Required Documents</h3>
+                    <ul class="eligibility-list">
+                        ${scheme.documents.map(item => `<li><i class="fas fa-file-alt"></i> ${item}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="apply-section">
+                    <a href="${scheme.applyLink}" target="_blank" class="apply-btn">
+                        <i class="fas fa-external-link-alt"></i> Apply Now
+                    </a>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        // Close modal
+        closeModalBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

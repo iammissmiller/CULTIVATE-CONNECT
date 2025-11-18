@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cultivate Connect - Nearby Shops & Services</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Vertical Sidebar Styles */
+         .sidebar {
+            width: 70px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.2); /* Changed to translucent black */
+            position: fixed;
+            left: 0;
+            top: 0;
+            transition: width 0.3s ease;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
+            backdrop-filter: blur(20px); /* Added for glass effect */
+            -webkit-backdrop-filter: blur(20px); /* Safari support */
+
+        }
+
+
+        .sidebar:hover {
+            width: 250px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #81c784;
+        }
+
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid #4caf50;
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            width: 30px;
+            margin-right: 20px;
+            text-align: center;
+        }
+
+        .nav-text {
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            font-weight: 500;
+        }
+
+        .sidebar:hover .nav-text {
+            opacity: 1;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 70px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar:hover ~ .main-content {
+            margin-left: 250px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .page-title {
+            color: #2e7d32;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .search-bar {
+            display: flex;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #c8e6c9;
+            border-radius: 50px 0 0 50px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-bar input:focus {
+            border-color: #4caf50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        .search-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 0 50px 50px 0;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #388e3c;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-title {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #2e7d32;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-title i {
+            margin-right: 8px;
+        }
+
+        .filter-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
+        }
+
+        .filter-option {
+            background: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .filter-option:hover {
+            background: #c8e6c9;
+        }
+
+        .filter-option.active {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .filter-option i {
+            margin-right: 6px;
+            font-size: 13px;
+        }
+
+        /* Map and List Container */
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .map-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            height: 450px;
+            position: relative;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 6px;
+            padding: 6px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-control-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 4px;
+            transition: background 0.3s;
+        }
+
+        .map-control-btn:hover {
+            background: #388e3c;
+        }
+
+        .list-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .list-header {
+            padding: 12px 16px;
+            background: #4caf50;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        /* Shop Cards */
+        .shop-card {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid #4caf50;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .shop-card.highlighted {
+            background: #e8f5e9;
+            border-left: 4px solid #ff9800;
+            box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+        }
+
+        .shop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .shop-name {
+            font-weight: 700;
+            color: #2e7d32;
+            font-size: 16px;
+        }
+
+        .shop-distance {
+            color: #757575;
+            font-size: 12px;
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 12px;
+        }
+
+        .shop-category {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+
+        .shop-address {
+            color: #616161;
+            font-size: 12px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+        }
+
+        .shop-address i {
+            margin-right: 4px;
+            color: #4caf50;
+            font-size: 12px;
+        }
+
+        .shop-rating {
+            color: #ff9800;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .shop-status {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .open-status {
+            color: #4caf50;
+            font-weight: 500;
+        }
+
+        .closed-status {
+            color: #f44336;
+            font-weight: 500;
+        }
+
+        .shop-actions {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .action-btn:hover {
+            background: #388e3c;
+        }
+
+        /* Service Booking Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            color: #2e7d32;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #757575;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group input:not([readonly]):focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            border-color: #4caf50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+            outline: none;
+        }
+
+        .form-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #388e3c;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (min-width: 992px) {
+            .content-container {
+                flex-direction: row;
+            }
+            
+            .map-container {
+                flex: 2;
+            }
+            
+            .list-container {
+                flex: 1;
+            }
+        }
+
+        /* Tablet Styles */
+        @media (max-width: 991px) {
+            .content-container {
+                flex-direction: column;
+            }
+            
+            .map-container, .list-container {
+                height: 400px;
+            }
+            
+            #map {
+                height: 350px;
+            }
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.mobile-open {
+                width: 250px;
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .mobile-menu-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                margin-bottom: 20px;
+                padding-top: 50px;
+            }
+            
+            .search-bar {
+                margin-top: 12px;
+                max-width: 100%;
+            }
+            
+            .filter-options {
+                grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            }
+            
+            .page-title {
+                font-size: 24px;
+            }
+            
+            .page-subtitle {
+                font-size: 13px;
+            }
+            
+            .map-container, .list-container {
+                height: 350px;
+            }
+            
+            #map {
+                height: 300px;
+            }
+            
+            .list-header {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+            
+            .shop-card {
+                padding: 10px;
+            }
+            
+            .shop-name {
+                font-size: 15px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                width: 95%;
+            }
+            
+            .modal-title {
+                font-size: 18px;
+            }
+        }
+
+        /* Small Mobile Styles */
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 10px;
+            }
+            
+            .header {
+                padding-top: 40px;
+            }
+            
+            .filter-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .filter-option {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            
+            .filter-option i {
+                margin-right: 4px;
+                font-size: 11px;
+            }
+            
+            .map-container, .list-container {
+                height: 300px;
+            }
+            
+            #map {
+                height: 250px;
+            }
+            
+            .list-header {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+            
+            .shop-card {
+                padding: 8px;
+                margin-bottom: 10px;
+            }
+            
+            .shop-name {
+                font-size: 14px;
+            }
+            
+            .shop-distance {
+                font-size: 11px;
+            }
+            
+            .shop-category {
+                font-size: 10px;
+            }
+            
+            .shop-address, .shop-rating, .shop-status {
+                font-size: 11px;
+            }
+            
+            .action-btn {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+            
+            .modal-content {
+                padding: 15px;
+            }
+            
+            .modal-title {
+                font-size: 16px;
+            }
+            
+            .form-group {
+                margin-bottom: 12px;
+            }
+            
+            .form-group label {
+                font-size: 13px;
+            }
+            
+            .form-group input, .form-group select, .form-group textarea {
+                padding: 6px;
+                font-size: 13px;
+            }
+            
+            .submit-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
+
+        /* Extra Small Mobile Styles */
+        @media (max-width: 360px) {
+            .filter-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .map-container, .list-container {
+                height: 250px;
+            }
+            
+            #map {
+                height: 200px;
+            }
+            
+            .shop-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .shop-distance {
+                align-self: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Vertical Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-nav">
+      <a href="farmer.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-home"></i></div>
+        <div class="nav-text">Dashboard</div>
+      </a>
+      <a href="cropinfo.html" class="nav-item active">
+        <div class="nav-icon"><i class="fa-solid fa-seedling"></i></div>
+        <div class="nav-text">Crop Information Hub</div>
+      </a>
+      <a href="weather.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-cloud-sun"></i></div>
+        <div class="nav-text">Weather Update</div>
+      </a>
+      <a href="Govt_scheme.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        <div class="nav-text">Govt Schemes & News</div>
+      </a>
+      <a href="farmer-update.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-bullhorn"></i></div>
+        <div class="nav-text">Updation Page</div>
+      </a>
+      <a href="nearbyshop.html" class="nav-item">
+        <div class="nav-icon"><i class="fa-solid fa-store"></i></div>
+        <div class="nav-text">Nearby Shops & Stuff</div>
+      </a>
+    </div>
+  </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <div>
+                <h1 class="page-title">Nearby Shops & Services</h1>
+                <p class="page-subtitle">Find agricultural suppliers, equipment rentals, and service providers near you</p>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search for shops, products, or services...">
+                <button class="search-btn" id="search-btn"><i class="fas fa-search"></i> Search</button>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <h2 class="filter-title"><i class="fas fa-filter"></i> Filter By Category</h2>
+            <div class="filter-options">
+                <div class="filter-option active" data-filter="all">
+                    <i class="fas fa-th"></i> All
+                </div>
+                <div class="filter-option" data-filter="nursery">
+                    <i class="fas fa-seedling"></i> Nurseries
+                </div>
+                <div class="filter-option" data-filter="farm-supplies">
+                    <i class="fas fa-tractor"></i> Farm Supplies
+                </div>
+                <div class="filter-option" data-filter="tools">
+                    <i class="fas fa-tools"></i> Tools & Equipment
+                </div>
+                <div class="filter-option" data-filter="seeds">
+                    <i class="fas fa-leaf"></i> Seeds & Plants
+                </div>
+                <div class="filter-option" data-filter="fertilizers-pesticides">
+                    <i class="fas fa-flask"></i> Fertilizers & Pesticides
+                </div>
+                <div class="filter-option" data-filter="services">
+                    <i class="fas fa-concierge-bell"></i> Services
+                </div>
+                <div class="filter-option" data-filter="individual">
+                    <i class="fas fa-user"></i> Individual Sellers
+                </div>
+                <div class="filter-option" data-filter="open">
+                    <i class="fas fa-door-open"></i> Open Now
+                </div>
+            </div>
+        </div>
+
+        <div class="content-container">
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="map-controls">
+                    <button class="map-control-btn" id="locate-btn"><i class="fas fa-location-arrow"></i></button>
+                    <button class="map-control-btn" id="reset-view-btn"><i class="fas fa-globe-americas"></i></button>
+                </div>
+            </div>
+
+            <div class="list-container">
+                <div class="list-header">
+                    <span>Nearby Shops & Services</span>
+                    <span id="shop-count">Loading...</span>
+                </div>
+                <div class="list-content" id="shop-list">
+                    <!-- Shop cards will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Service Booking Modal -->
+    <div class="modal" id="booking-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Book Service</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <form id="booking-form">
+                <div class="form-group">
+                    <label for="service-type">Service Type</label>
+                    <input type="text" id="service-type" placeholder="Enter service type">
+                </div>
+                <div class="form-group">
+                    <label for="provider-name">Provider Name</label>
+                    <input type="text" id="provider-name" placeholder="Enter provider name">
+                </div>
+                <div class="form-group">
+                    <label for="booking-date">Preferred Date</label>
+                    <input type="date" id="booking-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="booking-time">Preferred Time</label>
+                    <select id="booking-time" required>
+                        <option value="">Select Time</option>
+                        <option value="09:00">9:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="special-requests">Special Requests</label>
+                    <textarea id="special-requests" placeholder="Any special requirements or notes..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Book Service</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let map;
+        let userLat, userLng;
+        let shopMarkers = [];
+        let highlightedMarker = null;
+        let userMarker = null;
+
+        // Sample data for nearby shops and services
+        const shopsData = [
+            {
+                id: 1,
+                name: "Green Thumb Nursery",
+                category: "Nursery • Organic",
+                address: "123 Garden Ave, Green Valley",
+                rating: 4.5,
+                reviews: 128,
+                distance: 1.2,
+                latOffset: 0.001,
+                lngOffset: 0.001,
+                type: "nursery",
+                openNow: true,
+                phone: "+1 (555) 123-4567",
+                services: ["Plant Sales", "Gardening Advice", "Soil Testing"]
+            },
+            {
+                id: 2,
+                name: "Farm Supply Co.",
+                category: "Farm Supplies • Tools",
+                address: "456 Agriculture Rd, Farmland",
+                rating: 5.0,
+                reviews: 64,
+                distance: 2.5,
+                latOffset: -0.001,
+                lngOffset: 0.0005,
+                type: "farm-supplies",
+                openNow: true,
+                phone: "+1 (555) 234-5678",
+                services: ["Equipment Rental", "Feed & Supplies", "Repair Services"]
+            },
+            {
+                id: 3,
+                name: "Seed Savers Exchange",
+                category: "Seeds • Heirloom Plants",
+                address: "789 Heritage Lane, Old Town",
+                rating: 4.0,
+                reviews: 89,
+                distance: 3.1,
+                latOffset: 0.0015,
+                lngOffset: -0.001,
+                type: "seeds",
+                openNow: true,
+                phone: "+1 (555) 345-6789",
+                services: ["Seed Exchange", "Plant Propagation", "Educational Workshops"]
+            },
+            {
+                id: 4,
+                name: "AgroChem Solutions",
+                category: "Fertilizers & Pesticides",
+                address: "321 Chemical Ave, Industrial Park",
+                rating: 4.2,
+                reviews: 95,
+                distance: 1.8,
+                latOffset: 0.002,
+                lngOffset: 0.0015,
+                type: "fertilizers-pesticides",
+                openNow: true,
+                phone: "+1 (555) 456-7890",
+                services: ["Soil Analysis", "Crop Protection", "Custom Blending"]
+            },
+            {
+                id: 5,
+                name: "Crop Care Center",
+                category: "Fertilizers & Pesticides",
+                address: "654 Farmcare Road, Rural District",
+                rating: 4.7,
+                reviews: 112,
+                distance: 2.2,
+                latOffset: -0.002,
+                lngOffset: 0.002,
+                type: "fertilizers-pesticides",
+                openNow: false,
+                phone: "+1 (555) 567-8901",
+                services: ["Pest Control", "Fertilizer Application", "Crop Consulting"]
+            },
+            {
+                id: 6,
+                name: "Community Garden Co-op",
+                category: "Community Garden • Workshops",
+                address: "321 Cooperative St, Central District",
+                rating: 4.5,
+                reviews: 203,
+                distance: 0.8,
+                latOffset: 0.0005,
+                lngOffset: -0.0015,
+                type: "services",
+                openNow: true,
+                phone: "+1 (555) 678-9012",
+                services: ["Gardening Workshops", "Community Plots", "Composting Services"]
+            },
+            {
+                id: 7,
+                name: "Organic Harvest Market",
+                category: "Produce • Local Products",
+                address: "555 Sustainability Blvd, Eco Village",
+                rating: 4.0,
+                reviews: 156,
+                distance: 1.7,
+                latOffset: -0.0015,
+                lngOffset: -0.0005,
+                type: "services",
+                openNow: true,
+                phone: "+1 (555) 789-0123",
+                services: ["Farmers Market", "CSA Program", "Organic Certification"]
+            },
+            {
+                id: 8,
+                name: "Farmers' Fertilizer Depot",
+                category: "Fertilizers & Pesticides",
+                address: "888 Growth Street, Agriculture Zone",
+                rating: 4.3,
+                reviews: 78,
+                distance: 3.5,
+                latOffset: 0.003,
+                lngOffset: 0.0025,
+                type: "fertilizers-pesticides",
+                openNow: true,
+                phone: "+1 (555) 890-1234",
+                services: ["Bulk Fertilizer", "Soil Amendments", "Delivery Service"]
+            },
+            {
+                id: 9,
+                name: "Tool Masters",
+                category: "Tools & Equipment",
+                address: "777 Hardware Street, Toolville",
+                rating: 4.6,
+                reviews: 142,
+                distance: 2.8,
+                latOffset: 0.0025,
+                lngOffset: -0.002,
+                type: "tools",
+                openNow: true,
+                phone: "+1 (555) 901-2345",
+                services: ["Tool Rental", "Equipment Repair", "Sharpening Services"]
+            },
+            {
+                id: 10,
+                name: "Local Farmer Joe",
+                category: "Individual Seller • Fresh Produce",
+                address: "999 Country Road, Farmland",
+                rating: 4.8,
+                reviews: 56,
+                distance: 1.5,
+                latOffset: -0.001,
+                lngOffset: -0.002,
+                type: "individual",
+                openNow: false,
+                phone: "+1 (555) 012-3456",
+                services: ["Farm Stand", "Pick-Your-Own", "Farm Tours"]
+            }
+        ];
+
+        // Initialize the application
+        function initApp() {
+            // Create the map and set an initial neutral view
+            map = L.map('map').setView([20, 0], 2); // world view before location found
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              maxZoom: 19,
+              attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Check if browser supports geolocation
+            if ("geolocation" in navigator) {
+              // Request current location
+              navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                  // Get user's coordinates
+                  userLat = pos.coords.latitude;
+                  userLng = pos.coords.longitude;
+
+                  // Center map on user's location
+                  map.setView([userLat, userLng], 15);
+
+                  // Add a marker at user's location
+                  userMarker = L.marker([userLat, userLng]).addTo(map);
+                  userMarker.bindPopup("📍 You are here!").openPopup();
+
+                  // Add markers for nearby shops
+                  addShopMarkers();
+
+                  // Display all shops initially
+                  displayShops(shopsData);
+                },
+                (err) => {
+                  alert("⚠️ Unable to get your location: " + err.message);
+                  // Set a default location if geolocation fails
+                  userLat = 40.7128;
+                  userLng = -74.0060;
+                  map.setView([userLat, userLng], 10);
+                  
+                  // Add markers for nearby shops
+                  addShopMarkers();
+                  
+                  // Display shops even if location fails
+                  displayShops(shopsData);
+                },
+                {
+                  enableHighAccuracy: true,   // use GPS if available
+                  timeout: 10000,             // 10 seconds max wait
+                  maximumAge: 0               // don't use cached position
+                }
+              );
+            } else {
+              alert("❌ Geolocation not supported by your browser.");
+              // Set a default location if geolocation is not supported
+              userLat = 40.7128;
+              userLng = -74.0060;
+              map.setView([userLat, userLng], 10);
+              
+              // Add markers for nearby shops
+              addShopMarkers();
+              
+              // Display shops even if geolocation is not supported
+              displayShops(shopsData);
+            }
+
+            // Set up event listeners
+            setupEventListeners();
+        }
+
+        // Add shop markers to the map
+        function addShopMarkers() {
+            shopsData.forEach(shop => {
+                const shopLat = userLat + shop.latOffset;
+                const shopLng = userLng + shop.lngOffset;
+                
+                // Create custom icon based on shop type
+                let iconColor = '#4caf50'; // Default green
+                let iconClass = 'fas fa-store';
+                
+                if (shop.type === 'fertilizers-pesticides') {
+                    iconColor = '#ff9800'; // Orange for fertilizer/pesticide shops
+                    iconClass = 'fas fa-flask';
+                } else if (shop.type === 'tools') {
+                    iconColor = '#2196f3'; // Blue for tools
+                    iconClass = 'fas fa-tools';
+                } else if (shop.type === 'seeds') {
+                    iconColor = '#9c27b0'; // Purple for seeds
+                    iconClass = 'fas fa-seedling';
+                } else if (shop.type === 'individual') {
+                    iconColor = '#795548'; // Brown for individual sellers
+                    iconClass = 'fas fa-user';
+                } else if (shop.type === 'services') {
+                    iconColor = '#f44336'; // Red for services
+                    iconClass = 'fas fa-concierge-bell';
+                } else if (shop.type === 'nursery') {
+                    iconColor = '#4caf50'; // Green for nursery
+                    iconClass = 'fas fa-leaf';
+                } else if (shop.type === 'farm-supplies') {
+                    iconColor = '#607d8b'; // Blue gray for farm supplies
+                    iconClass = 'fas fa-tractor';
+                }
+                
+                const customIcon = L.divIcon({
+                    html: `<div style="background-color: ${iconColor}; width: 25px; height: 25px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;"><i class="${iconClass}" style="color: white; font-size: 12px;"></i></div>`,
+                    className: 'custom-marker',
+                    iconSize: [25, 25],
+                    iconAnchor: [12, 12]
+                });
+                
+                const marker = L.marker([shopLat, shopLng], {icon: customIcon})
+                  .addTo(map)
+                  .bindPopup(`
+                    <div style="min-width: 180px;">
+                        <b>${shop.name}</b><br>
+                        ${shop.category}<br>
+                        Distance: ${shop.distance} km<br>
+                        <div class="shop-rating">${generateStarRating(shop.rating)} ${shop.rating}</div>
+                        <div class="shop-status">${shop.openNow ? '<span class="open-status">Open Now</span>' : '<span class="closed-status">Closed</span>'}</div>
+                        <button class="action-btn" onclick="openBookingModal(${shop.id})" style="margin-top: 6px; width: 100%;">
+                            <i class="fas fa-calendar-check"></i> Book Service
+                        </button>
+                    </div>
+                  `);
+                
+                // Store shop info with marker for search functionality
+                marker.shopId = shop.id;
+                marker.shopName = shop.name;
+                marker.shopCategory = shop.category;
+                marker.shopDistance = shop.distance;
+                
+                shopMarkers.push(marker);
+            });
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Mobile menu toggle
+            document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('mobile-open');
+            });
+
+            // Filter option selection
+            document.querySelectorAll('.filter-option').forEach(option => {
+                option.addEventListener('click', function () {
+                    // Remove active class from all options
+                    document.querySelectorAll('.filter-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    // Add active class to clicked option
+                    this.classList.add('active');
+                    
+                    // Filter shops based on selected category
+                    const filterType = this.getAttribute('data-filter');
+                    filterShops(filterType);
+                });
+            });
+
+            // Search functionality
+            document.getElementById('search-btn').addEventListener('click', performSearch);
+            
+            // Enter key search
+            document.getElementById('search-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            // Map control buttons
+            document.getElementById('locate-btn').addEventListener('click', centerMapOnUser);
+            document.getElementById('reset-view-btn').addEventListener('click', resetMapView);
+
+            // Modal close button
+            document.getElementById('close-modal').addEventListener('click', closeBookingModal);
+            
+            // Booking form submission
+            document.getElementById('booking-form').addEventListener('submit', handleBookingSubmit);
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('booking-modal');
+                if (event.target === modal) {
+                    closeBookingModal();
+                }
+            });
+
+            // Close sidebar when clicking on a nav item on mobile
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        document.getElementById('sidebar').classList.remove('mobile-open');
+                    }
+                });
+            });
+        }
+
+        // Shop card click event
+        function setupShopCardListeners() {
+            document.querySelectorAll('.shop-card').forEach(card => {
+                card.addEventListener('click', function () {
+                    const shopId = parseInt(this.getAttribute('data-id'));
+                    highlightShopOnMap(shopId);
+                });
+            });
+        }
+
+        // Perform search function
+        function performSearch() {
+            const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
+            
+            if (searchTerm !== '') {
+                // Find shops that match the search term
+                const matchingShops = shopsData.filter(shop => 
+                    shop.name.toLowerCase().includes(searchTerm) || 
+                    shop.category.toLowerCase().includes(searchTerm) ||
+                    shop.address.toLowerCase().includes(searchTerm) ||
+                    (shop.services && shop.services.some(service => 
+                        service.toLowerCase().includes(searchTerm)
+                    ))
+                );
+                
+                if (matchingShops.length > 0) {
+                    // Display only matching shops
+                    displayShops(matchingShops);
+                    
+                    // Highlight the first matching shop on the map
+                    if (matchingShops.length > 0) {
+                        highlightShopOnMap(matchingShops[0].id);
+                    }
+                } else {
+                    alert(`No shops found for: "${searchTerm}"`);
+                    // Show all shops if no match found
+                    displayShops(shopsData);
+                }
+            } else {
+                // If search is empty, show all shops
+                displayShops(shopsData);
+                removeHighlightFromMap();
+            }
+        }
+
+        // Function to highlight a shop on the map
+        function highlightShopOnMap(shopId) {
+            // Remove previous highlight
+            removeHighlightFromMap();
+            
+            // Find the shop marker
+            const shopMarker = shopMarkers.find(marker => marker.shopId === shopId);
+            if (shopMarker) {
+                // Create a highlighted version of the marker
+                const highlightedIcon = L.divIcon({
+                    html: `<div style="background-color: #ff5722; width: 35px; height: 35px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(255,87,34,0.8); display: flex; align-items: center; justify-content: center;"><i class="fas fa-map-pin" style="color: white; font-size: 16px;"></i></div>`,
+                    className: 'highlighted-marker',
+                    iconSize: [35, 35],
+                    iconAnchor: [17, 17]
+                });
+                
+                // Create highlighted marker
+                highlightedMarker = L.marker([shopMarker.getLatLng().lat, shopMarker.getLatLng().lng], {icon: highlightedIcon})
+                    .addTo(map)
+                    .bindPopup(`<b>🔍 ${shopMarker.shopName}</b><br>${shopMarker.shopCategory}<br>Distance: ${shopMarker.shopDistance} km<br><em>Search Result</em>`)
+                    .openPopup();
+                
+                // Pan map to the highlighted shop
+                map.panTo([shopMarker.getLatLng().lat, shopMarker.getLatLng().lng]);
+                
+                // Highlight the shop card in the list
+                document.querySelectorAll('.shop-card').forEach(card => {
+                    card.classList.remove('highlighted');
+                    if (parseInt(card.getAttribute('data-id')) === shopId) {
+                        card.classList.add('highlighted');
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            }
+        }
+
+        // Function to remove highlight from map
+        function removeHighlightFromMap() {
+            if (highlightedMarker) {
+                map.removeLayer(highlightedMarker);
+                highlightedMarker = null;
+            }
+            
+            // Remove highlight from shop cards
+            document.querySelectorAll('.shop-card').forEach(card => {
+                card.classList.remove('highlighted');
+            });
+        }
+
+        // Function to display shops in the list
+        function displayShops(shops) {
+            const shopList = document.getElementById('shop-list');
+            shopList.innerHTML = '';
+            
+            if (shops.length === 0) {
+                shopList.innerHTML = '<div style="text-align: center; padding: 20px; color: #757575;">No shops found matching your criteria.</div>';
+            } else {
+                shops.forEach(shop => {
+                    const shopCard = document.createElement('div');
+                    shopCard.className = 'shop-card';
+                    shopCard.setAttribute('data-id', shop.id);
+                    shopCard.innerHTML = `
+                        <div class="shop-header">
+                            <div class="shop-name">${shop.name}</div>
+                            <div class="shop-distance">${shop.distance} km</div>
+                        </div>
+                        <div class="shop-category">${shop.category}</div>
+                        <div class="shop-address"><i class="fas fa-map-marker-alt"></i> ${shop.address}</div>
+                        <div class="shop-rating">
+                            ${generateStarRating(shop.rating)} ${shop.rating} (${shop.reviews} reviews)
+                        </div>
+                        <div class="shop-status">
+                            ${shop.openNow ? 
+                                '<span class="open-status"><i class="fas fa-check-circle"></i> Open Now</span>' : 
+                                '<span class="closed-status"><i class="fas fa-times-circle"></i> Closed</span>'
+                            }
+                        </div>
+                        <div class="shop-actions">
+                            <button class="action-btn" onclick="openBookingModal(${shop.id})">
+                                <i class="fas fa-calendar-check"></i> Book Service
+                            </button>
+                        </div>
+                    `;
+                    shopList.appendChild(shopCard);
+                });
+            }
+            
+            // Update shop count
+            document.getElementById('shop-count').textContent = `${shops.length} Results`;
+            
+            // Set up event listeners for the new shop cards
+            setupShopCardListeners();
+        }
+
+        // Function to generate star rating HTML
+        function generateStarRating(rating) {
+            let stars = '';
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i class="fas fa-star"></i>';
+            }
+            
+            if (hasHalfStar) {
+                stars += '<i class="fas fa-star-half-alt"></i>';
+            }
+            
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i class="far fa-star"></i>';
+            }
+            
+            return stars;
+        }
+
+        // Function to filter shops based on category
+        function filterShops(filterType) {
+            let filteredShops = [];
+            
+            switch(filterType) {
+                case 'all':
+                    filteredShops = shopsData;
+                    break;
+                case 'nursery':
+                    filteredShops = shopsData.filter(shop => shop.type === 'nursery');
+                    break;
+                case 'farm-supplies':
+                    filteredShops = shopsData.filter(shop => shop.type === 'farm-supplies');
+                    break;
+                case 'tools':
+                    filteredShops = shopsData.filter(shop => shop.type === 'tools');
+                    break;
+                case 'seeds':
+                    filteredShops = shopsData.filter(shop => shop.type === 'seeds');
+                    break;
+                case 'fertilizers-pesticides':
+                    filteredShops = shopsData.filter(shop => shop.type === 'fertilizers-pesticides');
+                    break;
+                case 'services':
+                    filteredShops = shopsData.filter(shop => shop.type === 'services');
+                    break;
+                case 'individual':
+                    filteredShops = shopsData.filter(shop => shop.type === 'individual');
+                    break;
+                case 'open':
+                    filteredShops = shopsData.filter(shop => shop.openNow === true);
+                    break;
+                default:
+                    filteredShops = shopsData;
+            }
+            
+            displayShops(filteredShops);
+            
+            // Remove any search highlights when filtering
+            removeHighlightFromMap();
+        }
+
+        // Center map on user's location
+        function centerMapOnUser() {
+            if (userLat && userLng) {
+                map.setView([userLat, userLng], 15);
+            }
+        }
+
+        // Reset map to default view
+        function resetMapView() {
+            if (userLat && userLng) {
+                map.setView([userLat, userLng], 13);
+            } else {
+                map.setView([20, 0], 2);
+            }
+        }
+
+        // Open booking modal
+        function openBookingModal(shopId) {
+            const shop = shopsData.find(s => s.id === shopId);
+            if (shop) {
+                // Set default values but allow editing
+                document.getElementById('service-type').value = shop.category;
+                document.getElementById('provider-name').value = shop.name;
+                document.getElementById('booking-modal').style.display = 'flex';
+            }
+        }
+
+        // Close booking modal
+        function closeBookingModal() {
+            document.getElementById('booking-modal').style.display = 'none';
+            document.getElementById('booking-form').reset();
+        }
+
+        // Handle booking form submission
+        function handleBookingSubmit(e) {
+            e.preventDefault();
+            
+            const serviceType = document.getElementById('service-type').value;
+            const providerName = document.getElementById('provider-name').value;
+            const bookingDate = document.getElementById('booking-date').value;
+            const bookingTime = document.getElementById('booking-time').value;
+            const specialRequests = document.getElementById('special-requests').value;
+            
+            // In a real application, you would send this data to your backend
+            alert(`Service booking request submitted!\n\nProvider: ${providerName}\nService: ${serviceType}\nDate: ${bookingDate}\nTime: ${bookingTime}\n\nWe'll contact you to confirm your booking.`);
+            
+            closeBookingModal();
+        }
+
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+
+</html>

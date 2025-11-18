@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cultivate Connect — Consumer FAQ</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  /* ---------------------------
+     Sunlit Wheat Beige Theme
+     --------------------------- */
+  :root{
+    --bg: #F7EFC2;
+    --card: #E7D7A7;
+    --card-2: #FFF7E8;
+    --accent: #C2A875;
+    --accent-dark: #B8945B;
+    --muted: #6b5b3a;
+    --soft: rgba(194,168,117,0.12);
+    --shadow-md: 0 12px 30px rgba(34,34,34,0.08);
+    --radius: 12px;
+    --shadow-sm: 0 6px 18px rgba(34,34,34,0.06);
+    font-family: Inter, "Segoe UI", system-ui;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:white;color:var(--muted);overflow-x:hidden;}
+
+  .app{
+    display:flex;
+    min-height:100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar{
+    width:76px;
+    background:linear-gradient(180deg,#fff,rgba(255,255,255,0.8));
+    border-right:1px solid rgba(0,0,0,0.08);
+    box-shadow:var(--shadow-sm);
+    position:fixed;
+    top:0;left:0;bottom:0;
+    padding:20px 10px;
+    transition:0.3s;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    backdrop-filter:blur(8px);
+  }
+  .sidebar:hover{width:260px;}
+
+  .brand{
+    width:100%;display:flex;align-items:center;
+    gap:12px;margin-bottom:20px;padding:6px 8px;
+  }
+  .logo{
+    width:46px;height:46px;border-radius:12px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+    display:flex;align-items:center;justify-content:center;
+    color:white;font-size:20px;font-weight:700;
+  }
+  .brand-title{display:none;font-weight:700;font-size:16px;}
+  .sidebar:hover .brand-title{display:block;}
+
+  .nav{width:100%;display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+
+  .nav-item{
+    display:flex;gap:12px;align-items:center;padding:10px;
+    border-radius:10px;cursor:pointer;transition:.2s;
+  }
+  .nav-item:hover{background:var(--soft);}
+  .icon{
+    width:40px;height:40px;border-radius:10px;
+    background:var(--card-2);display:flex;align-items:center;justify-content:center;
+    color:var(--accent-dark);font-size:18px;
+  }
+  .label{display:none;font-weight:600;}
+  .sidebar:hover .label{display:block;}
+
+  /* MAIN */
+  .main{
+    margin-left:76px;
+    padding:26px;
+    width:100%;
+    transition:0.3s;
+  }
+  .sidebar:hover ~ .main{margin-left:260px;}
+
+  .page-title{
+    font-size:24px;
+    font-weight:800;
+    color:var(--accent-dark);
+  }
+  .page-sub{margin-top:6px;font-size:14px;color:#5a4d37;}
+
+  /* SEARCH BAR */
+  .search-box{
+    margin-top:20px;
+    display:flex;align-items:center;gap:10px;
+    background:var(--card-2);
+    padding:10px 14px;
+    border-radius:999px;
+    width:330px;
+    box-shadow:var(--shadow-sm);
+  }
+  .search-box input{
+    border:0;background:transparent;outline:none;
+    font-size:14px;color:var(--muted);width:100%;
+  }
+
+  /* FAQ CATEGORY HEADER */
+  .category{
+    margin-top:28px;
+    padding:14px;
+    background:var(--card);
+    border-radius:var(--radius);
+    font-weight:700;
+    color:var(--accent-dark);
+    box-shadow:var(--shadow-sm);
+  }
+
+  /* FAQ ITEMS */
+  .faq-container{
+    margin-top:10px;
+    background:var(--card-2);
+    padding:20px;
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-md);
+  }
+
+  .faq-item{
+    padding:12px 0;
+    border-bottom:1px solid rgba(0,0,0,0.06);
+  }
+  .faq-q{
+    display:flex;justify-content:space-between;align-items:center;
+    cursor:pointer;font-weight:600;
+  }
+  .faq-q span{font-size:15px;color:var(--accent-dark);}
+  .faq-a{
+    display:none;font-size:14px;color:#5a4d37;margin-top:8px;
+  }
+
+  .no-results{
+    margin-top:12px;
+    font-size:14px;
+    color:#a15f3b;
+    display:none;
+  }
+
+  /* EXTRA SUGGESTION BOX */
+  .help-card{
+    margin-top:26px;
+    padding:20px;
+    background:var(--card-2);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-md);
+  }
+  .help-card h3{
+    margin-bottom:10px;font-size:18px;color:var(--accent-dark);
+  }
+  .help-card p{font-size:14px;color:#5a4d37;}
+
+  /* RESPONSIVE */
+  @media(max-width:600px){
+    .search-box{width:100%;}
+  }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">CC</div>
+      <div class="brand-title">Cultivate Connect</div>
+    </div>
+
+    <div class="nav">
+      <div class="nav-item"><div class="icon"><i class="fas fa-home"></i></div><div class="label">Dashboard</div></div>
+      <div class="nav-item"><div class="icon"><i class="fas fa-shopping-cart"></i></div><div class="label">Buy Products</div></div>
+      <div class="nav-item"><div class="icon"><i class="fas fa-lightbulb"></i></div><div class="label">Tips</div></div>
+      <div class="nav-item"><div class="icon"><i class="fas fa-bullhorn"></i></div><div class="label">Awareness</div></div>
+      <div class="nav-item"><div class="icon"><i class="fas fa-question-circle"></i></div><div class="label">FAQ</div></div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN FAQ PAGE -->
+  <main class="main">
+
+    <!-- TITLE -->
+    <div class="page-title">Frequently Asked Questions</div>
+    <div class="page-sub">Clear answers to help you make smart, safe purchasing decisions.</div>
+
+    <!-- SEARCH -->
+    <div class="search-box">
+      <i class="fas fa-search" style="color:var(--accent-dark)"></i>
+      <input id="faqSearch" placeholder="Search questions..." />
+    </div>
+
+    <!-- FAQ CATEGORY 1 -->
+    <div class="category">🛒 Buying & Product Quality</div>
+    <div class="faq-container">
+
+      <div class="faq-item">
+        <div class="faq-q"><span>How can I check if a product is genuinely organic?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-a">Look for government-approved certification logos and batch verification IDs.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span>Is shiny produce safe to buy?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-a">Unnaturally shiny items may be polished with chemicals. Prefer natural-looking produce.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span>What should I check before buying packaged products?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-a">Always inspect expiry date, seal condition, and ingredient list.</div>
+      </div>
+
+    </div>
+
+    <!-- FAQ CATEGORY 2 -->
+    <div class="category">⚠ Safety & Food Handling</div>
+    <div class="faq-container">
+
+      <div class="faq-item">
+        <div class="faq-q"><span>How do I reduce pesticide residue on vegetables?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-a">Wash thoroughly under running water; use salt or vinegar soak for extra safety.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span>How long can fresh produce stay safe after purchase?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-a">Most vegetables last 3–5 days when refrigerated properly.</div>
+      </div>
+
+    </div>
+
+    <!-- FAQ CATEGORY 3 -->
+    <div class="category">📣 Complaints & Consumer Rights</div>
+    <div class="faq-container">
+
+      <div class="faq-item">
+        <div class="faq-q"><span>How can I report a fake or unsafe product?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-a">Use the “Report Issue” option or contact your local consumer protection authority.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span>Can I return spoiled or low-quality produce?</span><i class="fas fa-chevron-down"></i></div>
+        <div class="faq-a">Yes, consumers have the right to return faulty or unsafe items with proof of purchase.</div>
+      </div>
+
+    </div>
+
+    <!-- SUGGESTION BOX -->
+    <div class="help-card">
+      <h3>Need more help?</h3>
+      <p>If you didn’t find your question here, you can raise a query through the “Report Concern” section or contact support.</p>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // FAQ Toggle
+  document.querySelectorAll('.faq-q').forEach(q=>{
+    q.addEventListener('click',()=>{
+      const ans = q.nextElementSibling;
+      const icon = q.querySelector('i');
+      const open = ans.style.display === 'block';
+
+      document.querySelectorAll('.faq-a').forEach(a=>a.style.display='none');
+      document.querySelectorAll('.faq-q i').forEach(i=>i.style.transform='rotate(0deg)');
+
+      if(!open){
+        ans.style.display='block';
+        icon.style.transform='rotate(180deg)';
+      }
+    });
+  });
+
+  // FAQ Search
+  const search = document.getElementById('faqSearch');
+  search.addEventListener('input', ()=>{
+    const val = search.value.toLowerCase();
+    let found = false;
+
+    document.querySelectorAll('.faq-item').forEach(item=>{
+      const text = item.innerText.toLowerCase();
+      if(text.includes(val)){
+        item.style.display='block';
+        found = true;
+      } else {
+        item.style.display='none';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

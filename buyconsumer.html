@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Buying Panel — Cultivate Connect</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+:root{
+  --bg: #F7EFC2;
+  --card: #E7D7A7;
+  --card-2: #FFF7E8;
+  --accent: #C2A875;
+  --accent-dark: #B8945B;
+  --muted: #6b5b3a;
+  --soft: rgba(194,168,117,0.10);
+  --glass: rgba(255,255,255,0.65);
+  --radius: 12px;
+  --shadow-sm: 0 6px 18px rgba(34,34,34,0.06);
+  --shadow-md: 0 10px 30px rgba(34,34,34,0.08);
+  --gap: 16px;
+  --text-dark: #4a3f29;
+  --sidebar-collapsed: 76px;
+  --sidebar-expanded: 260px;
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+/* reset */
+*{box-sizing:inherit}
+html,body{height:100%; margin:0; padding:0; background:linear-gradient(180deg,#fff 0%,var(--bg) 100%); color:var(--muted); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; font-size:15px; line-height:1.45;}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block;border-radius:8px}
+
+/* app layout */
+.app{display:flex; min-height:100vh; gap:var(--gap); align-items:flex-start;}
+.sidebar{
+  position:fixed;
+  left:0; top:0; bottom:0;
+  width:var(--sidebar-collapsed);
+  padding:18px 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.75));
+  border-right:1px solid rgba(167,133,63,0.06);
+  box-shadow:var(--shadow-sm);
+  z-index:1200;
+  transition: width .28s cubic-bezier(.2,.9,.2,1), box-shadow .2s;
+  display:flex; flex-direction:column; align-items:center;
+  overflow:visible;
+}
+
+/* expanded state overlays, does NOT push .main */
+.sidebar.expanded{
+  width:var(--sidebar-expanded);
+  box-shadow: 0 20px 60px rgba(34,34,34,0.12);
+  backdrop-filter: blur(6px);
+}
+
+/* brand */
+.brand{width:100%; display:flex; align-items:center; gap:12px; padding:6px 8px; margin-bottom:14px;}
+.logo{width:46px; height:46px; border-radius:10px; background:linear-gradient(135deg,var(--accent) 0%, var(--accent-dark) 100%); display:inline-flex; align-items:center; justify-content:center; color:white; font-weight:700; box-shadow: 0 6px 18px rgba(168,133,64,0.12); flex-shrink:0;}
+.brand-title{display:none; color:var(--muted); font-weight:700; font-size:16px;}
+
+/* nav */
+.nav{width:100%; margin-top:6px; display:flex; flex-direction:column; gap:8px;}
+.nav-item{display:flex; align-items:center; gap:12px; width:100%; padding:10px; border-radius:10px; color:var(--muted); transition:background .15s, transform .12s; cursor:pointer;}
+.nav-item .icon{width:40px; height:40px; display:inline-grid; place-items:center; background:var(--card-2); border-radius:9px; color:var(--accent-dark); font-size:18px; flex-shrink:0;}
+.nav-item .label{display:none; font-weight:600; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:calc(var(--sidebar-expanded) - 80px);}
+
+/* When sidebar expanded, show labels */
+.sidebar.expanded .brand-title,
+.sidebar.expanded .nav-item .label,
+.sidebar.expanded .sidebar-footer .user-meta{
+  display:block;
+}
+
+/* active nav */
+.nav-item:hover{background:var(--soft); transform:translateY(-2px);}
+.nav-item.active{ background:linear-gradient(90deg, rgba(194,168,117,0.12), rgba(194,168,117,0.06)); border-left:4px solid var(--accent); padding-left:8px; }
+
+/* footer & avatar */
+.sidebar-footer{margin-top:auto; width:100%; display:flex; gap:8px; align-items:center; padding:8px;}
+.avatar{width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#fff,#FFF7E8);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent-dark);box-shadow:0 6px 14px rgba(0,0,0,0.04);}
+.user-meta{display:none; font-size:13px; color:var(--muted); font-weight:600;}
+
+/* main area (leaves fixed gap for sidebar) */
+.main{margin-left:var(--sidebar-collapsed); padding:28px; width:100%; transition:margin-left .28s ease;}
+
+/* header */
+header.main-header{display:flex; justify-content:space-between; gap:18px; align-items:center; margin-bottom:18px; position:relative;}
+.page-title{font-size:20px; font-weight:800; color:var(--accent-dark); letter-spacing:.2px;}
+.page-sub{color:#604d33; opacity:.9; font-size:13px; margin-top:6px;}
+.header-actions{display:flex; gap:12px; align-items:center;}
+.search{display:flex; gap:8px; align-items:center; background:var(--card-2); padding:8px 10px; border-radius:999px; box-shadow:var(--shadow-sm);}
+
+/* allow header-search to shrink on small screens */
+.search input{border:0; background:transparent; outline:none; width:280px; font-size:14px; color:var(--muted); min-width:80px;}
+.header-actions .mobile-toggle{display:none; background:transparent; border:0; font-size:20px; cursor:pointer;}
+
+/* buttons */
+.btn{border:0; cursor:pointer; padding:10px 14px; border-radius:10px; font-weight:700; background:linear-gradient(90deg,var(--accent) 0%, var(--accent-dark) 100%); color:white; box-shadow:var(--shadow-sm);}
+.btn.ghost{background:transparent; border:1px solid rgba(130,100,60,0.07); color:var(--muted); font-weight:600;}
+.btn-primary-wide{display:block; padding:12px; border-radius:10px; width:100%; background:linear-gradient(90deg,var(--accent) 0%, var(--accent-dark) 100%); color:white; border:none; font-weight:800; cursor:pointer;}
+
+/* grid layout */
+.grid{display:grid; gap:18px; grid-template-columns: 1fr 360px; align-items:start;}
+.left-column{display:grid; gap:18px;}
+.right-column{display:grid; gap:18px;}
+
+/* card base */
+.card{background:linear-gradient(180deg,var(--card) 0%, var(--card-2) 100%); padding:18px; border-radius:var(--radius); box-shadow:var(--shadow-md); border:1px solid rgba(167,133,63,0.06); color:var(--text-dark);}
+
+/* buying panel */
+.buying-panel-inner{background:transparent; padding:0; box-shadow:none; border-radius:0;}
+.filter-options{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid rgba(0,0,0,0.04);}
+.filter-group{display:flex; flex-direction:column; gap:6px; min-width:160px; flex:1 1 160px;}
+.filter-group label{font-size:0.9rem; color:var(--muted); font-weight:600;}
+.filter-group select, .filter-group input{padding:10px 12px; border:1px solid rgba(0,0,0,0.06); border-radius:8px; font-size:0.95rem; background:rgba(255,255,255,0.9); width:100%;}
+
+/* search-sort */
+.search-sort-container{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; gap:12px; flex-wrap:wrap;}
+.search-box{position:relative; width:100%; max-width:420px;}
+.search-box input{width:100%; padding:10px 15px 10px 40px; border:1px solid rgba(0,0,0,0.06); border-radius:8px; font-size:0.95rem; background:white;}
+.search-box i{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted);}
+
+/* products grid: responsive, stable card heights */
+.products-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap:18px;
+}
+
+/* card layout improved */
+.product-card{
+  background: linear-gradient(180deg,#fff 0%, var(--card-2) 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform .25s, box-shadow .25s;
+  position: relative;
+  border:1px solid rgba(0,0,0,0.03);
+  display:flex;
+  flex-direction:column;
+  min-height: 360px; /* consistent baseline height */
+}
+.product-card:hover{ transform: translateY(-6px); box-shadow: var(--shadow-md); }
+
+/* image uses aspect-ratio for better cropping */
+.product-img{aspect-ratio: 16 / 10; width:100%; overflow:hidden; background:linear-gradient(180deg,#faf3da,#fff);}
+.product-img img{width:100%; height:100%; object-fit:cover; transition: transform .45s;}
+.product-card:hover .product-img img{ transform:scale(1.05); }
+
+/* info area uses flex to push actions to bottom */
+.product-info{padding:14px 16px; display:flex; flex-direction:column; gap:10px; flex:1;}
+.product-info h3{margin:0 0 4px; font-size:1.05rem; color:var(--text-dark);}
+.farmer{color:#7a6442; font-size:0.9rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;}
+.product-description{font-size:0.9rem; color:#6b5b3a; line-height:1.4; flex:1; overflow:hidden; text-overflow:ellipsis;}
+.price{font-weight:700; color:var(--accent-dark); font-size:1.15rem;}
+.product-meta{display:flex; justify-content:flex-start; gap:12px; font-size:0.82rem; color:#7a6442;}
+.product-actions{display:flex; gap:10px; margin-top:8px;}
+.add-to-cart{flex:1; padding:10px; background:linear-gradient(90deg,var(--accent) 0%, var(--accent-dark) 100%); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700;}
+.view-details{padding:10px 14px; background:transparent; border:1px solid rgba(0,0,0,0.06); color:var(--accent-dark); border-radius:8px; cursor:pointer; font-weight:700;}
+
+/* badges */
+.product-badge{position:absolute; top:12px; left:12px; background:var(--accent); color:white; padding:6px 10px; border-radius:8px; font-size:0.8rem; font-weight:600; z-index:2;}
+
+/* pagination */
+.pagination{display:flex; justify-content:center; margin-top:18px; gap:8px;}
+.pagination button{padding:8px 12px; border:1px solid rgba(0,0,0,0.06); background:white; border-radius:8px; cursor:pointer;}
+.pagination button.active{background:var(--accent); color:white; border-color:var(--accent);}
+
+/* cart panel */
+.cart-card{position:sticky; top:100px; background:linear-gradient(180deg,var(--card-2) 0%, #fff 100%); padding:16px; border-radius:12px; box-shadow:var(--shadow-sm); border:1px solid rgba(0,0,0,0.03); max-height:80vh; overflow:auto;}
+.cart-card h3{margin:0 0 12px; color:var(--accent-dark); display:flex; align-items:center; gap:8px;}
+.cart-empty{ text-align:center; padding:18px 12px; color:#7a6442;}
+.cart-empty i{font-size:48px; color:rgba(0,0,0,0.06); margin-bottom:10px;}
+.cart-items{max-height:360px; overflow-y:auto; margin-bottom:12px;}
+.cart-item{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.04);}
+.cart-item h4{margin:0; font-size:0.95rem; color:var(--text-dark);}
+.cart-item p{margin:0; font-size:0.9rem; color:#7a6442;}
+.cart-item-controls{display:flex; align-items:center; gap:10px;}
+.quantity-btn{width:30px; height:30px; border-radius:8px; background:white; border:1px solid rgba(0,0,0,0.06); display:flex; gap:0; align-items:center; justify-content:center; cursor:pointer;}
+.remove-item{color:#d04b3a; cursor:pointer; font-size:18px;}
+.cart-total{padding-top:12px; border-top:2px dashed rgba(0,0,0,0.03); display:flex; justify-content:space-between; align-items:center; font-weight:700; color:var(--accent-dark); margin-bottom:12px;}
+
+/* modal */
+.modal{display:none; position:fixed; z-index:1500; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.45); -webkit-overflow-scrolling:touch;}
+.modal-content{background:white; margin:24px auto; padding:22px; border-radius:12px; max-width:960px; width:94%; max-height:86vh; overflow:auto; box-shadow:0 10px 40px rgba(0,0,0,0.3);}
+.close{color:var(--muted); font-size:26px; font-weight:700; cursor:pointer;}
+
+/* product detail layout */
+.product-detail{display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;}
+.product-detail-img img{width:100%; border-radius:10px; height:auto; object-fit:cover;}
+.product-detail-info h2{margin:0 0 6px; color:var(--accent-dark);}
+.quantity-selector{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+.quantity-btn-modal{width:36px; height:36px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:white; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700;}
+
+/* checkout form */
+.checkout-form input, .checkout-form select, .checkout-form textarea{width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); margin-bottom:12px;}
+.order-summary{background:linear-gradient(180deg,#fff,#FFF7E8); padding:12px; border-radius:8px; border:1px solid rgba(0,0,0,0.04);}
+
+/* payment method selected state */
+.payment-method{transition:box-shadow .12s, border-color .12s;}
+.payment-method.selected{box-shadow: 0 8px 30px rgba(168,133,64,0.08); border-color:var(--accent);}
+
+/* FAQ small */
+.faq-q h4{margin:0; font-size:14px; color:var(--accent-dark);}
+.faq-a{margin-top:8px; display:none; color:#5a4d37; font-size:13px;}
+
+/* small helpers */
+.hidden{display:none !important;}
+.center{text-align:center}
+
+/* responsive tweaks */
+@media (max-width:1100px){
+  .search input{width:220px}
+  .grid{grid-template-columns: 1fr 320px;}
+  .cart-card{top:80px;}
+}
+
+@media (max-width:900px){
+  .grid{grid-template-columns:1fr;}
+  .right-column{order:2;}
+  .main{padding:20px;}
+  .product-card{min-height:320px;}
+}
+
+@media (max-width:560px){
+  /* hide sidebar on tiny screens; show mobile toggle via header */
+  .sidebar{display:none}
+  .main{margin-left:0; padding:12px;}
+  .header-actions .mobile-toggle{display:inline-flex;}
+  .products-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px;}
+  .product-card{min-height:280px;}
+  .cart-card{position:relative; max-height:none; order:3;}
+  .modal-content{margin:10px; width:96%;}
+  .brand-title{display:inline-block}
+}
+</style>
+
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="main navigation">
+    <div class="brand">
+      <div class="logo">CC</div>
+      <div class="brand-title">Cultivate Connect</div>
+    </div>
+
+    <nav class="nav" role="navigation">
+      <div class="nav-item" data-target="dashboard" data-link="consumer.html">
+        <div class="icon"><i class="fas fa-home"></i></div>
+        <div class="label">Dashboard</div>
+      </div>
+
+      <div class="nav-item active" data-target="crop">
+        <div class="icon"><i class="fas fa-shopping-basket"></i></div>
+        <div class="label">Buy Products</div>
+      </div>
+
+      <div class="nav-item" data-target="weather">
+        <div class="icon"><i class="fas fa-lightbulb"></i></div>
+        <div class="label">Tips</div>
+      </div>
+
+      <div class="nav-item" data-target="schemes">
+        <div class="icon"><i class="fas fa-bullhorn"></i></div>
+        <div class="label">Awareness</div>
+      </div>
+
+      <div class="nav-item" data-target="update">
+        <div class="icon"><i class="fas fa-question-circle"></i></div>
+        <div class="label">FAQ</div>
+      </div>
+
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">RK</div>
+      <div class="user-meta">
+        <div style="font-weight:700">Ramesh Kumar</div>
+        <div style="font-size:12px; opacity:.8">Consumer</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="main-header">
+      <div>
+        <div class="page-title">Buying Panel</div>
+        <div class="page-sub">Fresh produce directly from local farms</div>
+      </div>
+
+      <div class="header-actions">
+        <div class="search" role="search">
+          <i class="fas fa-search" style="color:var(--accent-dark)"></i>
+          <input id="global-search" placeholder="Search products..." />
+        </div>
+      </div>
+    </header>
+
+    <section class="grid" aria-labelledby="main-grid">
+      <!-- Left column: products -->
+      <div class="left-column">
+
+        <div class="card buying-panel-inner">
+          <div class="filter-options">
+            <div class="filter-group">
+              <label for="category">Category</label>
+              <select id="category">
+                <option value="all">All Categories</option>
+                <option value="vegetables">Vegetables</option>
+                <option value="fruits">Fruits</option>
+                <option value="grains">Grains</option>
+                <option value="dairy">Dairy</option>
+                <option value="herbs">Herbs</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="farm">Farm</label>
+              <select id="farm">
+                <option value="all">All Farms</option>
+                <option value="green-valley">Green Valley Farm</option>
+                <option value="sunny-meadows">Sunny Meadows</option>
+                <option value="organic-harvest">Organic Harvest</option>
+                <option value="happy-acres">Happy Acres</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="practice">Farming Practice</label>
+              <select id="practice">
+                <option value="all">All Practices</option>
+                <option value="organic">Certified Organic</option>
+                <option value="natural">Natural Farming</option>
+                <option value="sustainable">Sustainable</option>
+                <option value="biodynamic">Biodynamic</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="price-range">Price Range</label>
+              <select id="price-range">
+                <option value="all">All Prices</option>
+                <option value="0-5">$0 - $5</option>
+                <option value="5-10">$5 - $10</option>
+                <option value="10-20">$10 - $20</option>
+                <option value="20+">$20+</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="search-sort-container">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="search" placeholder="Search products...">
+            </div>
+            <div class="sort-options">
+              <select id="sort">
+                <option value="featured">Featured</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="name">Name: A to Z</option>
+                <option value="newest">Newest First</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="products-grid" id="products-grid">
+            <!-- Product 1 -->
+            <div class="product-card">
+              <div class="product-badge">Organic</div>
+              <div class="product-img">
+                <img src="https://images.unsplash.com/photo-1561136594-7f68413baa99?auto=format&fit=crop&w=1000&q=80" alt="Fresh Tomatoes">
+              </div>
+              <div class="product-info">
+                <h3>Fresh Tomatoes</h3>
+                <p class="farmer"><i class="fas fa-user"></i> Green Valley Farm</p>
+                <p class="product-description">Juicy, vine-ripened tomatoes grown using organic methods. Perfect for salads, sauces, and sandwiches.</p>
+                <div class="product-meta">
+                  <span><i class="fas fa-leaf"></i> Organic</span>
+                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
+                </div>
+                <p class="price">$3.99/kg</p>
+                <div class="product-actions">
+                  <button class="add-to-cart" data-product="Fresh Tomatoes" data-price="3.99" data-farmer="Green Valley Farm">Add to Cart</button>
+                  <button class="view-details" data-product="tomatoes">Details</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="product-card">
+              <div class="product-badge">New</div>
+              <div class="product-img">
+                <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=1000&q=80" alt="Organic Carrots">
+              </div>
+              <div class="product-info">
+                <h3>Organic Carrots</h3>
+                <p class="farmer"><i class="fas fa-user"></i> Sunny Meadows</p>
+                <p class="product-description">Sweet, crunchy carrots grown in nutrient-rich soil without synthetic pesticides or fertilizers.</p>
+                <div class="product-meta">
+                  <span><i class="fas fa-leaf"></i> Organic</span>
+                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
+                </div>
+                <p class="price">$2.49/kg</p>
+                <div class="product-actions">
+                  <button class="add-to-cart" data-product="Organic Carrots" data-price="2.49" data-farmer="Sunny Meadows">Add to Cart</button>
+                  <button class="view-details" data-product="carrots">Details</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="product-card">
+              <div class="product-badge">Seasonal</div>
+              <div class="product-img">
+                <img src="https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=1000&q=80" alt="Fresh Apples">
+              </div>
+              <div class="product-info">
+                <h3>Fresh Apples</h3>
+                <p class="farmer"><i class="fas fa-user"></i> Organic Harvest</p>
+                <p class="product-description">Crisp, sweet apples harvested at peak ripeness. Perfect for snacking, baking, or making cider.</p>
+                <div class="product-meta">
+                  <span><i class="fas fa-leaf"></i> Organic</span>
+                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
+                </div>
+                <p class="price">$4.99/kg</p>
+                <div class="product-actions">
+                  <button class="add-to-cart" data-product="Fresh Apples" data-price="4.99" data-farmer="Organic Harvest">Add to Cart</button>
+                  <button class="view-details" data-product="apples">Details</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=1000&q=80" alt="Spinach">
+              </div>
+              <div class="product-info">
+                <h3>Fresh Spinach</h3>
+                <p class="farmer"><i class="fas fa-user"></i> Green Valley Farm</p>
+                <p class="product-description">Tender, nutrient-packed spinach leaves perfect for salads, smoothies, or sautéing.</p>
+                <div class="product-meta">
+                  <span><i class="fas fa-leaf"></i> Organic</span>
+                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
+                </div>
+                <p class="price">$2.99/bunch</p>
+                <div class="product-actions">
+                  <button class="add-to-cart" data-product="Fresh Spinach" data-price="2.99" data-farmer="Green Valley Farm">Add to Cart</button>
+                  <button class="view-details" data-product="spinach">Details</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 5 -->
+            <div class="product-card">
+              <div class="product-badge">Limited</div>
+              <div class="product-img">
+                <img src="https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1000&q=80" alt="Bell Peppers">
+              </div>
+              <div class="product-info">
+                <h3>Bell Peppers</h3>
+                <p class="farmer"><i class="fas fa-user"></i> Happy Acres</p>
+                <p class="product-description">Colorful bell peppers in red, yellow, and green varieties. Sweet and crunchy with vibrant colors.</p>
+                <div class="product-meta">
+                  <span><i class="fas fa-leaf"></i> Organic</span>
+                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
+                </div>
+                <p class="price">$4.49/kg</p>
+                <div class="product-actions">
+                  <button class="add-to-cart" data-product="Bell Peppers" data-price="4.49" data-farmer="Happy Acres">Add to Cart</button>
+                  <button class="view-details" data-product="peppers">Details</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 6 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img src="https://images.unsplash.com/photo-1594282487584-6d87ac195118?auto=format&fit=crop&w=1000&q=80" alt="Cucumbers">
+              </div>
+              <div class="product-info">
+                <h3>Fresh Cucumbers</h3>
+                <p class="farmer"><i class="fas fa-user"></i> Sunny Meadows</p>
+                <p class="product-description">Crisp, refreshing cucumbers perfect for salads, pickling, or as a healthy snack.</p>
+                <div class="product-meta">
+                  <span><i class="fas fa-leaf"></i> Organic</span>
+                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
+                </div>
+                <p class="price">$1.99/each</p>
+                <div class="product-actions">
+                  <button class="add-to-cart" data-product="Fresh Cucumbers" data-price="1.99" data-farmer="Sunny Meadows">Add to Cart</button>
+                  <button class="view-details" data-product="cucumbers">Details</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+                    <div class="pagination">
+            <button class="active">1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>Next <i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div> <!-- closes .card.buying-panel-inner -->
+
+        <!-- </div>  WRONG extra closing div — removed/commented out -->
+
+      </div> <!-- closes .left-column -->
+
+      <!-- Right column: Cart and Checkout -->
+      <aside class="right-column">
+
+        <div class="cart-card">
+          <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
+          <div class="cart-items" id="cart-items-container">
+            <!-- dynamically inserted items -->
+          </div>
+
+          <div id="cart-total-container" style="display:none;">
+            <div class="cart-total">
+              <span>Total:</span>
+              <span id="cart-total-price">$0.00</span>
+            </div>
+            <button class="btn-primary-wide" id="proceed-checkout-btn">Proceed to Checkout</button>
+          </div>
+
+          <div id="cart-empty-message">
+            <div class="cart-empty">
+              <i class="fas fa-shopping-cart"></i>
+              <p>Your cart is empty</p>
+              <p style="margin-top:10px; color:#7a6442">Add items to get started!</p>
+            </div>
+          </div>
+        </div>
+
+        <footer class="small" style="color:#6b5b3a; margin-top:6px;">© 2025 Cultivate Connect</footer>
+      </aside>
+
+    </section>
+  </main>
+</div>
+
+<!-- Product Detail Modal -->
+<div id="product-detail-modal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div class="product-detail">
+      <div class="product-detail-img">
+        <img id="detail-img" src="" alt="Product Image">
+      </div>
+      <div class="product-detail-info">
+        <h2 id="detail-title">Product Title</h2>
+        <div class="product-detail-farmer">
+          <img id="detail-farmer-img" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Farmer" style="width:44px;height:44px;border-radius:8px; object-fit:cover;">
+          <div>
+            <strong id="detail-farmer-name">Farmer Name</strong>
+            <p id="detail-farm" style="margin:0; color:#7a6442;">Farm Name</p>
+          </div>
+        </div>
+
+        <div class="product-detail-price" id="detail-price" style="font-size:1.3rem; font-weight:700; color:var(--accent-dark); margin-bottom:10px;">$0.00</div>
+
+        <div class="product-detail-description" id="detail-description" style="margin-bottom:12px; color:#6b5b3a;">
+          Product description will appear here.
+        </div>
+
+        <div class="product-detail-meta" style="display:flex; gap:12px; margin-bottom:12px; color:#7a6442;">
+          <div><i class="fas fa-leaf"></i> <span id="detail-practice">Farming Practice</span></div>
+          <div><i class="fas fa-map-marker-alt"></i> <span id="detail-location">Location</span></div>
+          <div><i class="fas fa-calendar"></i> <span id="detail-harvest">Harvest Date</span></div>
+        </div>
+
+        <div class="quantity-selector">
+          <label style="font-weight:700; color:var(--muted)">Quantity:</label>
+          <div class="quantity-controls">
+            <button class="quantity-btn-modal" id="decrease-qty">-</button>
+            <span class="quantity-display" id="quantity" style="min-width:36px; display:inline-block; text-align:center; font-weight:700;">1</span>
+            <button class="quantity-btn-modal" id="increase-qty">+</button>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:8px;">
+          <button class="add-to-cart" id="detail-add-to-cart">Add to Cart</button>
+          <button class="btn ghost" style="padding:10px 12px; border-radius:8px;">Save for Later</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Checkout Modal -->
+<div id="checkout-modal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="checkout-form-container">
+      <h2 style="margin-top:0; color:var(--accent-dark)">Checkout</h2>
+      <div class="order-summary" id="checkout-order-summary">
+        <!-- Order summary will be inserted here -->
+      </div>
+
+      <form id="checkout-form" class="checkout-form" style="margin-top:12px;">
+        <div style="margin-bottom:16px;">
+          <h3 style="margin:0 0 8px; color:var(--accent-dark)">Delivery Information</h3>
+          <div style="display:grid; gap:10px;">
+            <input type="text" id="full-name" required placeholder="Full name *" />
+            <input type="email" id="email-address" required placeholder="Email address *" />
+            <input type="tel" id="phone" required placeholder="Phone number *" />
+            <textarea id="address" rows="3" required placeholder="Delivery address *"></textarea>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <input type="text" id="city" required placeholder="City *" />
+              <input type="text" id="zipcode" required placeholder="Zip code *" />
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <h3 style="margin:0 0 8px; color:var(--accent-dark)">Payment Method</h3>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <label class="payment-method" style="display:flex; gap:10px; align-items:center; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06);">
+              <input type="radio" name="payment" value="card" checked>
+              <div>
+                <strong>Credit/Debit Card</strong>
+                <div style="font-size:13px; color:#7a6442">Pay securely with your card</div>
+              </div>
+            </label>
+            <label class="payment-method" style="display:flex; gap:10px; align-items:center; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06);">
+              <input type="radio" name="payment" value="cash">
+              <div>
+                <strong>Cash on Delivery</strong>
+                <div style="font-size:13px; color:#7a6442">Pay when you receive your order</div>
+              </div>
+            </label>
+            <label class="payment-method" style="display:flex; gap:10px; align-items:center; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06);">
+              <input type="radio" name="payment" value="upi">
+              <div>
+                <strong>UPI Payment</strong>
+                <div style="font-size:13px; color:#7a6442">Pay using UPI apps</div>
+              </div>
+            </label>
+          </div>
+
+          <div id="card-details" style="margin-top:12px;">
+            <input type="text" id="card-number" placeholder="Card Number *" maxlength="19">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
+              <input type="text" id="cvv" placeholder="CVV" maxlength="4">
+            </div>
+            <input type="text" id="card-name" placeholder="Name on Card *">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary-wide">Place Order</button>
+      </form>
+    </div>
+
+    <div id="checkout-success" style="display:none;">
+      <div style="text-align:center; padding:32px;">
+        <i class="fas fa-check-circle" style="font-size:48px; color:var(--accent);"></i>
+        <h2 style="color:var(--accent-dark); margin-top:8px;">Order Placed Successfully!</h2>
+        <p>Thank you for your order. Your order ID is: <strong id="order-id"></strong></p>
+        <p style="margin-top:12px; color:#7a6442">You will receive a confirmation email shortly.</p>
+        <button class="btn-primary-wide" id="close-checkout-btn" style="margin-top:16px;">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Preserve original buying panel functionality but adapt to new layout
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let currentProduct = null;
+  let quantity = 1;
+
+  const updateCartDisplay = () => {
+    const cartContainer = document.getElementById('cart-items-container');
+    const totalContainer = document.getElementById('cart-total-container');
+    const emptyMessage = document.getElementById('cart-empty-message');
+    const checkoutBtn = document.getElementById('proceed-checkout-btn');
+
+    if (!cart || cart.length === 0) {
+      cartContainer.innerHTML = '';
+      totalContainer.style.display = 'none';
+      emptyMessage.style.display = 'block';
+      if (checkoutBtn) checkoutBtn.disabled = true;
+      return;
+    }
+
+    cartContainer.innerHTML = '';
+    let total = 0;
+
+    cart.forEach((item, index) => {
+      const itemTotal = item.price * item.quantity;
+      total += itemTotal;
+
+      const cartItem = document.createElement('div');
+      cartItem.className = 'cart-item';
+      cartItem.innerHTML = `
+        <div style="flex:1">
+          <h4>${item.product}</h4>
+          <p>${item.farmer}</p>
+        </div>
+        <div class="cart-item-controls">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
+            <span style="min-width:20px; text-align:center;">${item.quantity}</span>
+            <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
+          </div>
+          <div style="font-weight:700; color:var(--accent-dark); margin-left:10px;">$${itemTotal.toFixed(2)}</div>
+          <span class="remove-item" onclick="removeFromCart(${index})" title="Remove item">&times;</span>
+        </div>
+      `;
+      cartContainer.appendChild(cartItem);
+    });
+
+    document.getElementById('cart-total-price').textContent = `$${total.toFixed(2)}`;
+    totalContainer.style.display = 'block';
+    emptyMessage.style.display = 'none';
+    if (checkoutBtn) checkoutBtn.disabled = false;
+  };
+
+  function addToCart(product, price, farmer, button) {
+    const existingItem = cart.find(item => item.product === product);
+
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      cart.push({
+        product: product,
+        price: parseFloat(price),
+        farmer: farmer,
+        quantity: quantity
+      });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartDisplay();
+
+    // Small feedback on button if present
+    if (button) {
+      const originalText = button.textContent;
+      button.textContent = 'Added!';
+      button.style.opacity = '0.95';
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.style.opacity = '';
+      }, 1300);
+    }
+
+    // Reset quantity after add-from-modal
+    quantity = 1;
+    const qEl = document.getElementById('quantity');
+    if (qEl) qEl.textContent = quantity;
+  }
+
+  window.updateQuantity = function(index, change) {
+    if (!cart[index]) return;
+    cart[index].quantity += change;
+    if (cart[index].quantity <= 0) {
+      cart.splice(index, 1);
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartDisplay();
+  };
+
+  window.removeFromCart = function(index) {
+    cart.splice(index, 1);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartDisplay();
+  };
+
+  // Initialize display
+  updateCartDisplay();
+
+  // Add to Cart button listeners
+  document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', function(e) {
+      const product = this.getAttribute('data-product');
+      const price = this.getAttribute('data-price');
+      const farmer = this.getAttribute('data-farmer');
+      addToCart(product, price, farmer, this);
+    });
+  });
+
+  // View Details listeners
+  document.querySelectorAll('.view-details').forEach(button => {
+    button.addEventListener('click', function() {
+      const productType = this.getAttribute('data-product');
+      showProductDetails(productType);
+    });
+  });
+
+  // Product data (same as original demo)
+  function showProductDetails(productType) {
+    const productData = {
+      'tomatoes': {
+        title: 'Fresh Tomatoes',
+        image: 'https://images.unsplash.com/photo-1561136594-7f68413baa99?auto=format&fit=crop&w=1000&q=80',
+        farmerName: 'John Smith',
+        farm: 'Green Valley Farm',
+        price: '$3.99/kg',
+        description: 'Our juicy, vine-ripened tomatoes are grown using organic methods that prioritize soil health and biodiversity. Harvested at peak ripeness, these tomatoes are bursting with flavor and nutrients.',
+        practice: 'Certified Organic',
+        location: 'Within 50 miles',
+        harvest: 'Harvested yesterday'
+      },
+      'carrots': {
+        title: 'Organic Carrots',
+        image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=1000&q=80',
+        farmerName: 'Maria Rodriguez',
+        farm: 'Sunny Meadows',
+        price: '$2.49/kg',
+        description: 'These sweet, crunchy carrots are grown in nutrient-rich soil without synthetic pesticides or fertilizers. Our sustainable farming practices ensure each carrot is packed with vitamins and minerals.',
+        practice: 'Natural Farming',
+        location: 'Within 30 miles',
+        harvest: 'Harvested 2 days ago'
+      },
+      'apples': {
+        title: 'Fresh Apples',
+        image: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=1000&q=80',
+        farmerName: 'Robert Johnson',
+        farm: 'Organic Harvest',
+        price: '$4.99/kg',
+        description: 'Crisp, sweet apples harvested at peak ripeness from our heritage orchard. Grown using permaculture principles. Perfect for snacking, baking, or making cider.',
+        practice: 'Permaculture',
+        location: 'Within 40 miles',
+        harvest: 'Harvested this week'
+      },
+      'spinach': {
+        title: 'Fresh Spinach',
+        image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=1000&q=80',
+        farmerName: 'John Smith',
+        farm: 'Green Valley Farm',
+        price: '$2.99/bunch',
+        description: 'Tender, nutrient-packed spinach leaves grown in our greenhouse during cooler months and in open fields during spring and fall.',
+        practice: 'Certified Organic',
+        location: 'Within 50 miles',
+        harvest: 'Harvested today'
+      },
+      'peppers': {
+        title: 'Bell Peppers',
+        image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1000&q=80',
+        farmerName: 'Sarah Williams',
+        farm: 'Happy Acres',
+        price: '$4.49/kg',
+        description: 'Colorful bell peppers in red, yellow, and green varieties. Grown in our high tunnels to extend the growing season.',
+        practice: 'Sustainable',
+        location: 'Within 25 miles',
+        harvest: 'Harvested 3 days ago'
+      },
+      'cucumbers': {
+        title: 'Fresh Cucumbers',
+        image: 'https://images.unsplash.com/photo-1594282487584-6d87ac195118?auto=format&fit=crop&w=1000&q=80',
+        farmerName: 'Maria Rodriguez',
+        farm: 'Sunny Meadows',
+        price: '$1.99/each',
+        description: 'Crisp, refreshing cucumbers grown using natural farming methods. Known for thin skin and minimal seeds.',
+        practice: 'Natural Farming',
+        location: 'Within 30 miles',
+        harvest: 'Harvested yesterday'
+      }
+    };
+
+    const data = productData[productType] || productData['tomatoes'];
+
+    document.getElementById('detail-title').textContent = data.title;
+    document.getElementById('detail-img').src = data.image;
+    document.getElementById('detail-farmer-name').textContent = data.farmerName;
+    document.getElementById('detail-farm').textContent = data.farm;
+    document.getElementById('detail-price').textContent = data.price;
+    document.getElementById('detail-description').textContent = data.description;
+    document.getElementById('detail-practice').textContent = data.practice;
+    document.getElementById('detail-location').textContent = data.location;
+    document.getElementById('detail-harvest').textContent = data.harvest;
+
+    currentProduct = {
+      product: data.title,
+      price: parseFloat(data.price.replace('$', '').replace('/kg', '').replace('/each', '').replace('/bunch', '')),
+      farmer: data.farm
+    };
+
+    document.getElementById('product-detail-modal').style.display = 'block';
+  }
+
+  // Modal close handlers
+  document.querySelectorAll('.close').forEach(closeBtn => {
+    closeBtn.addEventListener('click', function() {
+      this.closest('.modal').style.display = 'none';
+    });
+  });
+  window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+      event.target.style.display = 'none';
+    }
+  });
+
+  // Modal quantity controls
+  document.getElementById('increase-qty').addEventListener('click', function() {
+    quantity++;
+    document.getElementById('quantity').textContent = quantity;
+  });
+
+  document.getElementById('decrease-qty').addEventListener('click', function() {
+    if (quantity > 1) {
+      quantity--;
+      document.getElementById('quantity').textContent = quantity;
+    }
+  });
+
+  // Add from modal
+  document.getElementById('detail-add-to-cart').addEventListener('click', function() {
+    if (currentProduct) {
+      addToCart(currentProduct.product, currentProduct.price, currentProduct.farmer, null);
+      document.getElementById('product-detail-modal').style.display = 'none';
+    }
+  });
+
+  // Proceed to checkout
+  document.getElementById('proceed-checkout-btn').addEventListener('click', function() {
+    if (!cart || cart.length === 0) {
+      alert('Your cart is empty. Please add items to proceed.');
+      return;
+    }
+
+    displayCheckoutSummary();
+
+    // Ensure card details display if card selected
+    const cardPayment = document.querySelector('input[name="payment"][value="card"]');
+    if (cardPayment && cardPayment.checked) {
+      document.getElementById('card-details').style.display = 'block';
+    }
+
+    // Show first payment method visually
+    document.querySelectorAll('.payment-method').forEach((m, i) => {
+      m.classList.remove('selected');
+      if (i === 0) m.classList.add('selected');
+    });
+
+    document.getElementById('checkout-modal').style.display = 'block';
+  });
+
+  function displayCheckoutSummary() {
+    const summaryContainer = document.getElementById('checkout-order-summary');
+    let total = 0;
+    let html = '<h3 style="margin-bottom:12px; color:var(--accent-dark)">Order Summary</h3>';
+
+    cart.forEach(item => {
+      const itemTotal = item.price * item.quantity;
+      total += itemTotal;
+      html += `
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.04);">
+          <span>${item.product} x ${item.quantity}</span>
+          <span>$${itemTotal.toFixed(2)}</span>
+        </div>
+      `;
+    });
+
+    html += `
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.04);">
+        <span>Subtotal</span>
+        <span>$${total.toFixed(2)}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.04);">
+        <span>Delivery Charges</span>
+        <span>$5.00</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding:10px 0; font-weight:800; color:var(--accent-dark);">
+        <span>Total</span>
+        <span>$${(total + 5).toFixed(2)}</span>
+      </div>
+    `;
+
+    summaryContainer.innerHTML = html;
+  }
+
+  // Payment method toggles
+  function handlePaymentMethodChange() {
+    document.querySelectorAll('input[name="payment"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        const cardDetails = document.getElementById('card-details');
+        if (this.value === 'card') {
+          cardDetails.style.display = 'block';
+          document.getElementById('card-number').required = true;
+          document.getElementById('expiry').required = true;
+          document.getElementById('cvv').required = true;
+          document.getElementById('card-name').required = true;
+        } else {
+          cardDetails.style.display = 'none';
+          document.getElementById('card-number').required = false;
+          document.getElementById('expiry').required = false;
+          document.getElementById('cvv').required = false;
+          document.getElementById('card-name').required = false;
+        }
+      });
+    });
+  }
+  handlePaymentMethodChange();
+
+  // Visual selection for payment method container
+  document.querySelectorAll('.payment-method').forEach(method => {
+    method.addEventListener('click', function() {
+      document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+      this.classList.add('selected');
+      const radio = this.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+      // trigger change
+      radio.dispatchEvent(new Event('change'));
+    });
+  });
+
+  // Format card number and expiry/cvv
+  document.getElementById('card-number').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\s/g, '');
+    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+    e.target.value = formattedValue;
+  });
+  document.getElementById('expiry').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length >= 2) {
+      value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
+    e.target.value = value;
+  });
+  document.getElementById('cvv').addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/\D/g, '');
+  });
+
+  // Checkout form submit
+  document.getElementById('checkout-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+    if (paymentMethod === 'card') {
+      const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
+      const expiry = document.getElementById('expiry').value;
+      const cvv = document.getElementById('cvv').value;
+      const cardName = document.getElementById('card-name').value;
+
+      if (!cardNumber || cardNumber.length < 16) {
+        alert('Please enter a valid card number');
+        return;
+      }
+      if (!expiry || expiry.length !== 5) {
+        alert('Please enter a valid expiry date (MM/YY)');
+        return;
+      }
+      if (!cvv || cvv.length < 3) {
+        alert('Please enter a valid CVV');
+        return;
+      }
+      if (!cardName) {
+        alert('Please enter the name on card');
+        return;
+      }
+    }
+
+    // Generate order ID
+    const orderId = 'ORD-' + Date.now().toString().substring(7);
+
+    // Show success
+    document.getElementById('checkout-form-container').style.display = 'none';
+    document.getElementById('checkout-success').style.display = 'block';
+    document.getElementById('order-id').textContent = orderId;
+
+    // Clear cart
+    cart = [];
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartDisplay();
+  });
+
+  document.getElementById('close-checkout-btn').addEventListener('click', function() {
+    document.getElementById('checkout-modal').style.display = 'none';
+    document.getElementById('checkout-form-container').style.display = 'block';
+    document.getElementById('checkout-success').style.display = 'none';
+    document.getElementById('checkout-form').reset();
+  });
+
+  // Filtering & search (basic)
+  document.getElementById('search').addEventListener('input', filterProducts);
+  document.getElementById('category').addEventListener('change', filterProducts);
+  document.getElementById('farm').addEventListener('change', filterProducts);
+  document.getElementById('practice').addEventListener('change', filterProducts);
+  document.getElementById('price-range').addEventListener('change', filterProducts);
+  document.getElementById('sort').addEventListener('change', sortProducts);
+  document.getElementById('global-search').addEventListener('input', function(e){
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) {
+      document.querySelectorAll('.product-card').forEach(p => p.style.display = '');
+      return;
+    }
+    document.querySelectorAll('.product-card').forEach(p => {
+      const text = (p.textContent || p.innerText || '').toLowerCase();
+      p.style.display = text.includes(q) ? '' : 'none';
+    });
+  });
+
+  function filterProducts() {
+    // Demo filtering: logs selected filters
+    const searchTerm = document.getElementById('search').value.toLowerCase();
+    const category = document.getElementById('category').value;
+    const farm = document.getElementById('farm').value;
+    const practice = document.getElementById('practice').value;
+    const priceRange = document.getElementById('price-range').value;
+    console.log('Filtering products with:', {searchTerm, category, farm, practice, priceRange});
+    // For demo, we'll perform a basic text filter using searchTerm
+    if (searchTerm) {
+      document.querySelectorAll('.product-card').forEach(p => {
+        const text = (p.textContent || p.innerText || '').toLowerCase();
+        p.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+    } else {
+      document.querySelectorAll('.product-card').forEach(p => p.style.display = '');
+    }
+  }
+
+  function sortProducts() {
+    const sortBy = document.getElementById('sort').value;
+    console.log('Sorting products by:', sortBy);
+    // Sorting not implemented in demo — would require product array and re-render
+  }
+
+  // Simple nav-item click behavior
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+      item.classList.add('active');
+      const link = item.dataset.link;
+      if (link) window.location.href = link;
+    });
+  });
+
+  // FAQ accordion demo (if you add FAQ card later)
+  document.querySelectorAll('.faq-item').forEach(item=>{
+    const q = item.querySelector('.faq-q');
+    if(!q) return;
+    q.addEventListener('click', ()=>{
+      const a = item.querySelector('.faq-a');
+      const expanded = a.style.display === 'block';
+      document.querySelectorAll('.faq-a').forEach(n=>n.style.display='none');
+      document.querySelectorAll('.faq-q i').forEach(i=>i.style.transform='rotate(0deg)');
+      if(!expanded){
+        a.style.display='block';
+        q.querySelector('i').style.transform='rotate(180deg)';
+      }
+    });
+  });
+
+  // Small keyboard shortcut: "/" focuses search
+  window.addEventListener('keydown', function(e){
+    if(e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){
+      e.preventDefault();
+      document.getElementById('global-search').focus();
+    }
+  });
+
+</script>
+
+</body>
+</html>
