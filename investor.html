@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cultivate Connect - Investor Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    
+<style>
+/* Cultivate Connect - Investor Dashboard CSS */
+/* Same structure as farmer dashboard */
+
+:root {
+  /* UI Colors */
+  --bg-primary: #f9f9f9;
+  --bg-white: #ffffff;
+  --bg-light: #f5f5f5;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-light: #999999;
+  
+  /* Status Colors */
+  --success: #4caf50;
+  --warning: #ffc107;
+  --danger: #f44336;
+  --info: #2196f3;
+  
+  /* Border & Shadow */
+  --border-light: #e0e0e0;
+  --border-medium: #bdbdbd;
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.12);
+  
+  /* Spacing */
+  --border-radius: 12px;
+  --border-radius-sm: 8px;
+  --border-radius-lg: 16px;
+  --transition: all 0.3s ease;
+}
+
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-primary);
+  line-height: 1.6;
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 0;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.dashboard-header {
+  background-color: white;
+  padding: 15px 30px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.header-title i {
+  color: var(--investor-primary);
+  font-size: 28px;
+}
+
+/* Navigation */
+.nav-bar {
+  display: flex;
+  gap: 25px;
+  list-style: none;
+}
+
+.nav-bar a {
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition);
+}
+
+.nav-bar a:hover,
+.nav-bar a.active {
+  color: var(--investor-primary);
+  background-color: rgba(29, 78, 216, 0.1);
+}
+
+/* User Info */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--investor-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Role Badge */
+.role-badge {
+  padding: 4px 12px;
+  border-radius: var(--border-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Main Content */
+.dashboard-main {
+  flex: 1;
+  padding: 25px;
+}
+
+/* Hero/Intro Section */
+.intro-section {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+  padding: 80px 30px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 25px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.intro-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--overlay-dark);
+  z-index: 1;
+}
+
+.intro-section h2,
+.intro-section p {
+  position: relative;
+  z-index: 2;
+}
+
+.intro-section h2 {
+  font-size: 42px;
+  margin-bottom: 15px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+}
+
+.intro-section p,
+.intro-description {
+  font-size: 20px;
+  opacity: 0.95;
+  max-width: 700px;
+  margin: 0 auto;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  line-height: 1.6;
+}
+
+/* Investor Tools Grid */
+.investor-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+  padding: 0 10px;
+}
+
+.investor-tool-card {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 30px 20px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  transition: var(--transition);
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.investor-tool-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--investor-primary);
+}
+
+.investor-tool-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background-color: rgba(29, 78, 216, 0.1);
+  color: var(--investor-primary);
+  transition: var(--transition);
+}
+
+.investor-tool-card:hover .investor-tool-icon {
+  background-color: var(--investor-primary);
+  color: white;
+}
+
+.investor-tool-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Chart Section */
+.chart-section {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  margin-bottom: 25px;
+}
+
+.chart-header {
+  padding: 18px 24px;
+  background-color: var(--investor-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chart-header h3 {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chart-body {
+  padding: 30px;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-placeholder {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.chart-placeholder i {
+  font-size: 48px;
+  color: var(--investor-primary);
+  margin-bottom: 15px;
+  display: block;
+}
+
+.chart-placeholder p {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.chart-placeholder small {
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+/* Footer */
+.dashboard-footer {
+  border-top: 1px solid var(--border-light);
+  padding: 30px 25px;
+  text-align: center;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  margin-top: auto;
+}
+
+.footer-text {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.footer-text strong {
+  color: var(--investor-primary);
+  font-weight: 700;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 20px;
+  }
+
+  .nav-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .nav-bar a {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  .header-title {
+    font-size: 20px;
+  }
+
+  .dashboard-main {
+    padding: 18px;
+  }
+
+  .intro-section {
+    padding: 60px 20px;
+  }
+
+  .intro-section h2 {
+    font-size: 32px;
+  }
+
+  .intro-description {
+    font-size: 18px;
+  }
+
+  .investor-tools-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .investor-tool-card {
+    padding: 25px 15px;
+  }
+
+  .investor-tool-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .chart-body {
+    padding: 20px;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-title {
+    font-size: 18px;
+  }
+
+  .user-info {
+    font-size: 14px;
+  }
+
+  .investor-tools-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .intro-section h2 {
+    font-size: 28px;
+  }
+
+  .intro-description {
+    font-size: 16px;
+  }
+}
+
+/* --- Investor Theme --- */
+body[data-dashboard="investor"] {
+  --investor-primary: #1d4ed8;
+  --investor-light: #3b82f6;
+  --investor-lighter: #60a5fa;
+  --investor-dark: #1e3a8a;
+  --investor-bg-soft: rgba(29, 78, 216, 0.08);
+  --investor-border-soft: rgba(29, 78, 216, 0.25);
+  --investor-shadow: 0 2px 12px rgba(29, 78, 216, 0.18);
+  --overlay-dark: rgba(0, 0, 0, 0.40);
+}
+
+body[data-dashboard="investor"] .intro-section {
+  background: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
+  background-color: var(--investor-primary);
+}
+
+body[data-dashboard="investor"] .intro-section h2 {
+  color: var(--investor-light);
+}
+
+body[data-dashboard="investor"] .header-title,
+body[data-dashboard="investor"] h1,
+body[data-dashboard="investor"] h2,
+body[data-dashboard="investor"] h3 {
+  color: var(--investor-primary);
+}
+
+body[data-dashboard="investor"] .dashboard-footer {
+  background: rgba(29, 78, 216, 0.08);
+  color: var(--investor-primary);
+  border-top: 1px solid var(--investor-border-soft);
+}
+</style>
+</head>
+<body data-dashboard="investor">
+    <div id="dashboard-root"></div>
+    
+<script>
+/**
+ * Investor Dashboard - Clean Version
+ */
+
+// --------------------------------------
+// HELPER FUNCTIONS
+// --------------------------------------
+function getInitials(name) {
+    if (!name) return "?";
+    return name
+        .split(" ")
+        .map(word => word[0])
+        .join("")
+        .toUpperCase();
+}
+
+// --------------------------------------
+// MAIN INITIALIZATION
+// --------------------------------------
+function initInvestorDashboard() {
+  console.log("Initializing Investor Dashboard...");
+
+  // Load the active logged-in user with error handling
+  let activeUser = null;
+  try {
+      const userData = localStorage.getItem("cc_active_user");
+      if (userData) {
+          activeUser = JSON.parse(userData);
+      }
+  } catch (error) {
+      console.error("Error parsing active user:", error);
+      alert("Error loading user data. Please login again.");
+      window.location.href = "Index.html";
+      return;
+  }
+
+  if (!activeUser || activeUser.role !== "investor") {
+      alert("Unauthorized access — please login as an investor.");
+      window.location.href = "Index.html";
+      return;
+  }
+
+  const root = document.getElementById("dashboard-root");
+  if (!root) {
+      console.error("❌ dashboard-root not found!");
+      return;
+  }
+
+  // Load investor personal data
+  const investorKey = `cc_user_data_${activeUser.username}`;
+  let investorData = null;
+  try {
+      const dataStr = localStorage.getItem(investorKey);
+      if (dataStr) {
+          investorData = JSON.parse(dataStr);
+      }
+  } catch (error) {
+      console.error("Error parsing investor data:", error);
+  }
+
+  // Fallback if no data (userData.js should have already created it)
+  if (!investorData) {
+      investorData = {
+          role: "investor",
+          wallet: 50000,
+          investments: [],
+          portfolioValue: 0,
+          returnsHistory: [],
+          notifications: []
+      };
+      try {
+          localStorage.setItem(investorKey, JSON.stringify(investorData));
+      } catch (error) {
+          console.error("Error saving investor data:", error);
+      }
+  }
+
+  const user = {
+      displayName: activeUser.username,
+      username: activeUser.username,
+      role: "investor"
+  };
+
+  console.log('Investor dashboard data loaded', user);
+
+  renderStaticInvestorDashboard(root, user);
+  attachInvestorEvents();
+
+  console.log("✅ Investor Dashboard Ready");
+}
+
+// --------------------------------------
+// UI BUILDERS
+// --------------------------------------
+function investorToolCard(label, icon) {
+  return `
+    <div class="investor-tool-card">
+      <div class="investor-tool-icon">
+        <i class="${icon}"></i>
+      </div>
+      <div class="investor-tool-label">${label}</div>
+    </div>
+  `;
+}
+
+// --------------------------------------
+// EVENTS
+// --------------------------------------
+function attachInvestorEvents() {
+  document.querySelectorAll(".investor-tool-card").forEach(card => {
+    card.addEventListener("click", function () {
+      const label = this.querySelector(".investor-tool-label").textContent.trim();
+
+      if (label === "Market Trends") {
+        window.location.href = "investor-market-trends.html";
+      }
+      else if (label === "Investments") {
+        window.location.href = "investor-investments.html";
+      }
+      else if (label === "ROI") {
+        window.location.href = "investor-roi.html";
+      }
+    });
+  });
+}
+
+
+// --------------------------------------
+// STATIC DASHBOARD RENDER
+// --------------------------------------
+function renderStaticInvestorDashboard(root, user) {
+  const initials = getInitials(user.displayName);
+
+  root.className = "dashboard-container";
+  root.innerHTML = `
+<header class="dashboard-header">
+    <div class="header-title">
+        <i class="fas fa-chart-line"></i>
+        <span>Cultivate Connect</span>
+    </div>
+
+    <nav class="nav-bar">
+        <a href="#" class="active" data-nav="dashboard">Dashboard</a>
+        <a href="investor-market-trends.html" data-nav="market-trends">Market Trends</a>
+        <a href="investor-investments.html" data-nav="investments">Investments</a>
+        <a href="investor-roi.html" data-nav="roi">ROI</a>
+    </nav>
+
+    <div class="user-info">
+        <div class="user-avatar">${initials}</div>
+        <span>${user.displayName}</span>
+        <span class="role-badge role-investor">Investor</span>
+    </div>
+</header>
+
+    <main class="dashboard-main">
+
+      <section class="intro-section">
+        <h2>Welcome back, ${user.displayName}!</h2>
+        <p class="intro-description">
+          Track your agricultural investments and discover new farming opportunities.
+        </p>
+      </section>
+
+      <!-- INVESTOR TOOLS SECTION -->
+      <div class="investor-tools-grid">
+        ${investorToolCard("Market Trends", "fas fa-chart-line")}
+        ${investorToolCard("Investments", "fas fa-coins")}
+        ${investorToolCard("ROI", "fas fa-calculator")}
+      </div>
+
+<!-- CHART SECTION -->
+<div class="chart-section">
+  <div class="chart-header">
+    <h3><i class="fas fa-chart-bar"></i> Investment Performance</h3>
+  </div>
+
+  <!-- ⭐ Dynamic chart goes HERE in the correct UI location -->
+  <div class="chart-body">
+    <canvas id="investorChart" style="width:100%; height:420px;"></canvas>
+  </div>
+</div>
+
+
+    </main>
+
+    <footer class="dashboard-footer">
+      <p class="footer-text">&copy; 2024 <strong>Cultivate Connect</strong> — Agriculture Investment Platform</p>
+    </footer>
+  `;
+   // Start chart after DOM is ready
+    setTimeout(() => {
+        try {
+            startInvestorMarketChart();
+        } catch (error) {
+            console.error("Chart initialization error:", error);
+        }
+    }, 100);
+}
+
+// Initialize when DOM is ready
+document.addEventListener("DOMContentLoaded", function() {
+    try {
+        initInvestorDashboard();
+    } catch (error) {
+        console.error("Dashboard initialization error:", error);
+        const root = document.getElementById("dashboard-root");
+        if (root) {
+            root.innerHTML = `
+                <div style="padding: 50px; text-align: center;">
+                    <h2>Error Loading Dashboard</h2>
+                    <p>${error.message}</p>
+                    <p><a href="Index.html">Return to Home</a></p>
+                </div>
+            `;
+        }
+    }
+});
+
+/* =================================================
+   MARKET BACKEND + DYNAMIC CHART ENGINE
+================================================= */
+
+function getAllKeys(prefix) {
+    return Object.keys(localStorage).filter(k => k.startsWith(prefix));
+}
+
+function getSupply() {
+    let sum = 0;
+    getAllKeys("cc_user_data_farmer_").forEach(key => {
+        let farmer = JSON.parse(localStorage.getItem(key));
+        if (farmer && farmer.listings) {
+            farmer.listings.forEach(item => {
+                sum += Number(item.qty || 0);
+            });
+        }
+    });
+    return sum;
+}
+
+function getDemand() {
+    let sum = 0;
+    getAllKeys("cc_user_data_consumer_").forEach(key => {
+        const consumer = JSON.parse(localStorage.getItem(key));
+        if (consumer && consumer.purchases) {
+            consumer.purchases.forEach(p => sum += Number(p.qty || 0));
+        }
+    });
+    return sum;
+}
+
+function getInvestmentPool() {
+    let sum = 0;
+    getAllKeys("cc_user_data_investor_").forEach(key => {
+        const inv = JSON.parse(localStorage.getItem(key));
+        if (inv && inv.investments) {
+            inv.investments.forEach(i => sum += Number(i.amount || 0));
+        }
+    });
+    return sum;
+}
+
+let lastPrice = 100;
+
+function calculatePrice(demand, supply) {
+    const delta = (demand - supply) / Math.max(1, supply);
+    const raw = 100 * (1 + delta * 0.5);
+    lastPrice = lastPrice + 0.3 * (raw - lastPrice);
+    return Math.max(1, lastPrice);
+}
+
+/* =================================================
+   CHART INITIALIZATION
+================================================= */
+
+function startInvestorMarketChart() {
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error("Chart.js library not loaded");
+        const canvas = document.getElementById("investorChart");
+        if (canvas) {
+            canvas.parentElement.innerHTML = `
+                <div class="chart-placeholder">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Chart library not loaded</p>
+                    <small>Please refresh the page</small>
+                </div>
+            `;
+        }
+        return;
+    }
+
+    const canvas = document.getElementById("investorChart");
+    if (!canvas) {
+        console.error("Chart canvas not found");
+        return;
+    }
+    const ctx = canvas.getContext("2d");
+
+    const history = [];  // start empty
+
+    const chart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: [],
+            datasets: [
+                { label: "Supply", borderColor: "#2e7d32", data: [] },
+                { label: "Demand", borderColor: "#f59e0b", data: [] },
+                { label: "Price", borderColor: "#1d4ed8", data: [], yAxisID: "y1" },
+                { label: "Investment Pool", borderColor: "#7c3aed", data: [], yAxisID: "y1" }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { title: { display: true, text: "Quantity" } },
+                y1: {
+                    position: "right",
+                    grid: { drawOnChartArea: false },
+                    title: { display: true, text: "₹ Price / Pool" }
+                }
+            }
+        }
+    });
+
+    // Update chart every 3 sec
+    setInterval(() => {
+        const supply = getSupply();
+        const demand = getDemand();
+        const pool = getInvestmentPool();
+        const price = calculatePrice(demand, supply);
+
+        const label = new Date().toLocaleTimeString();
+
+        chart.data.labels.push(label);
+        chart.data.datasets[0].data.push(supply);
+        chart.data.datasets[1].data.push(demand);
+        chart.data.datasets[2].data.push(price);
+        chart.data.datasets[3].data.push(pool);
+
+        if (chart.data.labels.length > 50) {
+            chart.data.labels.shift();
+            chart.data.datasets.forEach(ds => ds.data.shift());
+        }
+
+        chart.update();
+    }, 3000);
+}
+
+</script>
+</body>
+</html>

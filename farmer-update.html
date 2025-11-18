@@ -3,864 +3,391 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Cultivate Connect — Farmer Update (Buy & Sell)</title>
+  <title>Cultivate Connect – Farmer Update (Buy & Sell)</title>
+
+  <link rel="stylesheet" href="farmer.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    /* Layout (approx 60% buy / 40% sell on desktop) */
-    .update-container { max-width: 1200px; margin: 22px auto; padding: 18px; }
-    .update-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items:start; }
+    :root {
+      --primary-green: #2e7d32;
+      --light-green: #e8f5e9;
+      --accent-green: #4caf50;
+      --bg-gray: #fafafa;
+      --border-light: #e0e0e0;
+      --text-dark: #212121;
+      --text-muted: #757575;
+    }
+
+    body { background: var(--bg-gray); font-family: 'Segoe UI', system-ui, sans-serif; }
+    
+    .update-container { max-width: 1200px; margin: 20px auto; padding: 20px; }
+    .update-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: start; }
     @media (max-width: 920px) { .update-grid { grid-template-columns: 1fr; } }
 
-    .section-card { padding: 18px; border-radius: 12px; background: var(--bg-white,#fff); box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
-    .list-table { width:100%; border-collapse: collapse; margin-top:10px; }
-    .list-table th, .list-table td { padding:10px; border-bottom:1px solid #f2f2f2; text-align:left; vertical-align: middle; }
-    .supply-item { display:flex; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid #fafafa; }
-    .thumb-svg { width:72px; height:72px; display:inline-grid; place-items:center; border-radius:8px; background:#fff; border:1px solid #eee; }
-    .small-muted { color:#666; font-size:0.95rem; }
-    .img-select { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-    .img-select label { cursor:pointer; border:1px solid #eee; padding:6px; border-radius:8px; display:inline-block; background:#fff; }
-    .img-select svg { width:64px; height:48px; display:block; border-radius:6px; }
-    .wallet-controls { display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap; }
-    .fund-btn { padding:8px 10px; border-radius:8px; background:#f3f3f3; cursor:pointer; border:1px solid #ddd; }
-    .fund-custom { width:120px; padding:8px; border-radius:8px; border:1px solid #ddd; }
-    .qty-input { width:86px; padding:8px; border-radius:8px; border:1px solid #ddd; }
-    .price-inline { font-weight:700; color:var(--farmer-primary); }
-    .btn-outline { padding:8px 10px; border-radius:8px; border:1px solid #ddd; background:transparent; cursor:pointer; }
-    .btn-primary { padding:10px 14px; border-radius:8px; border:none; background:var(--farmer-primary); color:#fff; cursor:pointer; }
-     /* Cultivate Connect - Enhanced Dashboard CSS */
-/* Inspired by modern agricultural marketplace design */
-
-:root {
-  /* UI Colors */
-  --bg-primary: #f9f9f9;
-  --bg-white: #ffffff;
-  --bg-light: #f5f5f5;
-  --text-primary: #333333;
-  --text-secondary: #666666;
-  --text-light: #999999;
-  
-  /* Status Colors */
-  --success: #4caf50;
-  --warning: #ffc107;
-  --danger: #f44336;
-  --info: #2196f3;
-  
-  /* Border & Shadow */
-  --border-light: #e0e0e0;
-  --border-medium: #bdbdbd;
-  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.12);
-  
-  /* Spacing */
-  --border-radius: 12px;
-  --border-radius-sm: 8px;
-  --border-radius-lg: 16px;
-  --transition: all 0.3s ease;
-}
-
-/* Reset & Base */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text-primary);
-  line-height: 1.6;
-}
-
-/* Dashboard Container */
-.dashboard-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Header */
-.dashboard-header {
-  background-color: white;
-  padding: 15px 30px;
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.header-title i,
-.header-title::before {
-  color: var(--primary-green);
-  font-size: 28px;
-}
-
-/* Navigation */
-.nav-bar {
-  display: flex;
-  gap: 25px;
-  list-style: none;
-}
-
-.nav-bar a {
-  text-decoration: none;
-  color: var(--text-primary);
-  font-weight: 500;
-  padding: 8px 16px;
-  border-radius: var(--border-radius-sm);
-  transition: var(--transition);
-}
-
-.nav-bar a:hover,
-.nav-bar a.active {
-  color: var(--primary-green);
-  background-color: rgba(76, 175, 80, 0.1);
-}
-
-/* User Info */
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: var(--primary-green);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 16px;
-}
-
-/* Role Badge */
-.role-badge {
-  padding: 4px 12px;
-  border-radius: var(--border-radius-sm);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-/* Main Content */
-.dashboard-main {
-  flex: 1;
-  padding: 25px;
-}
-
-/* Hero/Intro Section */
-/* Hero/Intro Section */
-.intro-section {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  color: white;
-  padding: 80px 30px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
-  margin-bottom: 25px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.intro-section::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-
-  z-index: 1;
-}
-.intro-section h2,
-.intro-section p {
-  position: relative;
-  z-index: 2;
-}
-
-.intro-section h2 {
-  font-size: 42px;
-  margin-bottom: 15px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  font-weight: 700;
-}
-
-.intro-section p,
-.intro-description {
-  font-size: 20px;
-  opacity: 0.95;
-  max-width: 700px;
-  margin: 0 auto;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  line-height: 1.6;
-}
-/* Tools Panel / SubPage Icons Section */
-.subpage-section {
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
-  margin-bottom: 25px;
-}
-
-.tools-panel-header,
-.section-header {
-  padding: 18px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.tools-panel-header h2,
-.section-header h3 {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--primary-dark);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.tools-panel-header span,
-.section-header span {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-/* Card Grid */
-.card-grid,
-.tools-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 15px;
-  padding: 20px 24px;
-}
-
-/* Dashboard Cards / Tool Cards */
-.dashboard-card,
-.tool-card {
-  border-radius: var(--border-radius);
-  padding: 20px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  transition: var(--transition);
-  position: relative;
-}
-
-.dashboard-card:hover,
-.tool-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(46, 125, 50, 0.4);
-  box-shadow: var(--shadow-md);
-}
-
-.dashboard-card.active,
-.tool-card.active {
-  color: white;
-  border-color: transparent;
-  box-shadow: var(--shadow-lg);
-}
-
-/* Card Icons */
-.card-icon,
-.tool-card i,
-.dashboard-card i {
-  font-size: 32px;
-  padding: 14px;
-  border-radius: var(--border-radius);
-  background-color: rgba(46, 125, 50, 0.12);
-  transition: var(--transition);
-}
-
-.dashboard-card.active i,
-.tool-card.active i {
-  background-color: rgba(255, 255, 255, 0.25);
-  color: white;
-}
-
-/* Card Title */
-.card-title,
-.tool-card span,
-.dashboard-card span {
-  font-size: 15px;
-  font-weight: 600;
-  text-align: center;
-  color: var(--text-primary);
-}
-
-.dashboard-card.active span,
-.tool-card.active span {
-  color: white;
-}
-
-.card-content {
-  font-size: 14px;
-  color: var(--text-secondary);
-  text-align: center;
-  margin-top: 10px;
-}
-
-/* Alerts & Notifications Section */
-.alerts-section,
-.notifications-section {
-  background-color: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-}
-
-.alerts-header {
-  padding: 18px 20px;
-  background-color: var(--primary-green);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.alerts-header h3 {
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.alerts-body,
-.section-body {
-  padding: 20px;
-}
-
-/* Notification Items */
-.notifications-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.notification-item,
-.alert-item {
-  padding: 16px;
-  border-radius: var(--border-radius-sm);
-  background-color: var(--bg-light);
-  display: flex;
-  gap: 15px;
-  align-items: flex-start;
-  transition: var(--transition);
-}
-
-.notification-item:hover,
-.alert-item:hover {
-  background-color: #e8f5e9;
-  box-shadow: var(--shadow-sm);
-}
-
-.notification-icon,
-.alert-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
-}
-
-.notification-icon.info,
-.alert-icon.info { background-color: var(--info); }
-
-.notification-content h4,
-.alert-content h4 {
-  font-size: 15px;
-  margin-bottom: 5px;
-  color: var(--text-primary);
-}
-
-.notification-content p,
-.alert-content p {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.notification-time,
-.alert-time {
-  font-size: 12px;
-  color: var(--text-light);
-  margin-top: 5px;
-}
-
-/* Stats Cards */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 25px;
-}
-
-.stat-card {
-  background: white;
-  padding: 20px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-sm);
-  text-align: center;
-  transition: var(--transition);
-}
-
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--primary-green);
-  display: block;
-  margin-bottom: 8px;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Buttons */
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: var(--border-radius-sm);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-/* Footer */
-.dashboard-footer {
-  border-top: 1.3px solid var(--border-light);
-  padding: 10px 25px;
-  text-align: center;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  margin-top: auto;
-}
-
-.footer-text {
-  font-size: 16px;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.footer-text strong {
-  color: var(--primary-green);
-  font-weight: 700;
-}
-
-/* Content Rows */
-.content-row {
-  display: flex;
-  gap: 25px;
-  margin-bottom: 25px;
-}
-
-.content-row > * {
-  flex: 1;
-}
-
-/* Section Card */
-.section-card {
-  background-color: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-}
-
-/* Realtime Indicator */
-.realtime-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.realtime-indicator::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  background: var(--success);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.9); }
-}
-
-/* Loading State */
-.loading {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(46, 125, 50, 0.3);
-  border-radius: 50%;
-  border-top-color: var(--primary-green);
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Fade In Animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.dashboard-card,
-.tool-card,
-.intro-section,
-.stat-card,
-.section-card {
-  animation: fadeIn 0.5s ease-out;
-}
-
-/* Responsive Design */
-@media (max-width: 992px) {
-  .content-row {
-    flex-direction: column;
-  }
-  
-  .card-grid,
-  .tools-grid {
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-header {
-    flex-direction: column;
-    gap: 15px;
-    padding: 15px 20px;
-  }
-
-  .nav-bar {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .nav-bar a {
-    padding: 6px 12px;
-    font-size: 14px;
-  }
-
-  .header-title {
-    font-size: 20px;
-  }
-
-  .dashboard-main {
-    padding: 18px;
-  }
-
-.intro-section {
-    padding: 60px 20px;
-  }
-
-  .intro-section h2 {
-    font-size: 32px;
-  }
-
-  .intro-description {
-    font-size: 18px;
-  }
-
-  .card-grid,
-  .tools-grid {
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-    gap: 12px;
-    padding: 15px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .stat-value {
-    font-size: 24px;
-  }
-}
-
-@media (max-width: 480px) {
-  .header-title {
-    font-size: 18px;
-  }
-
-  .user-info {
-    font-size: 14px;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .card-grid,
-  .tools-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Utility Classes */
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
-.mt-1 { margin-top: 1rem; }
-.mt-2 { margin-top: 2rem; }
-.mb-1 { margin-bottom: 1rem; }
-.mb-2 { margin-bottom: 2rem; }
-.p-1 { padding: 1rem; }
-.p-2 { padding: 2rem; }
-.gap-1 { gap: 1rem; }
-.gap-2 { gap: 2rem; }
-
-/* --- Farmer Theme --- */
-
-/* =========================================================
-   FARMER THEME — Cultivate Connect
-   Applies ONLY when: <body data-dashboard="farmer">
-   ========================================================= */
-
-/* ---------------------------------------------------------
-   1. Farmer Theme Variables
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] {
-  --farmer-primary: #2e7d32;
-  --farmer-light: #4caf50;
-  --farmer-lighter: #66bb6a;
-  --farmer-dark: #1b5e20;
-
-  --farmer-bg-soft: rgba(46, 125, 50, 0.08);
-  --farmer-border-soft: rgba(46, 125, 50, 0.25);
-  --farmer-shadow: 0 2px 12px rgba(46, 125, 50, 0.18);
-
-  --overlay-dark: rgba(0, 0, 0, 0.40);
-}
-
-/* ---------------------------------------------------------
-   2. Hero / Intro Section (Banner)
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] .intro-section {
-background: url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
-  background-color: var(--farmer-primary); /* fallback */
-  position: relative;
-  overflow: hidden;
-  color: white;
-}
-
-/* Dark overlay for readability */
-body[data-dashboard="farmer"] .intro-section::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--overlay-dark);
-  z-index: 1;
-}
-
-/* Bring text above overlay */
-body[data-dashboard="farmer"] .intro-section * {
-  position: relative;
-  z-index: 2;
-}
-
-/* Title accent */
-body[data-dashboard="farmer"] .intro-section h2 {
-  color: var(--farmer-light);
-}
-
-/* ---------------------------------------------------------
-   3. Farmer Accent Colors — Global
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] .header-title,
-body[data-dashboard="farmer"] h1,
-body[data-dashboard="farmer"] h2,
-body[data-dashboard="farmer"] h3 {
-  color: var(--farmer-primary);
-}
-
-/* ---------------------------------------------------------
-   4. Dashboard Cards
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] .dashboard-card,
-body[data-dashboard="farmer"] .stat-card,
-body[data-dashboard="farmer"] .tool-card {
-  border: 1px solid var(--farmer-border-soft);
-  box-shadow: var(--farmer-shadow);
-  transition: 0.25s ease;
-}
-
-body[data-dashboard="farmer"] .dashboard-card:hover,
-body[data-dashboard="farmer"] .stat-card:hover,
-body[data-dashboard="farmer"] .tool-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 18px rgba(46, 125, 50, 0.32);
-}
-
-/* Stat card left border accent */
-body[data-dashboard="farmer"] .stat-card {
-  border-left: 4px solid var(--farmer-primary);
-}
-
-/* Active Section Glow */
-body[data-dashboard="farmer"] .active-section {
-  border-color: var(--farmer-primary);
-  box-shadow: 0 0 18px rgba(76, 175, 80, 0.32);
-}
-
-/* ---------------------------------------------------------
-   5. Tool Icons
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] .tool-card i {
-  color: var(--farmer-primary);
-}
-
-/* ---------------------------------------------------------
-   6. Buttons
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] .btn-primary {
-  background: var(--farmer-primary);
-  color: white;
-  border: none;
-}
-
-body[data-dashboard="farmer"] .btn-primary:hover {
-  background: var(--farmer-dark);
-}
-
-body[data-dashboard="farmer"] .btn-outline {
-  border: 2px solid var(--farmer-primary);
-  color: var(--farmer-primary);
-}
-
-body[data-dashboard="farmer"] .btn-outline:hover {
-  background: var(--farmer-primary);
-  color: white;
-}
-
-body[data-dashboard="farmer"] .btn-secondary {
-  background: var(--farmer-light);
-  color: white;
-}
-
-body[data-dashboard="farmer"] .btn-secondary:hover {
-  background: var(--farmer-primary);
-}
-
-/* ---------------------------------------------------------
-   7. Tables
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] table th {
-  background: rgba(46, 125, 50, 0.15);
-  color: var(--farmer-primary);
-}
-
-body[data-dashboard="farmer"] table tr:hover {
-  background: rgba(76, 175, 80, 0.10);
-}
-
-/* ---------------------------------------------------------
-   8. Input / Form Elements
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] input,
-body[data-dashboard="farmer"] select,
-body[data-dashboard="farmer"] textarea {
-  border: 1px solid var(--farmer-border-soft);
-  transition: 0.2s;
-}
-
-body[data-dashboard="farmer"] input:focus,
-body[data-dashboard="farmer"] select:focus,
-body[data-dashboard="farmer"] textarea:focus {
-  border-color: var(--farmer-primary);
-  box-shadow: 0 0 6px rgba(46, 125, 50, 0.35);
-}
-
-/* ---------------------------------------------------------
-   9. Image Cards / Item Cards
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] .item-card img,
-body[data-dashboard="farmer"] .product-card img {
-  border-radius: 10px;
-  border: 2px solid rgba(46, 125, 50, 0.25);
-}
-
-/* ---------------------------------------------------------
-   10. Links & Hover Accents
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] a {
-  transition: 0.2s ease;
-  color: var(--farmer-primary);
-}
-
-body[data-dashboard="farmer"] a:hover {
-  color: var(--farmer-light);
-}
-
-/* ---------------------------------------------------------
-   11. Farmer-Themed Scrollbar
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] ::-webkit-scrollbar {
-  width: 8px;
-}
-
-body[data-dashboard="farmer"] ::-webkit-scrollbar-thumb {
-  background: var(--farmer-primary);
-  border-radius: 6px;
-}
-
-body[data-dashboard="farmer"] ::-webkit-scrollbar-thumb:hover {
-  background: var(--farmer-dark);
-}
-
-/* ---------------------------------------------------------
-   12. Footer Theme
-   --------------------------------------------------------- */
-body[data-dashboard="farmer"] .dashboard-footer {
-  background: rgba(46, 125, 50, 0.08);
-  color: var(--farmer-primary);
-  border-top: 1px solid var(--farmer-border-soft);
-}
-
-/* ---------------------------------------------------------
-   END FARMER THEME
-   --------------------------------------------------------- */
+    .section-card { 
+      padding: 24px; 
+      border-radius: 16px; 
+      background: #fff; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid var(--border-light);
+    }
+
+    .section-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-card h3 i {
+      color: var(--primary-green);
+      font-size: 1.1rem;
+    }
+
+    .small-muted { 
+      color: var(--text-muted); 
+      font-size: 0.9rem; 
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    /* Wallet Section */
+    .wallet-header {
+      background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+      padding: 20px 24px;
+      border-radius: 16px;
+      color: white;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
+    }
+
+    .wallet-balance {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .wallet-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .fund-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: white;
+      color: var(--primary-green);
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .fund-btn:hover {
+      background: var(--light-green);
+      transform: translateY(-1px);
+    }
+
+    .fund-custom {
+      width: 120px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+      font-size: 0.9rem;
+    }
+
+    /* Supply Items - Minimalist Cards */
+    .supplies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .supply-card {
+      background: white;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+
+    .supply-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+
+    .supply-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--light-green);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .supply-info {
+      flex: 1;
+    }
+
+    .supply-name {
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+      font-size: 0.95rem;
+    }
+
+    .supply-price {
+      color: var(--primary-green);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .supply-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .qty-input {
+      width: 60px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .btn-buy {
+      flex: 1;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary-green);
+      color: white;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-buy:hover {
+      background: var(--accent-green);
+    }
+
+    /* Crop Selection Grid */
+    .crop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 8px;
+      background: var(--bg-gray);
+      border-radius: 12px;
+    }
+
+    .crop-option {
+      position: relative;
+      cursor: pointer;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .crop-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .crop-option input[type="radio"]:checked + .crop-card {
+      border-color: var(--primary-green);
+      background: var(--light-green);
+    }
+
+    .crop-card {
+      padding: 12px 8px;
+      text-align: center;
+      border: 2px solid var(--border-light);
+      border-radius: 12px;
+      background: white;
+      transition: all 0.2s;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .crop-option:hover .crop-card {
+      border-color: var(--accent-green);
+      transform: translateY(-2px);
+    }
+
+    .crop-emoji {
+      font-size: 2rem;
+      display: block;
+    }
+
+    .crop-name {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-dark);
+    }
+
+    .crop-category {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Form Inputs */
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      transition: border 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary-green);
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary-green);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-green);
+      transform: translateY(-1px);
+    }
+
+    /* Listings Table */
+    .listings-container {
+      margin-top: 20px;
+    }
+
+    .listing-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: var(--bg-gray);
+      transition: all 0.2s;
+    }
+
+    .listing-item:hover {
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .listing-icon {
+      font-size: 2rem;
+      width: 48px;
+      text-align: center;
+    }
+
+    .listing-details {
+      flex: 1;
+    }
+
+    .listing-title {
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+
+    .listing-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .btn-remove {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #e57373;
+      background: white;
+      color: #d32f2f;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .btn-remove:hover {
+      background: #ffebee;
+    }
+
+    /* History */
+    .history-item {
+      padding: 12px;
+      border-left: 3px solid var(--primary-green);
+      background: var(--bg-gray);
+      margin-bottom: 8px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .history-title {
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+
+    .history-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Category Headers */
+    .category-header {
+      font-weight: 600;
+      color: var(--primary-green);
+      margin: 16px 0 8px 0;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding-left: 8px;
+      border-left: 3px solid var(--primary-green);
+    }
   </style>
 </head>
 <body data-dashboard="farmer">
@@ -873,96 +400,132 @@ body[data-dashboard="farmer"] .dashboard-footer {
 
   <main class="dashboard-main">
     <div class="update-container">
-      <h2 style="margin-bottom:6px;">Farmer Update Center</h2>
-      <p class="small-muted">Buy supplies, add listings with icons, and manage wallet & history — all locally stored.</p>
+      <h2 style="margin-bottom:6px; color: var(--text-dark);">Farmer Update Center</h2>
+      <p class="small-muted">Buy supplies, list your crops, and manage your wallet – all locally stored.</p>
 
-      <div id="walletBox" style="margin:12px 0; font-weight:700; font-size:1.05rem;"></div>
+      <!-- Wallet Header -->
+      <div class="wallet-header">
+        <div>
+          <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 4px;">Available Balance</div>
+          <div class="wallet-balance" id="walletBalance">₹ 0.00</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.85rem; opacity: 0.9;">Quick Add</div>
+          <div class="wallet-controls">
+            <button class="fund-btn" data-amt="100">+₹100</button>
+            <button class="fund-btn" data-amt="500">+₹500</button>
+            <button class="fund-btn" data-amt="1000">+₹1000</button>
+            <input id="customFund" class="fund-custom" type="number" placeholder="Custom ₹" min="1" />
+            <button id="addCustomFund" class="fund-btn">Add</button>
+          </div>
+        </div>
+      </div>
 
       <div class="update-grid">
 
-        <!-- BUY (larger) -->
+        <!-- BUY SECTION -->
         <div class="section-card">
           <h3><i class="fas fa-shopping-cart"></i> Buy Supplies</h3>
-          <p class="small-muted">Choose quantity; wallet will debit qty × price.</p>
+          <p class="small-muted">Select quantity and add to cart. Wallet will be debited automatically.</p>
 
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin:8px 0 14px;">
-            <div class="inline-flex" style="gap:12px; align-items:center;">
-              <span class="small-muted">Quick add funds:</span>
-              <div class="wallet-controls">
-                <button class="fund-btn" data-amt="100">+₹100</button>
-                <button class="fund-btn" data-amt="500">+₹500</button>
-                <button class="fund-btn" data-amt="1000">+₹1000</button>
-                <input id="customFund" class="fund-custom" type="number" placeholder="Custom ₹" min="1" />
-                <button id="addCustomFund" class="fund-btn">Add</button>
-              </div>
-            </div>
-
-            <div class="inline-flex">
-              <span class="small-muted">Wallet:</span>
-              <div id="walletAmount" style="margin-left:8px; font-weight:700; color:var(--farmer-primary);"></div>
-            </div>
-          </div>
-
-          <div id="suppliesList"></div>
+          <div class="supplies-grid" id="suppliesList"></div>
         </div>
 
-        <!-- SELL (smaller) -->
+        <!-- SELL SECTION -->
         <div class="section-card">
-          <h3><i class="fas fa-store"></i> Add Crop Listing</h3>
-          <p class="small-muted">Pick an icon for the listing (farm-themed SVGs).</p>
+          <h3><i class="fas fa-store"></i> List Your Crops</h3>
+          <p class="small-muted">Select crop type and set your price to create a listing.</p>
 
           <form id="sellForm">
-            <label>Title</label>
-            <input id="sellTitle" placeholder="e.g., Tomato — 10kg" required>
+            <label>Crop Name</label>
+            <input id="sellTitle" placeholder="Select a crop below" readonly required style="cursor: pointer;">
+
+            <label>Select Crop Type</label>
+            <div class="crop-grid" id="cropSelector"></div>
 
             <label>Quantity</label>
-            <input id="sellQty" type="number" min="1" required value="1">
+            <input id="sellQty" type="number" min="1" required value="10">
+
+            <label>Unit</label>
+            <select id="sellUnit" required>
+              <option value="kg">Kilogram (Kg)</option>
+              <option value="qtl">Quintal (100 Kg)</option>
+              <option value="ton">Ton (1000 Kg)</option>
+            </select>
+
 
             <label>Price per unit (₹)</label>
-            <input id="sellPrice" type="number" min="1" required value="100">
+            <input id="sellPrice" type="number" min="1" required value="50">
 
-            <label style="margin-top:8px;">Choose icon</label>
-            <div class="img-select" id="imageSelector"></div>
-
-            <button class="btn-primary" type="submit" style="margin-top:10px;">Add Listing</button>
+            <button class="btn-primary" type="submit">
+              <i class="fas fa-plus-circle"></i> Add Listing
+            </button>
           </form>
 
-          <hr style="margin:16px 0;">
-          <h4>Your Listings</h4>
-          <div id="listingBox"></div>
+          <div class="listings-container">
+            <h4 style="margin-top: 24px; margin-bottom: 12px; color: var(--text-dark);">Your Active Listings</h4>
+            <div id="listingBox"></div>
+          </div>
         </div>
 
       </div>
 
       <!-- HISTORY -->
-      <div class="section-card" style="margin-top:22px;">
+      <div class="section-card" style="margin-top: 24px;">
         <h3><i class="fas fa-clock"></i> Purchase History</h3>
-        <div id="historyBox" class="small-muted"></div>
+        <p class="small-muted">Track all your supply purchases.</p>
+        <div id="historyBox"></div>
       </div>
     </div>
   </main>
 
   <footer class="dashboard-footer">
-    <p class="footer-text">© 2025 Cultivate Connect — Where Technology Meets the Fields</p>
+    <p class="footer-text">&copy; Cultivate Connect</p>
   </footer>
 
-  <!-- SVG ICON DEFINITIONS (farm-themed) -->
-  <script id="svg-defs" type="application/json">
-  {
-    "icon-fertilizer": "<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><rect x='8' y='12' width='48' height='40' rx='6' fill='#f7f7f7' stroke='#2e7d32' stroke-width='2'/><path d='M18 22c6 0 6-6 12-6s6 6 12 6' fill='#2e7d32' opacity='0.9'/><circle cx='26' cy='34' r='3' fill='#2e7d32'/><circle cx='36' cy='34' r='3' fill='#2e7d32'/></svg>",
-    "icon-seeds": "<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><circle cx='32' cy='20' r='12' fill='#e6f4ea' stroke='#2e7d32' stroke-width='2'/><path d='M24 34c3 6 12 6 15 0' stroke='#2e7d32' stroke-width='2' fill='none'/><ellipse cx='28' cy='24' rx='2.5' ry='4' fill='#2e7d32'/></svg>",
-    "icon-tools": "<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><path d='M14 44c10-8 18-8 32-2' stroke='#2e7d32' stroke-width='3' fill='none'/><path d='M44 14l6 6' stroke='#2e7d32' stroke-width='3' stroke-linecap='round'/><rect x='6' y='46' width='12' height='4' rx='1' fill='#fff' stroke='#2e7d32' stroke-width='2'/></svg>",
-    "icon-drip": "<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><path d='M32 8c6 8 10 12 10 18 0 10-8 18-10 18s-10-8-10-18c0-6 4-10 10-18z' fill='#e6f4ea' stroke='#2e7d32' stroke-width='2'/><circle cx='32' cy='34' r='3' fill='#2e7d32'/></svg>",
-    "icon-pesticide": "<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><rect x='20' y='14' width='24' height='36' rx='4' fill='#fff' stroke='#2e7d32' stroke-width='2'/><rect x='28' y='8' width='8' height='8' rx='1' fill='#2e7d32'/></svg>",
-    "icon-crop": "<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><path d='M32 44c6-12 16-18 16-24C48 16 40 14 32 18 24 14 16 16 16 20c0 6 10 12 16 24z' fill='#e6f4ea' stroke='#2e7d32' stroke-width='2'/><path d='M24 30c4 4 8 6 16 0' stroke='#2e7d32' stroke-width='2' fill='none'/></svg>"
-  }
-  </script>
-
-  <!-- PAGE JAVASCRIPT -->
   <script>
   (function () {
-    // parse svg defs
-    const svgDefs = JSON.parse(document.getElementById('svg-defs').textContent || '{}');
+    // Crop catalog with emojis
+    const cropCatalog = {
+      vegetables: [
+        { name: 'Tomato', emoji: '🍅', category: 'Vegetables' },
+        { name: 'Potato', emoji: '🥔', category: 'Vegetables' },
+        { name: 'Onion', emoji: '🧅', category: 'Vegetables' },
+        { name: 'Carrot', emoji: '🥕', category: 'Vegetables' },
+        { name: 'Spinach', emoji: '🥬', category: 'Vegetables' },
+        { name: 'Cucumber', emoji: '🥒', category: 'Vegetables' },
+        { name: 'Cauliflower', emoji: '🥦', category: 'Vegetables' },
+        { name: 'Cabbage', emoji: '🥬', category: 'Vegetables' },
+        { name: 'Brinjal', emoji: '🍆', category: 'Vegetables' },
+        { name: 'Okra', emoji: '🌱', category: 'Vegetables' }
+      ],
+      fruits: [
+        { name: 'Apple', emoji: '🍎', category: 'Fruits' },
+        { name: 'Banana', emoji: '🍌', category: 'Fruits' },
+        { name: 'Mango', emoji: '🥭', category: 'Fruits' },
+        { name: 'Grapes', emoji: '🍇', category: 'Fruits' },
+        { name: 'Orange', emoji: '🍊', category: 'Fruits' },
+        { name: 'Watermelon', emoji: '🍉', category: 'Fruits' }
+      ],
+      grains: [
+        { name: 'Wheat', emoji: '🌾', category: 'Grains' },
+        { name: 'Rice', emoji: '🌾', category: 'Grains' },
+        { name: 'Maize (Corn)', emoji: '🌽', category: 'Grains' },
+        { name: 'Soybean', emoji: '🫘', category: 'Pulses' },
+        { name: 'Chickpea (Chana)', emoji: '🫘', category: 'Pulses' },
+        { name: 'Lentils', emoji: '🫘', category: 'Pulses' }
+      ]
+    };
+
+    // Supplies with better icons
+    const supplies = [
+      { id:'s-fert', name:'NPK Fertilizer (50kg)', price:1200, icon:'🧪' },
+      { id:'s-urea', name:'Urea (50kg)', price:950, icon:'⚗️' },
+      { id:'s-seed', name:'Hybrid Seeds (1kg)', price:300, icon:'🌱' },
+      { id:'s-pest', name:'Pesticide (1L)', price:450, icon:'💊' },
+      { id:'s-tools', name:'Hand Tools Set', price:1800, icon:'🔧' },
+      { id:'s-drip', name:'Drip Irrigation Kit', price:5400, icon:'💧' }
+    ];
 
     // AUTH / DATA
     const active = JSON.parse(localStorage.getItem("cc_active_user"));
@@ -972,49 +535,71 @@ body[data-dashboard="farmer"] .dashboard-footer {
       return;
     }
     const key = `cc_user_data_${active.username}`;
-    let data = JSON.parse(localStorage.getItem(key));
+    
+    // Load user data from localStorage
+    let data = JSON.parse(localStorage.getItem(key) || 'null');
+    
+    // Initialize if data doesn't exist
     if (!data) {
-      data = { role: "farmer", wallet: 10000, listings: [], purchases: [], notifications: [] };
+      data = {
+        role: "farmer",
+        username: active.username,
+        displayName: active.username,
+        wallet: 10000,
+        listings: [],
+        purchases: [],
+        notifications: []
+      };
       localStorage.setItem(key, JSON.stringify(data));
     }
+    
+    // ---- AUTO FIX OLD LISTINGS ----
+    if (Array.isArray(data.listings)) {
+      data.listings = data.listings.map(l => {
+        // New format check (already correct)
+        if (l.rawUnitLabel || l.pricePerKg !== undefined) {
+          return l; 
+        }
+
+        // Old format listing (NEEDS FIX)
+        let rawQty = Number(l.qty) || 0;
+
+        // Old listings used: qty = rawQty (wrong), unit = "kg"
+        // Farmer never stored proper unit → assume "kg" but treat it as raw
+        // To avoid huge errors, we assume rawQty already means kg
+        let qtyKg = rawQty;
+
+        return {
+          id: l.id,
+          title: l.title || l.name || "Unknown Crop",
+          qty: qtyKg,
+          unit: "kg",
+          rawUnitLabel: "kg",      // assume kg
+          pricePerKg: Number(l.price || l.rate || 1),
+          emoji: l.emoji || "🌾",
+          createdAt: l.createdAt || new Date().toISOString()
+        };
+      });
+
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+    
     if (!Array.isArray(data.purchases)) data.purchases = [];
 
     // DOM references
     const headerUser = document.getElementById("headerUser");
-    const walletBox = document.getElementById("walletBox");
-    const walletAmount = document.getElementById("walletAmount");
+    const walletBalance = document.getElementById("walletBalance");
     const suppliesList = document.getElementById("suppliesList");
+    const cropSelector = document.getElementById("cropSelector");
     const listingBox = document.getElementById("listingBox");
     const historyBox = document.getElementById("historyBox");
     const sellForm = document.getElementById("sellForm");
     const sellTitle = document.getElementById("sellTitle");
     const sellQty = document.getElementById("sellQty");
     const sellPrice = document.getElementById("sellPrice");
-    const imageSelector = document.getElementById("imageSelector");
     const customFund = document.getElementById("customFund");
-    const addCustomFund = document.getElementById("addCustomFund");
 
-    // image option ids (refer to svgDefs keys)
-    const imageOptions = [
-      { id:'icon-fertilizer', label:'Fertilizer' },
-      { id:'icon-seeds', label:'Seeds' },
-      { id:'icon-tools', label:'Tools' },
-      { id:'icon-drip', label:'Drip Kit' },
-      { id:'icon-pesticide', label:'Pesticide' },
-      { id:'icon-crop', label:'Crop' }
-    ];
-
-    // supplies catalog using svg icon ids
-    const supplies = [
-      { id:'s-fert', name:'NPK Fertilizer (50kg)', price:1200, icon:'icon-fertilizer' },
-      { id:'s-urea', name:'Urea (50kg)', price:950, icon:'icon-fertilizer' },
-      { id:'s-seed', name:'Hybrid Seeds (1kg)', price:300, icon:'icon-seeds' },
-      { id:'s-pest', name:'Pesticide (1L)', price:450, icon:'icon-pesticide' },
-      { id:'s-tools', name:'Hand Tools Set', price:1800, icon:'icon-tools' },
-      { id:'s-drip', name:'Drip Irrigation Kit', price:5400, icon:'icon-drip' }
-    ];
-
-    // header
+    // Header
     headerUser.innerHTML = `
       <div class="user-avatar">${active.username.charAt(0).toUpperCase()}</div>
       <div>
@@ -1023,46 +608,65 @@ body[data-dashboard="farmer"] .dashboard-footer {
       </div>
     `;
 
-    // helpers
+    // Helpers
     function save() { localStorage.setItem(key, JSON.stringify(data)); }
-    function svgMarkup(id, cls='') { return svgDefs[id] ? svgDefs[id].replace('<svg','<svg class="'+cls+'"') : ''; }
     function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-    // RENDER functions
+    // Render functions
     function renderWallet(){
-      walletBox.innerHTML = `Wallet: ₹ <span style="font-weight:700;color:var(--farmer-primary)">${data.wallet.toFixed(2)}</span>`;
-      walletAmount.textContent = `₹ ${data.wallet.toFixed(2)}`;
+      walletBalance.textContent = `₹ ${data.wallet.toFixed(2)}`;
     }
 
-    function renderImageOptions(){
-      imageSelector.innerHTML = '';
-      imageOptions.forEach((opt, i) => {
-        const lbl = document.createElement('label');
-        const checked = i === 0 ? 'checked' : '';
-        lbl.innerHTML = `<input style="display:none" type="radio" name="listingImage" value="${opt.id}" ${checked}>
-                         ${svgMarkup(opt.id,'thumb-svg')}`;
-        imageSelector.appendChild(lbl);
+    function renderCropSelector(){
+      cropSelector.innerHTML = '';
+      let allCrops = [...cropCatalog.vegetables, ...cropCatalog.fruits, ...cropCatalog.grains];
+      
+      allCrops.forEach((crop, i) => {
+        const label = document.createElement('label');
+        label.className = 'crop-option';
+        label.innerHTML = `
+          <input type="radio" name="cropType" value="${crop.name}" data-emoji="${crop.emoji}" ${i === 0 ? 'checked' : ''}>
+          <div class="crop-card">
+            <span class="crop-emoji">${crop.emoji}</span>
+            <span class="crop-name">${crop.name}</span>
+          </div>
+        `;
+        cropSelector.appendChild(label);
       });
+
+      // Update title field when selection changes
+      cropSelector.querySelectorAll('input[name="cropType"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          sellTitle.value = e.target.value;
+        });
+      });
+
+      // Set initial value
+      sellTitle.value = allCrops[0].name;
     }
 
     function renderSupplies(){
       suppliesList.innerHTML = '';
       supplies.forEach(item => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'supply-item';
-        const left = document.createElement('div');
-        left.style.display='flex'; left.style.gap='12px'; left.style.alignItems='center';
-        left.innerHTML = `<div class="thumb-svg">${svgMarkup(item.icon)}</div>
-                          <div><strong>${escapeHtml(item.name)}</strong><div class="small-muted">₹ <span class="price-inline">${item.price}</span></div></div>`;
-        const right = document.createElement('div');
-        right.style.display='flex'; right.style.alignItems='center'; right.style.gap='8px';
-        right.innerHTML = `<input class="qty-input" type="number" min="1" value="1">
-                           <button class="btn-outline">Buy</button>`;
-        wrapper.appendChild(left); wrapper.appendChild(right);
-        suppliesList.appendChild(wrapper);
+        const card = document.createElement('div');
+        card.className = 'supply-card';
+        card.innerHTML = `
+          <div style="display: flex; gap: 12px; align-items: flex-start;">
+            <div class="supply-icon">${item.icon}</div>
+            <div class="supply-info">
+              <div class="supply-name">${escapeHtml(item.name)}</div>
+              <div class="supply-price">₹ ${item.price}</div>
+            </div>
+          </div>
+          <div class="supply-actions">
+            <input class="qty-input" type="number" min="1" value="1">
+            <button class="btn-buy">Add to Cart</button>
+          </div>
+        `;
+        suppliesList.appendChild(card);
 
-        const qtyInput = right.querySelector('input');
-        const buyBtn = right.querySelector('button');
+        const qtyInput = card.querySelector('.qty-input');
+        const buyBtn = card.querySelector('.btn-buy');
         buyBtn.addEventListener('click', () => {
           const qty = Math.max(1, Number(qtyInput.value) || 1);
           handleBuy(item, qty);
@@ -1073,23 +677,33 @@ body[data-dashboard="farmer"] .dashboard-footer {
     function renderListings(){
       listingBox.innerHTML = '';
       if (!data.listings || data.listings.length === 0) {
-        listingBox.innerHTML = '<div class="small-muted">No listings yet.</div>';
+        listingBox.innerHTML = '<div class="small-muted">No listings yet. Create your first listing above!</div>';
         return;
       }
-      const t = document.createElement('table'); t.className='list-table';
-      t.innerHTML = `<thead><tr><th style="width:86px">Icon</th><th>Title</th><th>Qty</th><th>Price</th><th></th></tr></thead><tbody></tbody>;
-      const tbody = t.querySelector('tbody')`;
-      data.listings.forEach(l => {
-        const tr = document.createElement('tr');
-        const iconHtml = l.iconId ? svgMarkup(l.iconId,'thumb-svg') : svgMarkup('icon-crop','thumb-svg');
-        tr.innerHTML = `<td>${iconHtml}</td><td>${escapeHtml(l.title)}</td><td>${l.qty}</td><td>₹ ${Number(l.price).toFixed(2)}</td><td><button class="btn-outline" data-del="${l.id}">Remove</button></td>`;
-        tbody.appendChild(tr);
+
+      data.listings.forEach(listing => {
+        const item = document.createElement('div');
+        item.className = 'listing-item';
+        item.innerHTML = `
+          <div class="listing-icon">${listing.emoji || '🌾'}</div>
+          <div class="listing-details">
+            <div class="listing-title">${escapeHtml(listing.title)}</div>
+            <div class="listing-meta">
+  Qty: ${listing.qty} kg • ₹${Number(listing.pricePerKg).toFixed(2)} per kg
+</div>
+
+          </div>
+          <button class="btn-remove" data-id="${listing.id}">
+            <i class="fas fa-trash"></i> Remove
+          </button>
+        `;
+        listingBox.appendChild(item);
       });
-      listingBox.appendChild(t);
-      listingBox.querySelectorAll('[data-del]').forEach(btn => {
+
+      listingBox.querySelectorAll('.btn-remove').forEach(btn => {
         btn.addEventListener('click', () => {
-          const id = btn.getAttribute('data-del');
-          if (!confirm('Delete this listing?')) return;
+          const id = btn.getAttribute('data-id');
+          if (!confirm('Remove this listing?')) return;
           data.listings = data.listings.filter(x => x.id !== id);
           save(); renderListings();
         });
@@ -1102,59 +716,110 @@ body[data-dashboard="farmer"] .dashboard-footer {
         historyBox.innerHTML = '<div class="small-muted">No purchases yet.</div>';
         return;
       }
-      const items = data.purchases.slice().reverse().map(p => {
-        return `<div style="padding:8px 0; border-bottom:1px solid #f4f4f4;">
-                  <strong>${escapeHtml(p.name)}</strong>
-                  <div class="small-muted">Qty: ${p.qty} &nbsp;•&nbsp; ₹ ${Number(p.total).toFixed(2)} &nbsp;•&nbsp; ${new Date(p.time).toLocaleString()}</div>
-                </div>`;
-      }).join('');
-      historyBox.innerHTML = items;
+
+      data.purchases.slice().reverse().forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML = `
+          <div class="history-title">${escapeHtml(p.name)}</div>
+          <div class="history-meta">
+            Qty: ${p.qty} • Total: ₹${Number(p.total).toFixed(2)} • ${new Date(p.time).toLocaleDateString()} ${new Date(p.time).toLocaleTimeString()}
+          </div>
+        `;
+        historyBox.appendChild(item);
+      });
     }
 
-    // ACTIONS
+    // Actions
     function handleBuy(item, qty){
       const total = item.price * qty;
-      if (data.wallet < total) { alert('Insufficient funds. Add money to wallet.'); return; }
-      if (!confirm(`Buy ${qty} × ${item.name} for ₹ ${total.toFixed(2)}?`)) return;
+      if (data.wallet < total) { 
+        alert('Insufficient funds! Please add money to your wallet.'); 
+        return; 
+      }
+      if (!confirm(`Buy ${qty} × ${item.name} for ₹${total.toFixed(2)}?`)) return;
+      
       data.wallet = Number((data.wallet - total).toFixed(2));
       data.purchases = data.purchases || [];
-      data.purchases.push({ id: item.id + '-' + Date.now(), name: item.name, qty, unitPrice: item.price, total, time: new Date().toISOString() });
-      save(); renderWallet(); renderHistory(); alert('Purchase successful.');
+      data.purchases.push({ 
+        id: item.id + '-' + Date.now(), 
+        name: item.name, 
+        qty, 
+        unitPrice: item.price, 
+        total, 
+        time: new Date().toISOString() 
+      });
+      save(); 
+      renderWallet(); 
+      renderHistory(); 
+      alert('✓ Purchase successful!');
     }
 
-    // add funds
+    // Add funds
     document.querySelectorAll('.fund-btn[data-amt]').forEach(b => {
       b.addEventListener('click', () => {
         const amt = Number(b.getAttribute('data-amt'));
         data.wallet = Number((data.wallet + amt).toFixed(2));
-        save(); renderWallet(); alert(`Added ₹ ${amt} to wallet.`);
+        save(); renderWallet(); 
       });
     });
+
     document.getElementById('addCustomFund').addEventListener('click', () => {
       const amt = Math.max(1, Number(customFund.value) || 0);
       if (!amt) { alert('Enter a valid amount'); return; }
       data.wallet = Number((data.wallet + amt).toFixed(2));
-      save(); renderWallet(); customFund.value=''; alert(`Added ₹ ${amt} to wallet.`);
+      save(); renderWallet(); customFund.value='';
     });
 
-    // sell form
-    sellForm.addEventListener('submit', e => {
-      e.preventDefault();
-      const title = sellTitle.value.trim(); if (!title) { alert('Enter title'); return; }
-      const qty = Math.max(1, Number(sellQty.value) || 1);
-      const price = Math.max(1, Number(sellPrice.value) || 1);
-      const checked = document.querySelector('input[name="listingImage"]:checked');
-      const iconId = checked ? checked.value : (imageOptions[0] && imageOptions[0].id);
-      const newListing = { id:'L'+Date.now(), title, qty, price, iconId, createdAt: new Date().toISOString() };
-      data.listings = data.listings || []; data.listings.push(newListing);
-      save(); renderListings();
-      sellTitle.value=''; sellQty.value='1'; sellPrice.value='100';
-      alert('Listing added');
-    });
+// Sell form — UPDATED with unit & kg normalization
+sellForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const title = sellTitle.value.trim();
+  if (!title) { alert('Please select a crop'); return; }
+  
+  const rawQty = Math.max(1, Number(sellQty.value) || 1);
+  const unit = document.getElementById("sellUnit").value;
+  const price = Math.max(1, Number(sellPrice.value) || 1); // price per kg
 
-    // init render
+  // 🔥 Convert quantity → kilograms
+  let qtyKg = rawQty;
+  if (unit === "qtl") qtyKg = rawQty * 100;
+  if (unit === "ton") qtyKg = rawQty * 1000;
+
+  // Selected emoji
+  const selectedCrop = document.querySelector('input[name="cropType"]:checked');
+  const emoji = selectedCrop ? selectedCrop.getAttribute('data-emoji') : '🌾';
+
+  // 🔥 Standardized listing structure
+  const newListing = { 
+    id: 'L' + Date.now(),
+    title,
+    qty: qtyKg,           // always stored in kg
+    unit: 'kg',           // canonical unit
+    rawUnitLabel: unit,   // for display if needed
+    pricePerKg: price,    // your new required format
+    emoji,
+    createdAt: new Date().toISOString() 
+  };
+  
+  data.listings = data.listings || [];
+  data.listings.push(newListing);
+  save(); 
+  renderListings();
+  
+  sellQty.value = '10';
+  sellPrice.value = '50';
+  alert('✓ Listing created successfully!');
+});
+
+
+    // Initialize
     function init(){
-      renderWallet(); renderImageOptions(); renderSupplies(); renderListings(); renderHistory();
+      renderWallet();
+      renderCropSelector();
+      renderSupplies();
+      renderListings();
+      renderHistory();
     }
     init();
 

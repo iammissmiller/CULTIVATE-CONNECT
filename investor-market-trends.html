@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cultivate Connect — Market Trends</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Companies engine (make sure these files exist in the same folder) -->
+  <script src="companies.js"></script>
+  <script src="companiesEngine.js"></script>
+
+  <style>
+    :root{
+      --investor-primary:#1d4ed8;
+      --bg:#f7f8fb;
+      --card:#fff;
+      --muted:#6b7280;
+      --success:#16a34a;
+      --danger:#ef4444;
+      --warning:#f59e0b;
+    }
+    body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial; margin:0; background:var(--bg); color:#111}
+    .container{max-width:1200px;margin:22px auto;padding:18px}
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .title{display:flex;gap:12px;align-items:center}
+    .title h1{font-size:20px;color:var(--investor-primary);margin:0}
+    .user {font-weight:600;color:#333}
+    .grid{display:grid;grid-template-columns: 1fr 360px; gap:18px}
+    .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 20px rgba(11,15,30,0.04)}
+    .row{display:flex;gap:12px;align-items:center}
+    .small{color:var(--muted);font-size:13px}
+    .stat{font-size:18px;font-weight:700}
+    .charts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:12px}
+    canvas{width:100%!important;height:300px!important}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left;font-size:14px}
+    .signal-buy{color:var(--success);font-weight:700}
+    .signal-sell{color:var(--danger);font-weight:700}
+    .signal-hold{color:var(--muted);font-weight:700}
+    .hot {background: linear-gradient(90deg, rgba(29,78,216,0.06), rgba(124,58,237,0.03)); padding:10px; border-radius:8px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .btn{padding:8px 10px;border-radius:8px;border:1px solid #e6edf8;background:white;cursor:pointer}
+    .btn-primary{background:var(--investor-primary);color:white;border:none}
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} .charts{grid-template-columns:1fr} canvas{height:260px!important} }
+  </style>
+</head>
+<body data-dashboard="investor">
+  <div class="container">
+    <div class="header">
+      <div class="title">
+        <i class="fas fa-chart-line" style="font-size:28px;color:var(--investor-primary)"></i>
+        <div>
+          <h1>Market Trends — Cultivate Connect</h1>
+          <div class="small">Live product supply & demand, company price trends and investment signals</div>
+        </div>
+      </div>
+      <div class="user small" id="headerUser">Investor</div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: charts & tables -->
+      <div>
+        <div class="card">
+          <div class="row" style="justify-content:space-between">
+            <div>
+              <div class="small">Market Snapshot</div>
+              <div class="stat" id="snapshotSummary">Loading...</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Last update</div>
+              <div id="lastUpdate" class="small">--</div>
+              <div class="controls">
+                <button class="btn" id="btnRefresh">Refresh</button>
+                <button class="btn btn-primary" id="btnExport">Export CSV</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="charts">
+            <div>
+              <h4 style="margin:8px 0 6px">Supply vs Demand (by product)</h4>
+              <canvas id="supplyDemandChart"></canvas>
+            </div>
+            <div>
+              <h4 style="margin:8px 0 6px">Global Price Trend</h4>
+              <canvas id="priceTrendChart"></canvas>
+            </div>
+          </div>
+
+          <div style="margin-top:14px">
+            <h4 style="margin-bottom:8px">Top Products</h4>
+            <table id="productsTable">
+              <thead><tr><th>Product</th><th>Supply</th><th>Demand</th><th>Signal</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sector trends card (ADDED) -->
+        <div class="card" style="margin-top:12px">
+          <h4 style="margin-bottom:8px">Sector Trends (Supply vs Demand)</h4>
+          <canvas id="sectorChart"></canvas>
+        </div>
+
+        <!-- Company performance table (ADDED) -->
+        <div class="card" style="margin-top:12px">
+          <h4 style="margin-bottom:8px">Company Performance</h4>
+          <table id="companyTable">
+            <thead>
+              <tr>
+                <th>Symbol</th><th>Name</th><th>Price</th><th>Change</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4 style="margin-bottom:8px">Market Signals & Notes</h4>
+          <div id="signalsBox" class="small">Analyzing market...</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: insights -->
+      <div>
+        <div class="card hot">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Hot Products</div>
+              <div id="hotList" style="margin-top:8px"></div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Investment Pool</div>
+              <div id="poolValue" class="stat">₹ 0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Company movers (ADDED) -->
+        <div class="card" style="margin-top:12px">
+          <h4>Company Movers</h4>
+          <div class="small"><strong>Top Gainers</strong></div>
+          <div id="gainers" class="small" style="margin-bottom:10px"></div>
+          <div class="small"><strong>Top Losers</strong></div>
+          <div id="losers" class="small"></div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4 style="margin-bottom:8px">Alerts</h4>
+          <div id="alertsBox" class="small">No alerts</div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4 style="margin-bottom:8px">How signals are generated</h4>
+          <div class="small">
+            - If Demand &gt; Supply → <span class="signal-buy">Buy / Invest</span> signal.<br>
+            - If Supply &gt; Demand by large margin → <span class="signal-sell">Avoid / Sell</span>.<br>
+            - Balanced → <span class="signal-hold">Hold</span>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* investor-market-trends.js (embedded)
+   PROFESSIONAL view: reads localStorage, renders charts, generates signals.
+   Sources:
+     - Farmer listings: cc_user_data_farmer_*
+     - Consumer purchases: cc_user_data_consumer_*
+     - Market history: cc_market_chart_data
+     - Companies: companiesEngine (cc_companies_master, snapshots)
+*/
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (window.CCCompaniesEngine) {
+        CCCompaniesEngine.startCompaniesMarket();   // ⭐ Start the engine
+    }
+
+    // If your page has init functions, call them:
+    initMarketTrends?.();
+});
+
+/* ---------------------------------------------------
+   REQUIRED INITIALIZER: Fix for "initMarketTrends not defined"
+--------------------------------------------------- */
+function initMarketTrends() {
+    console.log("Initializing Market Trends…");
+
+    try {
+        // Main rendering engine
+        if (typeof renderAll === "function") {
+            renderAll();
+        }
+
+        // Optional secondary components (safe calls)
+        if (typeof renderSectorBarChart === "function") renderSectorBarChart();
+        if (typeof renderCompanyMovers === "function") renderCompanyMovers();
+        if (typeof renderCompanyTable === "function") renderCompanyTable();
+
+        console.log("Market Trends Ready");
+    } catch (err) {
+        console.error("initMarketTrends failed:", err);
+    }
+}
+
+const CHART_KEY = "cc_market_chart_data";
+const MAX_LABELS = 30;
+const HOT_TOP = 5;
+const SIGNAL_THRESHOLD = 0.15;
+let sdChart = null, priceChart = null, sectorChart = null;
+
+const headerUser = document.getElementById('headerUser');
+const snapshotSummary = document.getElementById('snapshotSummary');
+const lastUpdate = document.getElementById('lastUpdate');
+const btnRefresh = document.getElementById('btnRefresh');
+const btnExport = document.getElementById('btnExport');
+const productsTableBody = document.querySelector('#productsTable tbody');
+const signalsBox = document.getElementById('signalsBox');
+const hotList = document.getElementById('hotList');
+const poolValue = document.getElementById('poolValue');
+const alertsBox = document.getElementById('alertsBox');
+
+function parseJSON(key) {
+  try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+}
+function listKeys(prefix) {
+  const out = [];
+  for (let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if (k && k.startsWith(prefix)) out.push(k);
+  }
+  return out;
+}
+
+function getSupplyByProduct() {
+  const map = Object.create(null);
+  listKeys('cc_user_data_farmer_').forEach(k => {
+    const f = parseJSON(k);
+    if (!f || !Array.isArray(f.listings)) return;
+    f.listings.forEach(it => {
+      const t = (it.title || '').trim() || 'unknown';
+      const q = Number(it.qty || it.quantity || 0);
+      map[t] = (map[t]||0) + q;
+    });
+  });
+  return map;
+}
+
+function getDemandByProduct() {
+  const map = Object.create(null);
+  listKeys('cc_user_data_consumer_').forEach(k => {
+    const c = parseJSON(k);
+    if (!c || !Array.isArray(c.purchases)) return;
+    c.purchases.forEach(p => {
+      const t = (p.name || p.item || '').trim() || 'unknown';
+      const q = Number(p.qty || p.quantity || 0);
+      map[t] = (map[t]||0) + q;
+    });
+  });
+  return map;
+}
+
+function getInvestmentPool() {
+    let sum = 0;
+    listKeys('cc_user_data_investor_').forEach(k => {
+        const inv = parseJSON(k);
+        if (!inv || !Array.isArray(inv.investments)) return;
+
+        const companies = CCCompaniesEngine.getCompanies();
+
+        inv.investments.forEach(i => {
+            const cmp = companies.find(c => c.symbol === i.symbol);
+            if (cmp) sum += i.qty * cmp.sharePrice;
+        });
+    });
+    return sum;
+}
+
+
+function getMarketHistory() {
+  return parseJSON(CHART_KEY) || [];
+}
+
+function aggregateProducts() {
+  const supply = getSupplyByProduct();
+  const demand = getDemandByProduct();
+  const keys = new Set([...Object.keys(supply), ...Object.keys(demand)]);
+  const arr = Array.from(keys).map(k => ({
+    product: k,
+    supply: supply[k] || 0,
+    demand: demand[k] || 0,
+    delta: ((demand[k]||0) - (supply[k]||0))
+  }));
+  arr.sort((a,b) => (b.supply + b.demand) - (a.supply + a.demand));
+  return arr;
+}
+
+function renderSupplyDemandChart(products) {
+  const labels = products.map(p => p.product);
+  const supplyData = products.map(p => p.supply);
+  const demandData = products.map(p => p.demand);
+  const ctx = document.getElementById('supplyDemandChart').getContext('2d');
+  if (sdChart) sdChart.destroy();
+  sdChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [
+      { label: 'Supply', data: supplyData, backgroundColor: 'rgba(46,125,50,0.7)' },
+      { label: 'Demand', data: demandData, backgroundColor: 'rgba(245,158,11,0.85)' }
+    ]},
+    options: { responsive:true, maintainAspectRatio:false, interaction:{mode:'index', intersect:false}, scales:{ x:{ stacked:true }, y:{ stacked:false, title:{display:true,text:'Units'} } } }
+  });
+}
+
+function renderPriceTrend() {
+  const hist = getMarketHistory();
+  const items = hist.slice(-MAX_LABELS);
+  const labels = items.map(i => new Date(i.timestamp).toLocaleTimeString());
+  const prices = items.map(i => i.price);
+  const ctx = document.getElementById('priceTrendChart').getContext('2d');
+  if (priceChart) priceChart.destroy();
+  priceChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ label:'Price', data: prices, borderColor:'rgba(29,78,216,0.95)', tension:0.25, fill:false }]},
+    options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ title:{display:true,text:'₹ Price'} } } }
+  });
+}
+
+function productSignal(p) {
+  if (p.supply === 0 && p.demand === 0) return {signal:'no-data', label:'No data', reason:'No supply or demand recorded'};
+  const denom = Math.max(1, p.supply);
+  const ratio = (p.demand - p.supply) / denom;
+  if (ratio > SIGNAL_THRESHOLD) return {signal:'buy', label:'Buy / Invest', reason:`Demand exceeds supply by ${(ratio*100).toFixed(0)}%`};
+  if (ratio < -SIGNAL_THRESHOLD) return {signal:'sell', label:'Avoid / Sell', reason:`Supply exceeds demand by ${Math.abs((ratio*100)).toFixed(0)}%`};
+  return {signal:'hold', label:'Hold', reason:'Market balanced'};
+}
+
+function renderProductsTable(products) {
+  productsTableBody.innerHTML = '';
+  const hot = [];
+  products.forEach(p => {
+    const s = productSignal(p);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(p.product)}</td>
+                    <td>${p.supply}</td>
+                    <td>${p.demand}</td>
+                    <td>${formatSignalLabel(s)}</td>`;
+    productsTableBody.appendChild(tr);
+    const activity = p.supply + p.demand;
+    hot.push({product:p.product, score: Math.abs(p.demand - p.supply) + activity/100, demand:p.demand, supply:p.supply, signal:s});
+  });
+  hot.sort((a,b)=>b.score-a.score);
+  const top = hot.slice(0, HOT_TOP);
+  hotList.innerHTML = top.map(t => `<div style="margin-bottom:6px"><strong>${escapeHtml(t.product)}</strong><div class="small">D:${t.demand} • S:${t.supply} • <span class="${t.signal.signal==='buy'?'signal-buy':t.signal.signal==='sell'?'signal-sell':'signal-hold'}">${t.signal.label}</span></div></div>`).join('');
+}
+
+function renderSummary(products) {
+  const totalSupply = products.reduce((s,p)=>s+p.supply,0);
+  const totalDemand = products.reduce((s,p)=>s+p.demand,0);
+  const hist = getMarketHistory();
+  const latest = hist[hist.length-1] || null;
+  const pool = getInvestmentPool();
+
+  snapshotSummary.textContent = `Supply: ${totalSupply} • Demand: ${totalDemand} • Price: ${latest?('₹ '+latest.price):'--'}`;
+  lastUpdate.textContent = latest ? new Date(latest.timestamp).toLocaleString() : '--';
+  poolValue.textContent = `₹ ${numberWithCommas(pool)}`;
+
+  const signals = [];
+  products.slice(0,10).forEach(p=>{
+    const s = productSignal(p);
+    if (s.signal === 'buy') signals.push(`${p.product}: ${s.label} (${s.reason})`);
+    else if (s.signal === 'sell') signals.push(`${p.product}: ${s.label} (${s.reason})`);
+  });
+  signalsBox.innerHTML = signals.length ? signals.map(x=>`<div>• ${escapeHtml(x)}</div>`).join('') : '<div>No strong buy/sell signals detected in top products.</div>';
+
+  const alerts = [];
+  if (totalDemand > totalSupply * 1.2) alerts.push({type:'warning',text:'Demand is significantly higher than supply — prices may surge.'});
+  if (totalSupply > totalDemand * 1.5) alerts.push({type:'info', text:'Over-supply detected — consider caution for new investments.'});
+  alertsBox.innerHTML = alerts.length ? alerts.map(a=>`<div style="margin-bottom:6px">${escapeHtml(a.text)}</div>`).join('') : 'No alerts';
+}
+
+function exportCSV(products) {
+  const rows = [['Product','Supply','Demand','Signal']];
+  products.forEach(p=>{
+    const s = productSignal(p);
+    rows.push([p.product,p.supply,p.demand,s.label]);
+  });
+  const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'market_products.csv'; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function numberWithCommas(x){ return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function formatSignalLabel(sig){ 
+  if (!sig) return '';
+  if (sig.signal==='buy') return `<span class="signal-buy">${sig.label}</span>`;
+  if (sig.signal==='sell') return `<span class="signal-sell">${sig.label}</span>`;
+  return `<span class="signal-hold">${sig.label}</span>`;
+}
+
+// COMPANY / SECTOR LINKING & Table rendering
+function renderSectorBarChart() {
+  // try to use engine's snapshots if available
+  const industry = {};
+  // attempt to aggregate via CCCompaniesEngine.getMarketSnapshots -> map sector signals
+  // fallback: use heuristic mapping from product names (same as other functions)
+  const products = aggregateProducts();
+  // derive sector counts by detecting keywords (simple)
+  const sectorMap = {};
+  products.forEach(p => {
+    // lightweight detection: reuse product keywords mapping similar to engine (seed, fertil, pestic, irrig, soil, machin, iot)
+    const t = p.product.toLowerCase();
+    const detect = (s) => {
+      if (t.includes('fertil')||t.includes('urea')||t.includes('npk')||t.includes('nutri')) return 'Fertilizers';
+      if (t.includes('seed')||t.includes('hybrid')||t.includes('wheat')||t.includes('rice')||t.includes('maize')||t.includes('tomato')) return 'Seeds';
+      if (t.includes('pestic')||t.includes('pest')||t.includes('fung')) return 'Pesticides';
+      if (t.includes('bio')||t.includes('microbe')) return 'Bio-Fertilizers';
+      if (t.includes('soil')||t.includes('test')) return 'SoilHealth';
+      if (t.includes('tractor')||t.includes('machin')||t.includes('plough')) return 'Machinery';
+      if (t.includes('irrig')||t.includes('drip')||t.includes('sprinkl')) return 'Irrigation';
+      if (t.includes('iot')||t.includes('sensor')||t.includes('analytics')||t.includes('data')) return 'AgriIoT';
+      return 'Other';
+    };
+    const sec = detect(p.product);
+    sectorMap[sec] = sectorMap[sec] || { supply:0, demand:0 };
+    sectorMap[sec].supply += p.supply;
+    sectorMap[sec].demand += p.demand;
+  });
+
+  const names = Object.keys(sectorMap);
+  const supplyData = names.map(n => sectorMap[n].supply);
+  const demandData = names.map(n => sectorMap[n].demand);
+
+  const canvas = document.getElementById('sectorChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (sectorChart) sectorChart.destroy();
+  sectorChart = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:names, datasets:[
+      { label:'Supply', data:supplyData, backgroundColor:'#2e7d32' },
+      { label:'Demand', data:demandData, backgroundColor:'#f59e0b' }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false }
+  });
+}
+
+function renderCompanyMovers() {
+  if (!window.CCCompaniesEngine) return;
+  const history = CCCompaniesEngine.getMarketSnapshots();
+  const companies = CCCompaniesEngine.getCompanies();
+  if (!history || history.length < 2) return;
+  const prev = history[history.length-2].companies || [];
+  const last = history[history.length-1].companies || [];
+  const changes = last.map(c => {
+    const old = prev.find(p => p.symbol === c.symbol);
+    const oldPrice = old ? old.price : c.price;
+    const change = oldPrice ? ((c.price - oldPrice) / oldPrice) * 100 : 0;
+    return { symbol: c.symbol, price: c.price, change };
+  });
+  const topGainers = [...changes].sort((a,b)=>b.change-a.change).slice(0,3);
+  const topLosers = [...changes].sort((a,b)=>a.change-b.change).slice(0,3);
+  document.getElementById('gainers').innerHTML = topGainers.map(g => `<div class="gain-item"><strong>${g.symbol}</strong> +${g.change.toFixed(2)}%</div>`).join('');
+  document.getElementById('losers').innerHTML = topLosers.map(g => `<div class="loss-item"><strong>${g.symbol}</strong> ${g.change.toFixed(2)}%</div>`).join('');
+}
+
+function renderCompanyTable() {
+  if (!window.CCCompaniesEngine) {
+    document.querySelector('#companyTable tbody').innerHTML = '<tr><td colspan="5" class="small">Companies engine not loaded.</td></tr>';
+    return;
+  }
+  const companies = CCCompaniesEngine.getCompanies();
+  const history = CCCompaniesEngine.getMarketSnapshots();
+  const prev = (history && history.length>1) ? history[history.length-2].companies : [];
+  const rows = companies.map(c=>{
+    const old = (prev || []).find(p => p.symbol === c.symbol);
+    const oldPrice = old ? old.price : c.sharePrice;
+    const pct = oldPrice ? ((c.sharePrice - oldPrice)/oldPrice)*100 : 0;
+    const signal = pct > 2 ? 'BUY' : pct < -2 ? 'SELL' : 'HOLD';
+    return `<tr><td>${c.symbol}</td><td>${escapeHtml(c.name)}</td><td>₹${c.sharePrice.toFixed(2)}</td><td style="color:${pct>0?'green':'red'}">${pct.toFixed(2)}%</td><td>
+  <button class="btn btn-primary" onclick="openBuyModal('${c.symbol}')">Buy</button>
+  <button class="btn" style="margin-left:6px" onclick="openSellModal('${c.symbol}')">Sell</button>
+</td>
+</tr>`;
+  }).join('');
+  document.querySelector('#companyTable tbody').innerHTML = rows;
+}
+
+function renderAll() {
+  headerUser.textContent = (JSON.parse(localStorage.getItem('cc_active_user')) || {username:'Investor'}).username || 'Investor';
+  const products = aggregateProducts();
+  renderSupplyDemandChart(products);
+  renderPriceTrend();
+  renderProductsTable(products);
+  renderSummary(products);
+  renderSectorBarChart();
+  renderCompanyMovers();
+  renderCompanyTable();
+}
+
+btnRefresh.addEventListener('click', renderAll);
+btnExport.addEventListener('click', ()=> exportCSV(aggregateProducts()));
+
+function seedMarketIfEmpty() {
+  const hist = getMarketHistory();
+  if (hist.length === 0) {
+    const t0 = Date.now() - 1000*60*30;
+    for (let i=0;i<6;i++){
+      const ts = t0 + i*1000*60*5;
+      const supply = Object.values(getSupplyByProduct()).reduce((a,b)=>a+b,0);
+      const demand = Object.values(getDemandByProduct()).reduce((a,b)=>a+b,0);
+      const pool = getInvestmentPool();
+      const raw = 100 * (1 + ((demand - supply)/Math.max(1,supply)) * 0.5);
+      const price = Math.max(1, Number(raw.toFixed(2)));
+      const point = { timestamp: ts, supply, demand, price, investmentPool: pool };
+      const arr = parseJSON(CHART_KEY) || [];
+      arr.push(point);
+      localStorage.setItem(CHART_KEY, JSON.stringify(arr));
+    }
+  }
+}
+
+seedMarketIfEmpty();
+renderAll();
+setInterval(renderAll, 5000);
+
+// expose debug helpers
+window.__market_trends = { getSupplyByProduct, getDemandByProduct, getInvestmentPool, renderAll, getMarketHistory };
+let modalState = {
+    mode: "buy",    // buy or sell
+    symbol: null,
+    price: 0
+};
+
+function openBuyModal(symbol) {
+    const companies = CCCompaniesEngine.getCompanies();
+    const company = companies.find(c => c.symbol === symbol);
+    const active = JSON.parse(localStorage.getItem("cc_active_user"));
+    const investorKey = `cc_user_data_${active.username}`;
+    const inv = JSON.parse(localStorage.getItem(investorKey));
+
+    modalState = {
+        mode: "buy",
+        symbol,
+        price: company.sharePrice
+    };
+
+    document.getElementById("modalTitle").innerText = "Buy Shares";
+    document.getElementById("modalCompany").innerText = symbol;
+    document.getElementById("modalPrice").innerText = company.sharePrice.toFixed(2);
+    document.getElementById("modalWallet").innerText = inv.wallet.toFixed(2);
+    document.getElementById("modalQty").value = 1;
+
+    updateModalTotal();
+    document.getElementById("investmentModal").style.display = "flex";
+}
+
+function openSellModal(symbol) {
+    const companies = CCCompaniesEngine.getCompanies();
+    const company = companies.find(c => c.symbol === symbol);
+
+    modalState = {
+        mode: "sell",
+        symbol,
+        price: company.sharePrice
+    };
+
+    document.getElementById("modalTitle").innerText = "Sell Shares";
+    document.getElementById("modalCompany").innerText = symbol;
+    document.getElementById("modalPrice").innerText = company.sharePrice.toFixed(2);
+
+    const active = JSON.parse(localStorage.getItem("cc_active_user"));
+    const inv = JSON.parse(localStorage.getItem(`cc_user_data_${active.username}`));
+
+    const owned = inv.investments.find(i => i.symbol === symbol)?.qty || 0;
+
+    document.getElementById("modalWallet").innerText = inv.wallet.toFixed(2);
+    document.getElementById("modalQty").value = 1;
+    document.getElementById("modalQty").max = owned;
+
+    updateModalTotal();
+    document.getElementById("investmentModal").style.display = "flex";
+}
+
+function closeInvestmentModal() {
+    document.getElementById("investmentModal").style.display = "none";
+}
+
+function updateModalTotal() {
+    const qty = Number(document.getElementById("modalQty").value);
+    const total = qty * modalState.price;
+    document.getElementById("modalTotal").innerText = `Total: ₹${total.toFixed(2)}`;
+}
+
+document.getElementById("modalQty").addEventListener("input", updateModalTotal);
+
+function confirmInvestment() {
+    const qty = Number(document.getElementById("modalQty").value);
+    if (qty <= 0) return;
+
+    const active = JSON.parse(localStorage.getItem("cc_active_user"));
+    const key = `cc_user_data_${active.username}`;
+    const inv = JSON.parse(localStorage.getItem(key));
+
+    const total = qty * modalState.price;
+
+    if (modalState.mode === "buy") {
+        if (inv.wallet < total) {
+            alert("Not enough wallet balance!");
+            return;
+        }
+        inv.wallet -= total;
+
+        const entry = inv.investments.find(i => i.symbol === modalState.symbol);
+        if (entry) entry.qty += qty;
+        else inv.investments.push({ symbol: modalState.symbol, qty, amount: total });
+
+    } else if (modalState.mode === "sell") {
+        const entry = inv.investments.find(i => i.symbol === modalState.symbol);
+        if (!entry || entry.qty < qty) {
+            alert("Not enough shares to sell!");
+            return;
+        }
+        entry.qty -= qty;
+        inv.wallet += total;
+
+        // Remove if zero left
+        if (entry.qty <= 0) {
+            inv.investments = inv.investments.filter(i => i.symbol !== modalState.symbol);
+        }
+
+    }
+
+    localStorage.setItem(key, JSON.stringify(inv));
+    closeInvestmentModal();
+    renderAll(); // refresh charts & tables
+};
+</script>
+<!-- INVESTMENT MODAL -->
+<div id="investmentModal" style="
+  position: fixed; inset:0; background:rgba(0,0,0,0.45);
+  display:none; justify-content:center; align-items:center;
+  z-index: 9999;">
+  
+  <div style="
+    width:350px; background:white; padding:20px; border-radius:12px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+    
+    <h3 id="modalTitle" style="margin-bottom:10px"></h3>
+    <div class="small">Company: <span id="modalCompany"></span></div>
+    <div class="small">Price: ₹<span id="modalPrice"></span></div>
+    <div class="small">Wallet: ₹<span id="modalWallet"></span></div>
+
+    <div style="margin-top:12px">
+      <label>Quantity</label>
+      <input id="modalQty" type="number" min="1" value="1" style="
+        width:100%; padding:8px; border-radius:8px; border:1px solid #ddd;">
+    </div>
+
+    <div id="modalTotal" style="margin-top:8px; font-weight:700"></div>
+
+    <div style="text-align:right; margin-top:16px">
+      <button class="btn" onclick="closeInvestmentModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmInvestment()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

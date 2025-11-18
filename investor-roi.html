@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cultivate Connect — ROI</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Required: companies.js + companiesEngine.js (if present) -->
+  <script src="companies.js"></script>
+  <script src="companiesEngine.js"></script>
+
+  <style>
+    :root{
+      --primary:#1d4ed8;
+      --bg:#f7f8fb;
+      --card:#fff;
+      --muted:#6b7280;
+      --success:#16a34a;
+      --danger:#ef4444;
+    }
+    body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial; margin:0; background:var(--bg); color:#111}
+    .wrap{max-width:1150px;margin:22px auto;padding:18px}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .title{display:flex;gap:12px;align-items:center}
+    h1{margin:0;color:var(--primary)}
+    .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 20px rgba(11,15,30,0.04)}
+    .row{display:flex;gap:12px;align-items:center}
+    .small{color:var(--muted);font-size:13px}
+    .stat{font-size:20px;font-weight:700}
+    .grid{display:grid;grid-template-columns: 1fr 420px; gap:18px}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left;font-size:14px}
+    .btn{padding:8px 10px;border-radius:8px;border:1px solid #e6edf8;background:white;cursor:pointer}
+    .btn-primary{background:var(--primary);color:white;border:none}
+    .muted{color:var(--muted)}
+    .chart-box{width:100%;height:260px;position:relative}
+    .chart-box canvas{position:absolute;inset:0;width:100% !important;height:100% !important}
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} .chart-box{height:220px} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="title">
+        <i class="fas fa-percent" style="font-size:28px;color:var(--primary)"></i>
+        <div>
+          <h1>ROI — Cultivate Connect</h1>
+          <div class="small">Realized & unrealized returns calculated from your real portfolio</div>
+        </div>
+      </div>
+
+      <div style="text-align:right">
+        <div class="small">Portfolio Value</div>
+        <div id="pvStat" class="stat">₹ 0.00</div>
+        <div id="roiStat" class="small muted">ROI: --</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: holdings with ROI details -->
+      <div>
+        <div class="card">
+          <h3 style="margin:0 0 10px">Holdings ROI</h3>
+          <div class="small muted">Per-company cost basis, current value and ROI% (uses transactions if available)</div>
+
+          <table id="roiTable" style="margin-top:12px">
+            <thead>
+              <tr><th>Company</th><th>Qty</th><th>Cost Basis</th><th>Current Value</th><th>P/L</th><th>ROI%</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+
+          <div style="margin-top:12px" class="small muted">
+            Notes: Cost basis is derived from your buy transactions (preferred). If transactions are missing, fallback to stored `invested/amount/avgPrice`.
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3 style="margin:0 0 10px">Realized Returns</h3>
+          <div id="realizedBox" class="small muted">Computed from historical sell transactions and buy cost basis.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: charts -->
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Portfolio value (history)</div>
+              <div class="muted">Based on `cc_portfolio_history_<username>` (auto-maintained)</div>
+            </div>
+            <div>
+              <button class="btn" id="exportROI">Export CSV</button>
+            </div>
+          </div>
+          <div class="chart-box" style="margin-top:12px">
+            <canvas id="roiValueChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 10px">ROI% by Company</h3>
+          <div class="chart-box">
+            <canvas id="roiBarChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+  investor-roi.html
+  - Uses cc_user_data_investor_<username>, company engine and portfolio history.
+  - Assumes `amount` in holdings (if present) is total money spent for that holding (cost basis).
+  - Falls back to buy transactions to compute cost basis (recommended).
+*/
+
+(function(){
+  // helpers
+  function qs(sel){ return document.querySelector(sel); }
+  function qsa(sel){ return Array.from(document.querySelectorAll(sel)); }
+  function now(){ return Date.now(); }
+  function fmtMoney(x){ return '₹ ' + Number(x || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function toPct(x){ return (Number(x || 0) * 100).toFixed(2) + '%'; }
+  function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // auth
+  const active = JSON.parse(localStorage.getItem('cc_active_user') || 'null');
+  if (!active || active.role !== 'investor') {
+    alert('Unauthorized — login as an investor.');
+    window.location.href = 'Index.html';
+    return;
+  }
+  const username = active.username;
+  const HISTORY_KEY = `cc_portfolio_history_${username}`;
+
+  // DOM refs
+  const pvStat = qs('#pvStat');
+  const roiStat = qs('#roiStat');
+  const roiTbody = qs('#roiTable tbody');
+  const realizedBox = qs('#realizedBox');
+  const exportBtn = qs('#exportROI');
+  const valueCtx = qs('#roiValueChart').getContext('2d');
+  const barCtx = qs('#roiBarChart').getContext('2d');
+
+  // charts
+  let valueChart = null;
+  let barChart = null;
+
+  // load investor data robustly
+  function loadInvestor() {
+    const key = `cc_user_data_${username}`;
+    const raw = localStorage.getItem(key);
+    if (!raw) {
+      // create default investor object (safe)
+      const obj = { role: 'investor', wallet: 50000, investments: [], transactions: [] };
+      localStorage.setItem(key, JSON.stringify(obj));
+      return obj;
+    }
+    try { const parsed = JSON.parse(raw); parsed.investments = parsed.investments || []; parsed.transactions = parsed.transactions || []; return parsed; }
+    catch { return { role:'investor', wallet:0, investments:[], transactions:[] }; }
+  }
+
+  // get companies live (light)
+  function getCompaniesLight(){
+    if (window.CCCompaniesEngine && typeof CCCompaniesEngine.getCompanies === 'function') {
+      return CCCompaniesEngine.getCompanies();
+    }
+    try {
+      const raw = localStorage.getItem('cc_companies_master');
+      return raw ? JSON.parse(raw).map(c => ({ symbol: c.symbol, name: c.name, sharePrice: c.sharePrice })) : [];
+    } catch(e){ return []; }
+  }
+
+  // build cost-basis map from buy transactions (preferred)
+  function buildBuySummary(transactions) {
+    // returns { [symbol]: { boughtShares, boughtCost } }
+    const map = {};
+    (transactions || []).forEach(t => {
+      if (!t || !t.symbol) return;
+      if (t.type && t.type.toLowerCase() === 'buy') {
+        const s = Number(t.shares || t.qty || 0);
+        const cost = Number(t.cost || t.amount || t.price * s || 0);
+        if (!map[t.symbol]) map[t.symbol] = { boughtShares:0, boughtCost:0 };
+        map[t.symbol].boughtShares += s;
+        map[t.symbol].boughtCost += cost;
+      }
+    });
+    return map;
+  }
+
+  // compute portfolio ROI data
+  function computeROIData() {
+    const investor = loadInvestor();
+    const companies = getCompaniesLight();
+
+    // transactions buy summary
+    const buySummary = buildBuySummary(investor.transactions || []);
+
+    let totalInvested = 0;
+    let currentValue = 0;
+    let totalUnrealized = 0;
+    const rows = [];
+
+    // For realized P/L, use sell transactions and allocate cost basis using average buy price per symbol
+    let realizedPL = 0;
+    const sellTx = (investor.transactions || []).filter(t => t.type && t.type.toLowerCase() === 'sell');
+
+    // compute realized using average buy cost per symbol
+    const avgBuyCostPerSymbol = {};
+    Object.keys(buySummary).forEach(sym => {
+      const s = buySummary[sym];
+      avgBuyCostPerSymbol[sym] = s.boughtShares > 0 ? (s.boughtCost / s.boughtShares) : 0;
+    });
+
+    sellTx.forEach(s => {
+      const shares = Number(s.shares || s.qty || 0);
+      const proceeds = Number(s.proceeds || s.amount || s.price * shares || 0);
+      const avgCost = avgBuyCostPerSymbol[s.symbol] || 0;
+      const costOfSold = shares * avgCost;
+      realizedPL += (proceeds - costOfSold);
+    });
+
+    // iterate investments to compute per-holding ROI
+    (investor.investments || []).forEach(inv => {
+      const symbol = inv.symbol;
+      const shares = Number(inv.shares || inv.qty || inv.qtyOwned || inv.qty || inv.amount && 0); // fallback
+      // cost basis: prefer transaction-based summary; else use inv.invested/amount/avgPrice
+      let costBasis = 0;
+      if (buySummary[symbol] && buySummary[symbol].boughtShares > 0) {
+        // take cost proportionally to holdings (if more buys than current holdings, we assume average)
+        const avgBuy = buySummary[symbol].boughtCost / Math.max(1, buySummary[symbol].boughtShares);
+        costBasis = avgBuy * shares;
+      } else if (inv.invested) {
+        costBasis = Number(inv.invested || 0);
+      } else if (inv.amount && inv.amount > 0 && inv.shares) {
+        // if inv.amount is per-share or total? prefer treating amount as total invested if shares present
+        // attempt: if amount > shares, treat as total invested; if amount <= plausible single-share price, fallback
+        if (Number(inv.amount) / Math.max(1, shares) > 0.001) {
+          // treat amount as total invested
+          costBasis = Number(inv.amount || 0);
+        } else {
+          costBasis = (Number(inv.amount || 0) * shares);
+        }
+      } else if (inv.avgPrice) {
+        costBasis = Number(inv.avgPrice) * shares;
+      } else {
+        // last fallback: 0
+        costBasis = 0;
+      }
+
+      const cmp = companies.find(c => c.symbol === symbol) || { sharePrice: inv.avgPrice || 0, name: symbol };
+      const price = Number(cmp.sharePrice || 0);
+      const value = price * shares;
+      const pl = value - costBasis;
+      const roiPct = costBasis > 0 ? (pl / costBasis) : (pl > 0 ? Infinity : 0);
+
+      totalInvested += costBasis;
+      currentValue += value;
+      totalUnrealized += pl;
+
+      rows.push({
+        symbol,
+        name: cmp.name || symbol,
+        shares,
+        costBasis,
+        price,
+        value,
+        pl,
+        roiPct
+      });
+    });
+
+    const totalNet = currentValue + Number(investor.wallet || 0);
+    const totalPL = totalUnrealized + realizedPL;
+    const portfolioROI = totalInvested > 0 ? (totalPL / totalInvested) : 0;
+
+    return {
+      investor,
+      rows,
+      totals: {
+        totalInvested,
+        currentValue,
+        totalPL,
+        realizedPL,
+        unrealizedPL: totalUnrealized,
+        portfolioROI,
+        totalNet
+      }
+    };
+  }
+
+  // render ROI table and summary
+  function renderROI() {
+    const data = computeROIData();
+    const totals = data.totals;
+
+    pvStat.innerText = fmtMoney(totals.totalNet);
+    roiStat.innerText = `ROI: ${ (totals.portfolioROI === Infinity) ? '∞' : ( (totals.portfolioROI*100).toFixed(2) + '%' ) } (Realized: ${fmtMoney(totals.realizedPL)})`;
+
+    // table
+    roiTbody.innerHTML = '';
+    if (!data.rows.length) {
+      roiTbody.innerHTML = '<tr><td colspan="6" class="muted">No holdings to show ROI for.</td></tr>';
+    } else {
+      data.rows.forEach(r => {
+        const roiLabel = r.roiPct === Infinity ? '∞' : ((r.roiPct*100).toFixed(2) + '%');
+        const plColor = r.pl >= 0 ? 'var(--success)' : 'var(--danger)';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><strong>${escapeHtml(r.symbol)}</strong><div class="small muted">${escapeHtml(r.name || '')}</div></td>
+                        <td>${r.shares}</td>
+                        <td>${fmtMoney(r.costBasis)}</td>
+                        <td>${fmtMoney(r.value)}</td>
+                        <td style="color:${plColor}">${fmtMoney(r.pl)}</td>
+                        <td>${roiLabel}</td>`;
+        roiTbody.appendChild(tr);
+      });
+    }
+
+    // realized box
+    realizedBox.innerText = `Realized profit/loss (from sell transactions): ${fmtMoney(totals.realizedPL)}. Unrealized P/L: ${fmtMoney(totals.unrealizedPL)}. Total Invested: ${fmtMoney(totals.totalInvested)}.`;
+
+    // charts
+    renderValueChart();
+    renderROIPerCompany(data.rows);
+  }
+
+  // render portfolio value history chart
+  function renderValueChart() {
+    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    const labels = hist.map(h => new Date(h.timestamp).toLocaleTimeString());
+    const data = hist.map(h => Number(h.totalValue || h.totalNet || 0));
+
+    if (valueChart) valueChart.destroy();
+    valueChart = new Chart(valueCtx, {
+      type: 'line',
+      data: { labels, datasets: [{ label: 'Portfolio Value', data, borderColor: 'rgba(29,78,216,0.95)', tension:0.25, fill:false }] },
+      options: { responsive:true, maintainAspectRatio:false, scales: { y:{ title:{ display:true, text:'₹ Value' } } } }
+    });
+  }
+
+  // render ROI per company bar chart
+  function renderROIPerCompany(rows) {
+    const labels = rows.map(r => r.symbol);
+    const data = rows.map(r => (r.roiPct === Infinity ? 0 : r.roiPct*100));
+    if (barChart) barChart.destroy();
+    barChart = new Chart(barCtx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'ROI %', data }] },
+      options: { responsive:true, maintainAspectRatio:false, scales: { y: { title: { display:true, text:'ROI (%)' } } } }
+    });
+  }
+
+  // export CSV for ROI details + history
+  exportBtn.addEventListener && exportBtn.addEventListener('click', () => {
+    const data = computeROIData();
+    const rows = [['Symbol','Name','Qty','CostBasis','CurrentValue','P/L','ROI%']];
+    data.rows.forEach(r => rows.push([r.symbol, r.name, r.shares, r.costBasis, r.value, r.pl, r.roiPct === Infinity ? '∞' : (r.roiPct*100).toFixed(2)]));
+    rows.push([]);
+    rows.push(['Totals','', '', data.totals.totalInvested, data.totals.currentValue, data.totals.totalPL, data.totals.portfolioROI*100]);
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `roi_${username}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  // refresh loop
+  function init() {
+    // ensure portfolio history exists
+    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    if (!hist || hist.length === 0) {
+      // seed with current portfolio totalNet if not present
+      const inv = loadInvestor();
+      const comp = getCompaniesLight();
+      // compute current totalNet: wallet + holdings value (simple)
+      let totalValue = 0;
+      (inv.investments || []).forEach(i => {
+        const cmp = comp.find(c => c.symbol === i.symbol) || { sharePrice: i.avgPrice || 0 };
+        const qty = Number(i.shares || i.qty || i.qtyOwned || 0);
+        totalValue += qty * Number(cmp.sharePrice || 0);
+      });
+      const totalNet = totalValue + Number(inv.wallet || 0);
+      const point = { timestamp: now(), totalNet, totalValue };
+      const arr = [];
+      arr.push(point);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(arr));
+    }
+
+    renderROI();
+    // periodic refresh (update charts & numbers)
+    setInterval(renderROI, 4500);
+    // also attempt to start companies engine if present
+    if (window.CCCompaniesEngine && typeof CCCompaniesEngine.startCompaniesMarket === 'function') {
+      try { CCCompaniesEngine.startCompaniesMarket(); } catch(e){ /*ignore*/ }
+    }
+  }
+
+  // expose helper to recompute immediately
+  window.__roi_debug = { computeROIData };
+
+  init();
+
+})();
+</script>
+</body>
+</html>

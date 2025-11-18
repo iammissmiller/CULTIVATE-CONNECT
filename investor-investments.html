@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cultivate Connect — My Investments</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Make sure these are present -->
+  <script src="companies.js"></script>
+  <script src="companiesEngine.js"></script>
+
+  <style>
+    :root{
+      --primary:#1d4ed8;
+      --bg:#f7f8fb;
+      --card:#fff;
+      --muted:#6b7280;
+      --success:#16a34a;
+      --danger:#ef4444;
+    }
+    body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial; margin:0; background:var(--bg); color:#111}
+    .wrap{max-width:1150px;margin:22px auto;padding:18px}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .title{display:flex;gap:12px;align-items:center}
+    h1{margin:0;color:var(--primary)}
+    .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 20px rgba(11,15,30,0.04)}
+    .row{display:flex;gap:12px;align-items:center}
+    .small{color:var(--muted);font-size:13px}
+    .stat{font-size:20px;font-weight:700}
+    .grid{display:grid;grid-template-columns: 1fr 400px; gap:18px}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left;font-size:14px}
+    .btn{padding:8px 10px;border-radius:8px;border:1px solid #e6edf8;background:white;cursor:pointer}
+    .btn-primary{background:var(--primary);color:white;border:none}
+    .btn-danger{background:var(--danger);color:white;border:none}
+    .controls{display:flex;gap:8px;align-items:center}
+    .muted{color:var(--muted)}
+    .chart-box {
+  width: 100%;
+  height: 260px;         /* fixes infinite growth */
+  position: relative;    /* required by Chart.js */
+}
+
+.chart-box canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} canvas{height:260px!important} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="title">
+        <i class="fas fa-wallet" style="font-size:28px;color:var(--primary)"></i>
+        <div>
+          <h1>My Investments</h1>
+          <div class="small">Personal portfolio — live prices & real data</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div style="text-align:right">
+          <div class="small">Wallet</div>
+          <div id="walletStat" class="stat">₹ 0.00</div>
+        </div>
+        <button class="btn" id="btnAddFunds">Add Funds</button>
+        <button class="btn" id="btnRefresh">Refresh</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: holdings + activity -->
+      <div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Portfolio Value</div>
+              <div id="portfolioValue" class="stat">₹ 0.00</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Unrealized P/L</div>
+              <div id="portfolioPL" class="stat muted">₹ 0.00</div>
+            </div>
+          </div>
+
+          <hr style="margin:12px 0">
+
+          <h4 style="margin:8px 0">Holdings</h4>
+          <table id="holdingsTable">
+            <thead>
+              <tr><th>Company</th><th>Qty</th><th>Price</th><th>Value</th><th>P/L</th><th>Actions</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+
+          <div style="margin-top:12px" class="small muted">
+            Note: All values use live prices from the market engine.
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4 style="margin-bottom:8px">Recent Transactions</h4>
+          <table id="txTable">
+            <thead><tr><th>Time</th><th>Type</th><th>Company</th><th>Qty</th><th>Price</th><th>Amount</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RIGHT: charts & details -->
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Portfolio Trend</div>
+              <div class="muted">Value over time (local history)</div>
+            </div>
+            <div>
+              <button class="btn" id="btnExportCSV">Export CSV</button>
+            </div>
+<div class="chart-box" style="margin-top:12px">
+  <div class="chart-box">
+  <canvas id="portfolioPieChart"></canvas>
+</div>
+
+</div>
+
+
+        <div class="card">
+          <h4 style="margin-bottom:8px">Portfolio Distribution</h4>
+          <canvas id="portfolioPieChart" style="width:100%;height:260px"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Funds Modal -->
+  <div id="fundsModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:9999">
+    <div style="width:360px;background:white;padding:18px;border-radius:12px;">
+      <h3 style="margin-top:0">Add Funds</h3>
+      <div class="small muted">Deposit money to your wallet (local only)</div>
+      <div style="margin-top:12px">
+        <input id="addFundsAmt" type="number" min="1" value="1000" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ddd">
+      </div>
+      <div style="text-align:right;margin-top:12px">
+        <button class="btn" onclick="closeFundsModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmAddFunds()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sell Modal -->
+  <div id="sellModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:9999">
+    <div style="width:360px;background:white;padding:18px;border-radius:12px;">
+      <h3 id="sellTitle" style="margin-top:0">Sell Shares</h3>
+      <div class="small muted">Company: <strong id="sellCompany"></strong></div>
+      <div style="margin-top:8px" class="small">Current Price: ₹<span id="sellPrice">0</span></div>
+      <div style="margin-top:12px">
+        <label>Quantity</label>
+        <input id="sellQty" type="number" min="1" value="1" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ddd">
+      </div>
+      <div id="sellTotal" style="margin-top:8px;font-weight:700"></div>
+      <div style="text-align:right;margin-top:12px">
+        <button class="btn" onclick="closeSellModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmSell()">Sell</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* Investments page — personal portfolio (real data)
+   - Reads cc_user_data_investor_<username>
+   - Uses CCCompaniesEngine for live prices (if available)
+   - Keeps portfolio history in cc_portfolio_history_<username>
+*/
+
+(function(){
+  // --- helpers
+  const CHART_HISTORY_LIMIT = 200;
+  const REFRESH_MS = 4500;
+
+  function qs(sel){ return document.querySelector(sel); }
+  function qsa(sel){ return Array.from(document.querySelectorAll(sel)); }
+  function now(){ return Date.now(); }
+  function fmtMoney(x){ return '₹ ' + Number(x || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function numberWithCommas(x){ return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+
+  // active user check
+  const active = JSON.parse(localStorage.getItem('cc_active_user') || 'null');
+  if (!active || active.role !== 'investor') {
+    alert('Unauthorized — please login as an investor.');
+    window.location.href = 'Index.html';
+    return;
+  }
+  const username = active.username;
+
+  // DOM
+  const walletStat = qs('#walletStat');
+  const portfolioValueEl = qs('#portfolioValue');
+  const portfolioPLEl = qs('#portfolioPL');
+  const holdingsTbody = qs('#holdingsTable tbody');
+  const txTbody = qs('#txTable tbody');
+  const btnRefresh = qs('#btnRefresh');
+  const btnAddFunds = qs('#btnAddFunds');
+  const fundsModal = qs('#fundsModal');
+  const addFundsAmt = qs('#addFundsAmt');
+  const portfolioTrendCtx = qs('#portfolioTrendChart').getContext('2d');
+  const portfolioPieCtx = qs('#portfolioPieChart').getContext('2d');
+  const btnExportCSV = qs('#btnExportCSV');
+
+  // sell modal
+  const sellModal = qs('#sellModal');
+  const sellCompanyEl = qs('#sellCompany');
+  const sellPriceEl = qs('#sellPrice');
+  const sellQtyEl = qs('#sellQty');
+  const sellTotalEl = qs('#sellTotal');
+
+  // history storage key
+  const HISTORY_KEY = `cc_portfolio_history_${username}`;
+
+  // charts
+  let trendChart = null;
+  let pieChart = null;
+
+  // ensure investor data exists (fallback)
+  function ensureInvestorData() {
+    const key = `cc_user_data_${username}`;
+    let data = JSON.parse(localStorage.getItem(key) || 'null');
+    if (!data) {
+      data = { role:'investor', wallet: 50000, investments: [], transactions: [] };
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+    if (!Array.isArray(data.investments)) data.investments = [];
+    if (!Array.isArray(data.transactions)) data.transactions = [];
+    localStorage.setItem(key, JSON.stringify(data));
+    return data;
+  }
+
+  // get live companies (light)
+  function getCompaniesLight(){
+    if (window.CCCompaniesEngine && typeof CCCompaniesEngine.getCompanies === 'function') {
+      return CCCompaniesEngine.getCompanies();
+    }
+    // fallback: read from localStorage if companies master present
+    try {
+      const raw = localStorage.getItem('cc_companies_master');
+      return raw ? JSON.parse(raw).map(c=>({ symbol:c.symbol, name:c.name, sharePrice:c.sharePrice })) : [];
+    } catch(e){ return []; }
+  }
+
+  // compute portfolio using live prices
+  function computePortfolio() {
+    const key = `cc_user_data_${username}`;
+    const user = JSON.parse(localStorage.getItem(key) || '{}');
+    const investments = user.investments || [];
+    const companies = getCompaniesLight();
+
+    let wallet = Number(user.wallet || 0);
+    let holdings = [];
+    let totalValue = 0;
+    let totalInvested = 0;
+    investments.forEach(inv => {
+      const cmp = companies.find(c => c.symbol === inv.symbol) || { sharePrice: inv.avgPrice || 0, name: inv.symbol };
+      const price = Number(cmp.sharePrice || inv.avgPrice || 0);
+      const qty = Number(inv.shares || inv.qty || inv.qtyOwned || 0);
+      const value = price * qty;
+      const invested = Number(inv.invested || inv.amount || (inv.avgPrice ? inv.avgPrice * qty : 0));
+      totalValue += value;
+      totalInvested += invested;
+      holdings.push({
+        symbol: inv.symbol,
+        name: cmp.name || inv.symbol,
+        qty,
+        price,
+        value,
+        invested,
+        profit: value - invested
+      });
+    });
+
+    const unrealizedPL = totalValue - totalInvested;
+    const totalNet = wallet + totalValue;
+
+    return { wallet, holdings, totalValue, unrealizedPL, totalInvested, totalNet, transactions: user.transactions || [] };
+  }
+
+  // persist portfolio history point
+  function pushPortfolioHistory(point) {
+    try {
+      const arrRaw = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      arrRaw.push(point);
+      if (arrRaw.length > CHART_HISTORY_LIMIT) arrRaw.splice(0, arrRaw.length - CHART_HISTORY_LIMIT);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(arrRaw));
+    } catch(e){}
+  }
+
+  function getPortfolioHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e){ return []; }
+  }
+
+  // render holdings table
+  function renderHoldings() {
+    const p = computePortfolio();
+    walletStat.innerText = fmtMoney(p.wallet);
+    portfolioValueEl.innerText = fmtMoney(p.totalValue);
+    portfolioPLEl.innerText = (p.unrealizedPL >= 0 ? '₹ ' + p.unrealizedPL.toFixed(2) : '₹ ' + p.unrealizedPL.toFixed(2));
+    portfolioPLEl.style.color = p.unrealizedPL >= 0 ? 'var(--success)' : 'var(--danger)';
+
+    holdingsTbody.innerHTML = '';
+    if (!p.holdings.length) {
+      holdingsTbody.innerHTML = '<tr><td colspan="6" class="muted">You have no holdings yet.</td></tr>';
+    } else {
+      p.holdings.forEach(h => {
+        const plColor = h.profit >= 0 ? 'var(--success)' : 'var(--danger)';
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong>${escapeHtml(h.symbol)}</strong><div class="small muted">${escapeHtml(h.name || '')}</div></td>
+          <td>${h.qty}</td>
+          <td>${fmtMoney(h.price)}</td>
+          <td>${fmtMoney(h.value)}</td>
+          <td style="color:${plColor}">${fmtMoney(h.profit)}</td>
+          <td>
+            <button class="btn" onclick="openSellModal('${h.symbol}')">Sell</button>
+          </td>
+        `;
+        holdingsTbody.appendChild(row);
+      });
+    }
+
+    renderTransactions(p.transactions);
+    updateCharts(p);
+  }
+
+  // transactions table
+  function renderTransactions(txnList) {
+    txTbody.innerHTML = '';
+    if (!txnList || txnList.length === 0) {
+      txTbody.innerHTML = '<tr><td colspan="6" class="muted">No transactions yet.</td></tr>';
+      return;
+    }
+    // show latest first
+    const list = txnList.slice().reverse();
+    list.forEach(t => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${new Date(t.date).toLocaleString()}</td>
+        <td>${escapeHtml(t.type || '')}</td>
+        <td>${escapeHtml(t.symbol || '')}</td>
+        <td>${Number(t.shares || t.qty || 0)}</td>
+        <td>${fmtMoney(t.price || 0)}</td>
+        <td>${fmtMoney(t.cost || t.proceeds || 0)}</td>`;
+      txTbody.appendChild(tr);
+    });
+  }
+
+  // charts
+  function updateCharts(portData) {
+    // trend chart: use stored history, ensure latest point exists
+    const hist = getPortfolioHistory();
+    // if last snapshot is not recent, append current
+    const last = hist[hist.length - 1];
+    const nowPoint = { timestamp: now(), totalValue: portData.totalNet };
+    if (!last || Math.abs(nowPoint.totalValue - last.totalValue) > 0.01) {
+      // push to history (but keep frequency reasonable)
+      pushPortfolioHistory(nowPoint);
+    }
+
+    const history = getPortfolioHistory();
+    const labels = history.map(h => new Date(h.timestamp).toLocaleTimeString());
+    const data = history.map(h => Number(h.totalValue.toFixed(2)));
+
+    if (trendChart) trendChart.destroy();
+    trendChart = new Chart(portfolioTrendCtx, {
+      type: 'line',
+      data: { labels, datasets: [{ label: 'Total Value', data, borderColor: 'rgba(29,78,216,0.95)', tension:0.2, fill:false }] },
+      options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ title:{display:true,text:'₹ Value'} } } }
+    });
+
+    // pie chart distribution
+    const labelsPie = portData.holdings.map(h => h.symbol);
+    const valuesPie = portData.holdings.map(h => Number(h.value.toFixed(2)));
+    if (pieChart) pieChart.destroy();
+    pieChart = new Chart(portfolioPieCtx, {
+      type: 'pie',
+      data: { labels: labelsPie, datasets: [{ data: valuesPie }] },
+      options: { responsive:true, maintainAspectRatio:false }
+    });
+  }
+
+  // Sell modal logic
+  window.openSellModal = function(symbol) {
+    const p = computePortfolio();
+    const holding = p.holdings.find(h => h.symbol === symbol);
+    if (!holding) { alert('No holding found for ' + symbol); return; }
+    sellCompanyEl.innerText = symbol;
+    sellPriceEl.innerText = holding.price.toFixed(2);
+    sellQtyEl.value = Math.max(1, Math.floor(holding.qty));
+    sellQtyEl.max = Math.max(1, Math.floor(holding.qty));
+    updateSellTotal();
+    sellModal.style.display = 'flex';
+  };
+
+  function closeSellModal(){ sellModal.style.display = 'none'; }
+  window.closeSellModal = closeSellModal;
+
+  function updateSellTotal(){
+    const qty = Number(sellQtyEl.value || 0);
+    const price = Number(sellPriceEl.innerText || 0);
+    sellTotalEl.innerText = 'Total: ' + fmtMoney(qty * price);
+  }
+  sellQtyEl.addEventListener('input', updateSellTotal);
+
+  // confirm sell uses engine if available (preferred), else manual
+  window.confirmSell = function() {
+    const qty = Number(sellQtyEl.value || 0);
+    const symbol = sellCompanyEl.innerText;
+    if (qty <= 0) return alert('Invalid quantity');
+
+    const investorKey = `cc_user_data_${username}`;
+    let user = JSON.parse(localStorage.getItem(investorKey) || '{}');
+    user.investments = user.investments || [];
+    user.transactions = user.transactions || [];
+
+    const holding = user.investments.find(i => i.symbol === symbol && (i.shares || i.qty || i.qtyOwned));
+    if (!holding) return alert('Holding not found');
+    const available = Number(holding.shares || holding.qty || holding.qtyOwned || 0);
+    if (qty > available) return alert('Not enough shares');
+
+    // price from engine or fallback
+    const cmp = getCompaniesLight().find(c=>c.symbol===symbol);
+    const price = Number(cmp ? cmp.sharePrice : (holding.avgPrice || 0));
+
+    // attempt engine sell
+    if (window.CCCompaniesEngine && typeof CCCompaniesEngine.sellShares === 'function') {
+      const res = CCCompaniesEngine.sellShares(username, symbol, { shares: qty });
+      if (res && res.success) {
+        // engine adjusts wallet/investments; we still refresh UI
+        // but ensure transactions present — engine may or may not record them; we also add record
+        user = JSON.parse(localStorage.getItem(investorKey) || '{}');
+        user.transactions = user.transactions || [];
+        user.transactions.push({ id: 'TR' + Math.floor(Math.random()*1e9), symbol, type:'sell', shares: qty, price, proceeds: Number((qty*price).toFixed(2)), date: now() });
+        localStorage.setItem(investorKey, JSON.stringify(user));
+      } else {
+        // engine returned failure - fallback to manual update
+        manualSellFallback(user, holding, qty, price);
+      }
+    } else {
+      // manual fallback
+      manualSellFallback(user, holding, qty, price);
+    }
+
+    closeSellModal();
+    renderHoldings();
+  };
+
+  function manualSellFallback(user, holding, qty, price) {
+    // reduce shares
+    holding.shares = Number((Number(holding.shares || holding.qty || 0) - qty).toFixed(6));
+    if (holding.shares <= 0) {
+      user.investments = (user.investments || []).filter(i => i.symbol !== holding.symbol);
+    }
+    const proceeds = Number((qty * price).toFixed(2));
+    user.wallet = Number((Number(user.wallet || 0) + proceeds).toFixed(2));
+    user.transactions = user.transactions || [];
+    user.transactions.push({ id: 'TR' + Math.floor(Math.random()*1e9), symbol: holding.symbol, type:'sell', shares: qty, price, proceeds, date: now() });
+    localStorage.setItem(`cc_user_data_${username}`, JSON.stringify(user));
+  }
+
+  // Add funds logic
+  btnAddFunds.addEventListener('click', ()=> { fundsModal.style.display = 'flex'; });
+  window.closeFundsModal = function(){ fundsModal.style.display = 'none'; };
+  window.confirmAddFunds = function() {
+    const amt = Number(addFundsAmt.value || 0);
+    if (amt <= 0) return alert('Invalid amount');
+    const key = `cc_user_data_${username}`;
+    const user = ensureInvestorData();
+    user.wallet = Number((Number(user.wallet || 0) + amt).toFixed(2));
+    localStorage.setItem(key, JSON.stringify(user));
+    closeFundsModal();
+    renderHoldings();
+  };
+
+  // export CSV
+  btnExportCSV.addEventListener('click', ()=> {
+    const p = computePortfolio();
+    const rows = [['Symbol','Name','Qty','Price','Value','Invested','Profit']];
+    p.holdings.forEach(h => rows.push([h.symbol, h.name, h.qty, h.price, h.value, h.invested, h.profit]));
+    if (rows.length === 1) return alert('No holdings to export');
+    const csv = rows.map(r=> r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `portfolio_${username}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  // refresh handler
+  btnRefresh.addEventListener('click', ()=> renderHoldings());
+
+  // utility escape
+  function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // initialization & periodic update
+  function init() {
+    ensureInvestorData();
+    // start engine if available
+    if (window.CCCompaniesEngine && typeof CCCompaniesEngine.startCompaniesMarket === 'function') {
+      try { CCCompaniesEngine.startCompaniesMarket(); } catch(e){ console.warn(e); }
+    }
+    // seed history if empty
+    const hist = getPortfolioHistory();
+    if (!hist || hist.length === 0) {
+      const p = computePortfolio();
+      pushPortfolioHistory({ timestamp: now(), totalValue: p.totalNet });
+    }
+    // initial render
+    renderHoldings();
+    // periodic refresh
+    setInterval(() => {
+      renderHoldings();
+    }, REFRESH_MS);
+  }
+
+  // run init
+  init();
+
+  // expose some helpers for debugging
+  window.__investments_debug = { computePortfolio, getPortfolioHistory, pushPortfolioHistory };
+
+})();
+</script>
+</body>
+</html>

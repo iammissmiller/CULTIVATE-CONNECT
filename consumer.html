@@ -918,7 +918,7 @@ function renderStaticConsumerDashboard(root, user) {
       </div>
 
       <nav class="nav-bar">
-        <a href="buyconsumer.html" class="active">Buy Products</a>
+        <a href="buyconsumer.html">Browse Products</a>
         <a href="tip.html">Tips</a>
         <a href="consumerawareness.html">Awareness</a>
         <a href="consumerFAQ.html">FAQ</a>
@@ -939,7 +939,7 @@ function renderStaticConsumerDashboard(root, user) {
         </p>
       </section>
 
-      <div class="tools-grid">
+<div class="tools-grid">
   ${toolCard("buyconsumer.html", "fas fa-shopping-basket", "Buy Products")}
   ${toolCard("tip.html", "fas fa-lightbulb", "Tips")}
   ${toolCard("consumerawareness.html", "fas fa-bullhorn", "Awareness")}
@@ -957,7 +957,7 @@ function renderStaticConsumerDashboard(root, user) {
 // --------------------------------------
 // UI BUILDERS
 // --------------------------------------
-function toolCard(link, icon, label) {
+function toolCard(link, icon, label,disabled = false) {
   return `
     <a href="${link}" class="tool-card disabled-link">
       <i class="${icon}"></i>

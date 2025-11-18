@@ -6,1165 +6,802 @@
   <title>Buying Panel — Cultivate Connect</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
   <style>
-:root{
-  --bg: #F7EFC2;
-  --card: #E7D7A7;
-  --card-2: #FFF7E8;
-  --accent: #C2A875;
-  --accent-dark: #B8945B;
-  --muted: #6b5b3a;
-  --soft: rgba(194,168,117,0.10);
-  --glass: rgba(255,255,255,0.65);
-  --radius: 12px;
-  --shadow-sm: 0 6px 18px rgba(34,34,34,0.06);
-  --shadow-md: 0 10px 30px rgba(34,34,34,0.08);
-  --gap: 16px;
-  --text-dark: #4a3f29;
-  --sidebar-collapsed: 76px;
-  --sidebar-expanded: 260px;
-  font-family: Inter, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  box-sizing: border-box;
-}
+    :root{
+      --bg: #F7EFC2;
+      --card: #E7D7A7;
+      --card-2: #FFF7E8;
+      --accent: #C2A875;
+      --accent-dark: #B8945B;
+      --muted: #6b5b3a;
+      --soft: rgba(194,168,117,0.10);
+      --glass: rgba(255,255,255,0.65);
+      --radius: 12px;
+      --shadow-sm: 0 6px 18px rgba(34,34,34,0.06);
+      --shadow-md: 0 10px 30px rgba(34,34,34,0.08);
+      --gap: 16px;
+      --text-dark: #4a3f29;
+      font-family: Inter, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+      box-sizing: border-box;
+    }
+    *{box-sizing:inherit}
+    html,body{height:100%; margin:0; padding:0; background:linear-gradient(180deg,#fff 0%,var(--bg) 100%); color:var(--muted); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; font-size:15px; line-height:1.45;}
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block;border-radius:8px}
 
-/* reset */
-*{box-sizing:inherit}
-html,body{height:100%; margin:0; padding:0; background:linear-gradient(180deg,#fff 0%,var(--bg) 100%); color:var(--muted); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; font-size:15px; line-height:1.45;}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block;border-radius:8px}
-
-/* app layout */
-.app{display:flex; min-height:100vh; gap:var(--gap); align-items:flex-start;}
-.sidebar{
-  position:fixed;
-  left:0; top:0; bottom:0;
-  width:var(--sidebar-collapsed);
-  padding:18px 10px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.75));
-  border-right:1px solid rgba(167,133,63,0.06);
-  box-shadow:var(--shadow-sm);
-  z-index:1200;
-  transition: width .28s cubic-bezier(.2,.9,.2,1), box-shadow .2s;
-  display:flex; flex-direction:column; align-items:center;
-  overflow:visible;
-}
-
-/* expanded state overlays, does NOT push .main */
-.sidebar.expanded{
-  width:var(--sidebar-expanded);
-  box-shadow: 0 20px 60px rgba(34,34,34,0.12);
-  backdrop-filter: blur(6px);
-}
-
-/* brand */
-.brand{width:100%; display:flex; align-items:center; gap:12px; padding:6px 8px; margin-bottom:14px;}
-.logo{width:46px; height:46px; border-radius:10px; background:linear-gradient(135deg,var(--accent) 0%, var(--accent-dark) 100%); display:inline-flex; align-items:center; justify-content:center; color:white; font-weight:700; box-shadow: 0 6px 18px rgba(168,133,64,0.12); flex-shrink:0;}
-.brand-title{display:none; color:var(--muted); font-weight:700; font-size:16px;}
-
-/* nav */
-.nav{width:100%; margin-top:6px; display:flex; flex-direction:column; gap:8px;}
-.nav-item{display:flex; align-items:center; gap:12px; width:100%; padding:10px; border-radius:10px; color:var(--muted); transition:background .15s, transform .12s; cursor:pointer;}
-.nav-item .icon{width:40px; height:40px; display:inline-grid; place-items:center; background:var(--card-2); border-radius:9px; color:var(--accent-dark); font-size:18px; flex-shrink:0;}
-.nav-item .label{display:none; font-weight:600; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:calc(var(--sidebar-expanded) - 80px);}
-
-/* When sidebar expanded, show labels */
-.sidebar.expanded .brand-title,
-.sidebar.expanded .nav-item .label,
-.sidebar.expanded .sidebar-footer .user-meta{
-  display:block;
-}
-
-/* active nav */
-.nav-item:hover{background:var(--soft); transform:translateY(-2px);}
-.nav-item.active{ background:linear-gradient(90deg, rgba(194,168,117,0.12), rgba(194,168,117,0.06)); border-left:4px solid var(--accent); padding-left:8px; }
-
-/* footer & avatar */
-.sidebar-footer{margin-top:auto; width:100%; display:flex; gap:8px; align-items:center; padding:8px;}
-.avatar{width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#fff,#FFF7E8);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent-dark);box-shadow:0 6px 14px rgba(0,0,0,0.04);}
-.user-meta{display:none; font-size:13px; color:var(--muted); font-weight:600;}
-
-/* main area (leaves fixed gap for sidebar) */
-.main{margin-left:var(--sidebar-collapsed); padding:28px; width:100%; transition:margin-left .28s ease;}
-
-/* header */
-header.main-header{display:flex; justify-content:space-between; gap:18px; align-items:center; margin-bottom:18px; position:relative;}
-.page-title{font-size:20px; font-weight:800; color:var(--accent-dark); letter-spacing:.2px;}
-.page-sub{color:#604d33; opacity:.9; font-size:13px; margin-top:6px;}
-.header-actions{display:flex; gap:12px; align-items:center;}
-.search{display:flex; gap:8px; align-items:center; background:var(--card-2); padding:8px 10px; border-radius:999px; box-shadow:var(--shadow-sm);}
-
-/* allow header-search to shrink on small screens */
-.search input{border:0; background:transparent; outline:none; width:280px; font-size:14px; color:var(--muted); min-width:80px;}
-.header-actions .mobile-toggle{display:none; background:transparent; border:0; font-size:20px; cursor:pointer;}
-
-/* buttons */
-.btn{border:0; cursor:pointer; padding:10px 14px; border-radius:10px; font-weight:700; background:linear-gradient(90deg,var(--accent) 0%, var(--accent-dark) 100%); color:white; box-shadow:var(--shadow-sm);}
-.btn.ghost{background:transparent; border:1px solid rgba(130,100,60,0.07); color:var(--muted); font-weight:600;}
-.btn-primary-wide{display:block; padding:12px; border-radius:10px; width:100%; background:linear-gradient(90deg,var(--accent) 0%, var(--accent-dark) 100%); color:white; border:none; font-weight:800; cursor:pointer;}
-
-/* grid layout */
-.grid{display:grid; gap:18px; grid-template-columns: 1fr 360px; align-items:start;}
-.left-column{display:grid; gap:18px;}
-.right-column{display:grid; gap:18px;}
-
-/* card base */
-.card{background:linear-gradient(180deg,var(--card) 0%, var(--card-2) 100%); padding:18px; border-radius:var(--radius); box-shadow:var(--shadow-md); border:1px solid rgba(167,133,63,0.06); color:var(--text-dark);}
-
-/* buying panel */
-.buying-panel-inner{background:transparent; padding:0; box-shadow:none; border-radius:0;}
-.filter-options{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid rgba(0,0,0,0.04);}
-.filter-group{display:flex; flex-direction:column; gap:6px; min-width:160px; flex:1 1 160px;}
-.filter-group label{font-size:0.9rem; color:var(--muted); font-weight:600;}
-.filter-group select, .filter-group input{padding:10px 12px; border:1px solid rgba(0,0,0,0.06); border-radius:8px; font-size:0.95rem; background:rgba(255,255,255,0.9); width:100%;}
-
-/* search-sort */
-.search-sort-container{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; gap:12px; flex-wrap:wrap;}
-.search-box{position:relative; width:100%; max-width:420px;}
-.search-box input{width:100%; padding:10px 15px 10px 40px; border:1px solid rgba(0,0,0,0.06); border-radius:8px; font-size:0.95rem; background:white;}
-.search-box i{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted);}
-
-/* products grid: responsive, stable card heights */
-.products-grid{
-  display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap:18px;
-}
-
-/* card layout improved */
-.product-card{
-  background: linear-gradient(180deg,#fff 0%, var(--card-2) 100%);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: transform .25s, box-shadow .25s;
-  position: relative;
-  border:1px solid rgba(0,0,0,0.03);
-  display:flex;
-  flex-direction:column;
-  min-height: 360px; /* consistent baseline height */
-}
-.product-card:hover{ transform: translateY(-6px); box-shadow: var(--shadow-md); }
-
-/* image uses aspect-ratio for better cropping */
-.product-img{aspect-ratio: 16 / 10; width:100%; overflow:hidden; background:linear-gradient(180deg,#faf3da,#fff);}
-.product-img img{width:100%; height:100%; object-fit:cover; transition: transform .45s;}
-.product-card:hover .product-img img{ transform:scale(1.05); }
-
-/* info area uses flex to push actions to bottom */
-.product-info{padding:14px 16px; display:flex; flex-direction:column; gap:10px; flex:1;}
-.product-info h3{margin:0 0 4px; font-size:1.05rem; color:var(--text-dark);}
-.farmer{color:#7a6442; font-size:0.9rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;}
-.product-description{font-size:0.9rem; color:#6b5b3a; line-height:1.4; flex:1; overflow:hidden; text-overflow:ellipsis;}
-.price{font-weight:700; color:var(--accent-dark); font-size:1.15rem;}
-.product-meta{display:flex; justify-content:flex-start; gap:12px; font-size:0.82rem; color:#7a6442;}
-.product-actions{display:flex; gap:10px; margin-top:8px;}
-.add-to-cart{flex:1; padding:10px; background:linear-gradient(90deg,var(--accent) 0%, var(--accent-dark) 100%); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700;}
-.view-details{padding:10px 14px; background:transparent; border:1px solid rgba(0,0,0,0.06); color:var(--accent-dark); border-radius:8px; cursor:pointer; font-weight:700;}
-
-/* badges */
-.product-badge{position:absolute; top:12px; left:12px; background:var(--accent); color:white; padding:6px 10px; border-radius:8px; font-size:0.8rem; font-weight:600; z-index:2;}
-
-/* pagination */
-.pagination{display:flex; justify-content:center; margin-top:18px; gap:8px;}
-.pagination button{padding:8px 12px; border:1px solid rgba(0,0,0,0.06); background:white; border-radius:8px; cursor:pointer;}
-.pagination button.active{background:var(--accent); color:white; border-color:var(--accent);}
-
-/* cart panel */
-.cart-card{position:sticky; top:100px; background:linear-gradient(180deg,var(--card-2) 0%, #fff 100%); padding:16px; border-radius:12px; box-shadow:var(--shadow-sm); border:1px solid rgba(0,0,0,0.03); max-height:80vh; overflow:auto;}
-.cart-card h3{margin:0 0 12px; color:var(--accent-dark); display:flex; align-items:center; gap:8px;}
-.cart-empty{ text-align:center; padding:18px 12px; color:#7a6442;}
-.cart-empty i{font-size:48px; color:rgba(0,0,0,0.06); margin-bottom:10px;}
-.cart-items{max-height:360px; overflow-y:auto; margin-bottom:12px;}
-.cart-item{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.04);}
-.cart-item h4{margin:0; font-size:0.95rem; color:var(--text-dark);}
-.cart-item p{margin:0; font-size:0.9rem; color:#7a6442;}
-.cart-item-controls{display:flex; align-items:center; gap:10px;}
-.quantity-btn{width:30px; height:30px; border-radius:8px; background:white; border:1px solid rgba(0,0,0,0.06); display:flex; gap:0; align-items:center; justify-content:center; cursor:pointer;}
-.remove-item{color:#d04b3a; cursor:pointer; font-size:18px;}
-.cart-total{padding-top:12px; border-top:2px dashed rgba(0,0,0,0.03); display:flex; justify-content:space-between; align-items:center; font-weight:700; color:var(--accent-dark); margin-bottom:12px;}
-
-/* modal */
-.modal{display:none; position:fixed; z-index:1500; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.45); -webkit-overflow-scrolling:touch;}
-.modal-content{background:white; margin:24px auto; padding:22px; border-radius:12px; max-width:960px; width:94%; max-height:86vh; overflow:auto; box-shadow:0 10px 40px rgba(0,0,0,0.3);}
-.close{color:var(--muted); font-size:26px; font-weight:700; cursor:pointer;}
-
-/* product detail layout */
-.product-detail{display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;}
-.product-detail-img img{width:100%; border-radius:10px; height:auto; object-fit:cover;}
-.product-detail-info h2{margin:0 0 6px; color:var(--accent-dark);}
-.quantity-selector{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
-.quantity-btn-modal{width:36px; height:36px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:white; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700;}
-
-/* checkout form */
-.checkout-form input, .checkout-form select, .checkout-form textarea{width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); margin-bottom:12px;}
-.order-summary{background:linear-gradient(180deg,#fff,#FFF7E8); padding:12px; border-radius:8px; border:1px solid rgba(0,0,0,0.04);}
-
-/* payment method selected state */
-.payment-method{transition:box-shadow .12s, border-color .12s;}
-.payment-method.selected{box-shadow: 0 8px 30px rgba(168,133,64,0.08); border-color:var(--accent);}
-
-/* FAQ small */
-.faq-q h4{margin:0; font-size:14px; color:var(--accent-dark);}
-.faq-a{margin-top:8px; display:none; color:#5a4d37; font-size:13px;}
-
-/* small helpers */
-.hidden{display:none !important;}
-.center{text-align:center}
-
-/* responsive tweaks */
-@media (max-width:1100px){
-  .search input{width:220px}
-  .grid{grid-template-columns: 1fr 320px;}
-  .cart-card{top:80px;}
-}
-
-@media (max-width:900px){
-  .grid{grid-template-columns:1fr;}
-  .right-column{order:2;}
-  .main{padding:20px;}
-  .product-card{min-height:320px;}
-}
-
-@media (max-width:560px){
-  /* hide sidebar on tiny screens; show mobile toggle via header */
-  .sidebar{display:none}
-  .main{margin-left:0; padding:12px;}
-  .header-actions .mobile-toggle{display:inline-flex;}
-  .products-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px;}
-  .product-card{min-height:280px;}
-  .cart-card{position:relative; max-height:none; order:3;}
-  .modal-content{margin:10px; width:96%;}
-  .brand-title{display:inline-block}
-}
-</style>
-
+    .container{max-width:1200px;margin:22px auto;padding:18px}
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .title{display:flex;gap:12px;align-items:center}
+    .title h1{font-size:20px;color:var(--accent-dark);margin:0}
+    .user {font-weight:600;color:#333}
+    .grid{display:grid;grid-template-columns: 1fr 360px; gap:18px}
+    .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow-sm)}
+    .row{display:flex;gap:12px;align-items:center}
+    .small{color:var(--muted);font-size:13px}
+    .stat{font-size:18px;font-weight:700}
+    .charts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:12px}
+    canvas{width:100%!important;height:300px!important}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left;font-size:14px}
+    .btn{padding:8px 10px;border-radius:8px;border:1px solid #e6edf8;background:white;cursor:pointer}
+    .btn-primary{background:var(--accent-dark); color:white; border:none; padding:10px 12px; border-radius:8px; cursor:pointer}
+    .product-grid{display:grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap:16px}
+    .product-card{background:linear-gradient(180deg,#fff 0%, var(--card-2) 100%); border-radius:12px; overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column;}
+    .product-img{aspect-ratio:16/10; background:#faf3da; display:flex; align-items:center; justify-content:center}
+    .product-body{padding:12px; display:flex; flex-direction:column; gap:8px; flex:1}
+    .price{font-weight:800; color:var(--accent-dark)}
+    .meta{color:#7a6442; font-size:13px}
+    .product-actions{display:flex; gap:8px; margin-top:auto}
+    .qty-input{width:86px; padding:8px; border-radius:8px; border:1px solid #ddd}
+    .cart-card{position:sticky; top:100px; padding:16px; border-radius:12px; background:linear-gradient(180deg,var(--card-2),#fff); box-shadow:var(--shadow-sm)}
+    .cart-item{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.04)}
+    .cart-empty{text-align:center; padding:18px 12px; color:#7a6442}
+    .modal{display:none; position:fixed; z-index:1500; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.45)}
+    .modal-content{background:white; margin:24px auto; padding:22px; border-radius:12px; max-width:760px; width:94%; max-height:86vh; overflow:auto; box-shadow:0 10px 40px rgba(0,0,0,0.3)}
+    .close{color:var(--muted); font-size:26px; font-weight:700; cursor:pointer}
+    .label-small{font-size:13px; color:#6b5b3a}
+    .badge{display:inline-block; padding:6px 8px; font-weight:700; border-radius:8px; background:#fff; border:1px solid rgba(0,0,0,0.04); color:var(--accent-dark)}
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} .charts{grid-template-columns:1fr} canvas{height:260px!important} }
   </style>
 </head>
 <body>
-
-<div class="app">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar" aria-label="main navigation">
-    <div class="brand">
-      <div class="logo">CC</div>
-      <div class="brand-title">Cultivate Connect</div>
-    </div>
-
-    <nav class="nav" role="navigation">
-      <div class="nav-item" data-target="dashboard" data-link="consumer.html">
-        <div class="icon"><i class="fas fa-home"></i></div>
-        <div class="label">Dashboard</div>
+  <div class="container">
+    <div class="header">
+      <div class="title">
+        <i class="fas fa-shopping-basket" style="font-size:28px;color:var(--accent-dark)"></i>
+        <div>
+          <h1>Buy — Cultivate Connect</h1>
+          <div class="small">Only products listed by farmers — price shown is ₹ per kg. Bulk discounts auto-applied.</div>
+        </div>
       </div>
 
-      <div class="nav-item active" data-target="crop">
-        <div class="icon"><i class="fas fa-shopping-basket"></i></div>
-        <div class="label">Buy Products</div>
-      </div>
-
-      <div class="nav-item" data-target="weather">
-        <div class="icon"><i class="fas fa-lightbulb"></i></div>
-        <div class="label">Tips</div>
-      </div>
-
-      <div class="nav-item" data-target="schemes">
-        <div class="icon"><i class="fas fa-bullhorn"></i></div>
-        <div class="label">Awareness</div>
-      </div>
-
-      <div class="nav-item" data-target="update">
-        <div class="icon"><i class="fas fa-question-circle"></i></div>
-        <div class="label">FAQ</div>
-      </div>
-
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="avatar">RK</div>
-      <div class="user-meta">
-        <div style="font-weight:700">Ramesh Kumar</div>
-        <div style="font-size:12px; opacity:.8">Consumer</div>
+      <div class="row">
+        <div class="small user" id="headerUser">Consumer</div>
       </div>
     </div>
-  </aside>
 
-  <!-- MAIN -->
-  <main class="main">
-    <header class="main-header">
+    <div class="grid">
+      <!-- LEFT: Product list -->
       <div>
-        <div class="page-title">Buying Panel</div>
-        <div class="page-sub">Fresh produce directly from local farms</div>
-      </div>
-
-      <div class="header-actions">
-        <div class="search" role="search">
-          <i class="fas fa-search" style="color:var(--accent-dark)"></i>
-          <input id="global-search" placeholder="Search products..." />
-        </div>
-      </div>
-    </header>
-
-    <section class="grid" aria-labelledby="main-grid">
-      <!-- Left column: products -->
-      <div class="left-column">
-
-        <div class="card buying-panel-inner">
-          <div class="filter-options">
-            <div class="filter-group">
-              <label for="category">Category</label>
-              <select id="category">
-                <option value="all">All Categories</option>
-                <option value="vegetables">Vegetables</option>
-                <option value="fruits">Fruits</option>
-                <option value="grains">Grains</option>
-                <option value="dairy">Dairy</option>
-                <option value="herbs">Herbs</option>
-              </select>
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+            <div>
+              <div class="label-small">Market Snapshot</div>
+              <div class="stat" id="snapshot">Loading...</div>
             </div>
-
-            <div class="filter-group">
-              <label for="farm">Farm</label>
-              <select id="farm">
-                <option value="all">All Farms</option>
-                <option value="green-valley">Green Valley Farm</option>
-                <option value="sunny-meadows">Sunny Meadows</option>
-                <option value="organic-harvest">Organic Harvest</option>
-                <option value="happy-acres">Happy Acres</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label for="practice">Farming Practice</label>
-              <select id="practice">
-                <option value="all">All Practices</option>
-                <option value="organic">Certified Organic</option>
-                <option value="natural">Natural Farming</option>
-                <option value="sustainable">Sustainable</option>
-                <option value="biodynamic">Biodynamic</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label for="price-range">Price Range</label>
-              <select id="price-range">
-                <option value="all">All Prices</option>
-                <option value="0-5">$0 - $5</option>
-                <option value="5-10">$5 - $10</option>
-                <option value="10-20">$10 - $20</option>
-                <option value="20+">$20+</option>
-              </select>
+            <div style="text-align:right">
+              <div class="label-small">Last update</div>
+              <div id="lastUpdate" class="small">--</div>
             </div>
           </div>
 
-          <div class="search-sort-container">
-            <div class="search-box">
-              <i class="fas fa-search"></i>
-              <input type="text" id="search" placeholder="Search products...">
-            </div>
-            <div class="sort-options">
-              <select id="sort">
-                <option value="featured">Featured</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="name">Name: A to Z</option>
-                <option value="newest">Newest First</option>
-              </select>
-            </div>
+          <div style="margin-top:14px; margin-bottom:8px;">
+            <input id="searchInput" placeholder="Search products or farm..." style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6e6e6;">
           </div>
 
-          <div class="products-grid" id="products-grid">
-            <!-- Product 1 -->
-            <div class="product-card">
-              <div class="product-badge">Organic</div>
-              <div class="product-img">
-                <img src="https://images.unsplash.com/photo-1561136594-7f68413baa99?auto=format&fit=crop&w=1000&q=80" alt="Fresh Tomatoes">
-              </div>
-              <div class="product-info">
-                <h3>Fresh Tomatoes</h3>
-                <p class="farmer"><i class="fas fa-user"></i> Green Valley Farm</p>
-                <p class="product-description">Juicy, vine-ripened tomatoes grown using organic methods. Perfect for salads, sauces, and sandwiches.</p>
-                <div class="product-meta">
-                  <span><i class="fas fa-leaf"></i> Organic</span>
-                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
-                </div>
-                <p class="price">$3.99/kg</p>
-                <div class="product-actions">
-                  <button class="add-to-cart" data-product="Fresh Tomatoes" data-price="3.99" data-farmer="Green Valley Farm">Add to Cart</button>
-                  <button class="view-details" data-product="tomatoes">Details</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Product 2 -->
-            <div class="product-card">
-              <div class="product-badge">New</div>
-              <div class="product-img">
-                <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=1000&q=80" alt="Organic Carrots">
-              </div>
-              <div class="product-info">
-                <h3>Organic Carrots</h3>
-                <p class="farmer"><i class="fas fa-user"></i> Sunny Meadows</p>
-                <p class="product-description">Sweet, crunchy carrots grown in nutrient-rich soil without synthetic pesticides or fertilizers.</p>
-                <div class="product-meta">
-                  <span><i class="fas fa-leaf"></i> Organic</span>
-                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
-                </div>
-                <p class="price">$2.49/kg</p>
-                <div class="product-actions">
-                  <button class="add-to-cart" data-product="Organic Carrots" data-price="2.49" data-farmer="Sunny Meadows">Add to Cart</button>
-                  <button class="view-details" data-product="carrots">Details</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Product 3 -->
-            <div class="product-card">
-              <div class="product-badge">Seasonal</div>
-              <div class="product-img">
-                <img src="https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=1000&q=80" alt="Fresh Apples">
-              </div>
-              <div class="product-info">
-                <h3>Fresh Apples</h3>
-                <p class="farmer"><i class="fas fa-user"></i> Organic Harvest</p>
-                <p class="product-description">Crisp, sweet apples harvested at peak ripeness. Perfect for snacking, baking, or making cider.</p>
-                <div class="product-meta">
-                  <span><i class="fas fa-leaf"></i> Organic</span>
-                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
-                </div>
-                <p class="price">$4.99/kg</p>
-                <div class="product-actions">
-                  <button class="add-to-cart" data-product="Fresh Apples" data-price="4.99" data-farmer="Organic Harvest">Add to Cart</button>
-                  <button class="view-details" data-product="apples">Details</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Product 4 -->
-            <div class="product-card">
-              <div class="product-img">
-                <img src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=1000&q=80" alt="Spinach">
-              </div>
-              <div class="product-info">
-                <h3>Fresh Spinach</h3>
-                <p class="farmer"><i class="fas fa-user"></i> Green Valley Farm</p>
-                <p class="product-description">Tender, nutrient-packed spinach leaves perfect for salads, smoothies, or sautéing.</p>
-                <div class="product-meta">
-                  <span><i class="fas fa-leaf"></i> Organic</span>
-                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
-                </div>
-                <p class="price">$2.99/bunch</p>
-                <div class="product-actions">
-                  <button class="add-to-cart" data-product="Fresh Spinach" data-price="2.99" data-farmer="Green Valley Farm">Add to Cart</button>
-                  <button class="view-details" data-product="spinach">Details</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Product 5 -->
-            <div class="product-card">
-              <div class="product-badge">Limited</div>
-              <div class="product-img">
-                <img src="https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1000&q=80" alt="Bell Peppers">
-              </div>
-              <div class="product-info">
-                <h3>Bell Peppers</h3>
-                <p class="farmer"><i class="fas fa-user"></i> Happy Acres</p>
-                <p class="product-description">Colorful bell peppers in red, yellow, and green varieties. Sweet and crunchy with vibrant colors.</p>
-                <div class="product-meta">
-                  <span><i class="fas fa-leaf"></i> Organic</span>
-                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
-                </div>
-                <p class="price">$4.49/kg</p>
-                <div class="product-actions">
-                  <button class="add-to-cart" data-product="Bell Peppers" data-price="4.49" data-farmer="Happy Acres">Add to Cart</button>
-                  <button class="view-details" data-product="peppers">Details</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Product 6 -->
-            <div class="product-card">
-              <div class="product-img">
-                <img src="https://images.unsplash.com/photo-1594282487584-6d87ac195118?auto=format&fit=crop&w=1000&q=80" alt="Cucumbers">
-              </div>
-              <div class="product-info">
-                <h3>Fresh Cucumbers</h3>
-                <p class="farmer"><i class="fas fa-user"></i> Sunny Meadows</p>
-                <p class="product-description">Crisp, refreshing cucumbers perfect for salads, pickling, or as a healthy snack.</p>
-                <div class="product-meta">
-                  <span><i class="fas fa-leaf"></i> Organic</span>
-                  <span><i class="fas fa-map-marker-alt"></i> Local</span>
-                </div>
-                <p class="price">$1.99/each</p>
-                <div class="product-actions">
-                  <button class="add-to-cart" data-product="Fresh Cucumbers" data-price="1.99" data-farmer="Sunny Meadows">Add to Cart</button>
-                  <button class="view-details" data-product="cucumbers">Details</button>
-                </div>
-              </div>
-            </div>
-
+          <div id="productsContainer" class="product-grid" aria-live="polite">
+            <!-- Products injected here -->
           </div>
 
-                    <div class="pagination">
-            <button class="active">1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>Next <i class="fas fa-chevron-right"></i></button>
-          </div>
-        </div> <!-- closes .card.buying-panel-inner -->
-
-        <!-- </div>  WRONG extra closing div — removed/commented out -->
-
-      </div> <!-- closes .left-column -->
-
-      <!-- Right column: Cart and Checkout -->
-      <aside class="right-column">
-
-        <div class="cart-card">
-          <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
-          <div class="cart-items" id="cart-items-container">
-            <!-- dynamically inserted items -->
-          </div>
-
-          <div id="cart-total-container" style="display:none;">
-            <div class="cart-total">
-              <span>Total:</span>
-              <span id="cart-total-price">$0.00</span>
-            </div>
-            <button class="btn-primary-wide" id="proceed-checkout-btn">Proceed to Checkout</button>
-          </div>
-
-          <div id="cart-empty-message">
-            <div class="cart-empty">
-              <i class="fas fa-shopping-cart"></i>
-              <p>Your cart is empty</p>
-              <p style="margin-top:10px; color:#7a6442">Add items to get started!</p>
-            </div>
+          <div style="margin-top:12px;">
+            <small class="small">Note — quantities are converted to kg (1 quintal = 100 kg, 1 ton = 1000 kg). Price shown is per kg.</small>
           </div>
         </div>
 
-        <footer class="small" style="color:#6b5b3a; margin-top:6px;">© 2025 Cultivate Connect</footer>
+        <!-- Purchase history (consumer) -->
+        <div style="margin-top:14px;" class="card">
+          <h3 style="margin:0 0 8px;">Your Purchases</h3>
+          <div id="consumerHistory" class="small">Loading...</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Cart -->
+      <aside>
+        <div class="cart-card card">
+          <h3 style="margin:0 0 12px;"><i class="fas fa-shopping-cart"></i> Cart</h3>
+          <div id="cartItems" style="min-height:120px;">
+            <div class="cart-empty">Cart is empty</div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div class="small">Subtotal</div>
+              <div class="stat" id="cartSubtotal">₹ 0.00</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+              <div class="small">Discount</div>
+              <div class="small" id="cartDiscount">- ₹ 0.00</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; border-top:1px dashed rgba(0,0,0,0.06); padding-top:10px;">
+              <div class="small" style="font-weight:800">Total</div>
+              <div class="stat" id="cartTotal">₹ 0.00</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button id="btnCheckout" class="btn-primary" style="flex:1" disabled>Proceed to Checkout</button>
+            <button id="btnClear" class="btn" style="width:86px">Clear</button>
+          </div>
+
+          <div style="margin-top:12px;">
+            <small class="small">Bulk discount rules applied automatically:</small>
+            <ul style="margin:6px 0 0 18px; color:#6b5b3a">
+              <li>0–49 kg: 0%</li>
+              <li>50–199 kg: 5%</li>
+              <li>200–499 kg: 8%</li>
+              <li>500+ kg: 12%</li>
+            </ul>
+          </div>
+        </div>
       </aside>
+    </div>
+  </div>
 
-    </section>
-  </main>
-</div>
-
-<!-- Product Detail Modal -->
-<div id="product-detail-modal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <div class="product-detail">
-      <div class="product-detail-img">
-        <img id="detail-img" src="" alt="Product Image">
+  <!-- Product detail + checkout modals -->
+  <div id="detailModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 id="detailTitle">Product</h2>
+        <span class="close" id="closeDetail">&times;</span>
       </div>
-      <div class="product-detail-info">
-        <h2 id="detail-title">Product Title</h2>
-        <div class="product-detail-farmer">
-          <img id="detail-farmer-img" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Farmer" style="width:44px;height:44px;border-radius:8px; object-fit:cover;">
-          <div>
-            <strong id="detail-farmer-name">Farmer Name</strong>
-            <p id="detail-farm" style="margin:0; color:#7a6442;">Farm Name</p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+        <div id="detailImg" style="background:#faf3da; border-radius:8px; display:flex; align-items:center; justify-content:center; min-height:160px;">Image</div>
+        <div>
+          <div class="label-small">Farm</div>
+          <div id="detailFarm" style="font-weight:700; margin-bottom:8px;"></div>
+
+          <div class="label-small">Available (kg)</div>
+          <div id="detailAvailable" style="margin-bottom:8px;"></div>
+
+          <div class="label-small">Price (per kg)</div>
+          <div id="detailPrice" style="font-weight:700; margin-bottom:12px;"></div>
+
+          <div class="label-small">Buy (kg)</div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input id="detailQty" type="number" min="0.5" step="0.5" value="1" style="padding:8px; width:140px; border-radius:8px; border:1px solid #ddd">
+            <div id="detailTotal" style="font-weight:800">₹ 0.00</div>
           </div>
-        </div>
 
-        <div class="product-detail-price" id="detail-price" style="font-size:1.3rem; font-weight:700; color:var(--accent-dark); margin-bottom:10px;">$0.00</div>
-
-        <div class="product-detail-description" id="detail-description" style="margin-bottom:12px; color:#6b5b3a;">
-          Product description will appear here.
-        </div>
-
-        <div class="product-detail-meta" style="display:flex; gap:12px; margin-bottom:12px; color:#7a6442;">
-          <div><i class="fas fa-leaf"></i> <span id="detail-practice">Farming Practice</span></div>
-          <div><i class="fas fa-map-marker-alt"></i> <span id="detail-location">Location</span></div>
-          <div><i class="fas fa-calendar"></i> <span id="detail-harvest">Harvest Date</span></div>
-        </div>
-
-        <div class="quantity-selector">
-          <label style="font-weight:700; color:var(--muted)">Quantity:</label>
-          <div class="quantity-controls">
-            <button class="quantity-btn-modal" id="decrease-qty">-</button>
-            <span class="quantity-display" id="quantity" style="min-width:36px; display:inline-block; text-align:center; font-weight:700;">1</span>
-            <button class="quantity-btn-modal" id="increase-qty">+</button>
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button id="addToCartBtn" class="btn-primary">Add to Cart</button>
+            <button id="buyNowBtn" class="btn">Buy Now</button>
           </div>
-        </div>
-
-        <div style="display:flex; gap:10px; margin-top:8px;">
-          <button class="add-to-cart" id="detail-add-to-cart">Add to Cart</button>
-          <button class="btn ghost" style="padding:10px 12px; border-radius:8px;">Save for Later</button>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Checkout Modal -->
-<div id="checkout-modal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <div id="checkout-form-container">
-      <h2 style="margin-top:0; color:var(--accent-dark)">Checkout</h2>
-      <div class="order-summary" id="checkout-order-summary">
-        <!-- Order summary will be inserted here -->
+  <div id="checkoutModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Checkout</h2>
+        <span class="close" id="closeCheckout">&times;</span>
       </div>
 
-      <form id="checkout-form" class="checkout-form" style="margin-top:12px;">
-        <div style="margin-bottom:16px;">
-          <h3 style="margin:0 0 8px; color:var(--accent-dark)">Delivery Information</h3>
-          <div style="display:grid; gap:10px;">
-            <input type="text" id="full-name" required placeholder="Full name *" />
-            <input type="email" id="email-address" required placeholder="Email address *" />
-            <input type="tel" id="phone" required placeholder="Phone number *" />
-            <textarea id="address" rows="3" required placeholder="Delivery address *"></textarea>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-              <input type="text" id="city" required placeholder="City *" />
-              <input type="text" id="zipcode" required placeholder="Zip code *" />
+      <div id="checkoutBody" style="margin-top:12px;">
+        <div id="checkoutSummary"></div>
+
+        <form id="checkoutForm" style="margin-top:12px;">
+          <div style="display:grid; gap:8px;">
+            <input id="cName" placeholder="Full name" required style="padding:8px; border-radius:8px; border:1px solid #ddd">
+            <input id="cPhone" placeholder="Phone" required style="padding:8px; border-radius:8px; border:1px solid #ddd">
+            <input id="cAddress" placeholder="Delivery address" required style="padding:8px; border-radius:8px; border:1px solid #ddd">
+            <div style="display:flex; gap:8px;">
+              <input id="cCity" placeholder="City" required style="padding:8px; border-radius:8px; border:1px solid #ddd; flex:1">
+              <input id="cZip" placeholder="Zip" style="padding:8px; border-radius:8px; border:1px solid #ddd; width:120px">
             </div>
           </div>
-        </div>
 
-        <div style="margin-bottom:16px;">
-          <h3 style="margin:0 0 8px; color:var(--accent-dark)">Payment Method</h3>
-          <div style="display:flex; flex-direction:column; gap:8px;">
-            <label class="payment-method" style="display:flex; gap:10px; align-items:center; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06);">
-              <input type="radio" name="payment" value="card" checked>
-              <div>
-                <strong>Credit/Debit Card</strong>
-                <div style="font-size:13px; color:#7a6442">Pay securely with your card</div>
-              </div>
-            </label>
-            <label class="payment-method" style="display:flex; gap:10px; align-items:center; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06);">
-              <input type="radio" name="payment" value="cash">
-              <div>
-                <strong>Cash on Delivery</strong>
-                <div style="font-size:13px; color:#7a6442">Pay when you receive your order</div>
-              </div>
-            </label>
-            <label class="payment-method" style="display:flex; gap:10px; align-items:center; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06);">
-              <input type="radio" name="payment" value="upi">
-              <div>
-                <strong>UPI Payment</strong>
-                <div style="font-size:13px; color:#7a6442">Pay using UPI apps</div>
-              </div>
-            </label>
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button type="submit" class="btn-primary" style="flex:1">Confirm Purchase</button>
+            <button type="button" id="cancelCheckout" class="btn" style="width:120px">Cancel</button>
           </div>
-
-          <div id="card-details" style="margin-top:12px;">
-            <input type="text" id="card-number" placeholder="Card Number *" maxlength="19">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-              <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
-              <input type="text" id="cvv" placeholder="CVV" maxlength="4">
-            </div>
-            <input type="text" id="card-name" placeholder="Name on Card *">
-          </div>
-        </div>
-
-        <button type="submit" class="btn-primary-wide">Place Order</button>
-      </form>
-    </div>
-
-    <div id="checkout-success" style="display:none;">
-      <div style="text-align:center; padding:32px;">
-        <i class="fas fa-check-circle" style="font-size:48px; color:var(--accent);"></i>
-        <h2 style="color:var(--accent-dark); margin-top:8px;">Order Placed Successfully!</h2>
-        <p>Thank you for your order. Your order ID is: <strong id="order-id"></strong></p>
-        <p style="margin-top:12px; color:#7a6442">You will receive a confirmation email shortly.</p>
-        <button class="btn-primary-wide" id="close-checkout-btn" style="margin-top:16px;">Close</button>
+        </form>
       </div>
     </div>
   </div>
-</div>
 
 <script>
-  // Preserve original buying panel functionality but adapt to new layout
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  let currentProduct = null;
-  let quantity = 1;
+/*
+  buyconsumer.html
+  - Reads farmer listings from localStorage keys cc_user_data_farmer_<username>
+  - Consumers must be logged in: cc_active_user with role 'consumer'
+  - Price is per kg (listing.price or listing.pricePerKg)
+  - Units: listing.qty + listing.unit (unit: "kg"|"quintal"|"ton"). If none, assume kg.
+  - Bulk discounts:
+      0-49kg: 0%
+      50-199kg: 5%
+      200-499kg: 8%
+      500+: 12%
+  - On checkout: create consumer purchase records and decrement farmer listing qty (persist to localStorage)
+*/
 
-  const updateCartDisplay = () => {
-    const cartContainer = document.getElementById('cart-items-container');
-    const totalContainer = document.getElementById('cart-total-container');
-    const emptyMessage = document.getElementById('cart-empty-message');
-    const checkoutBtn = document.getElementById('proceed-checkout-btn');
+(function(){
+  // --- Authentication & data keys
+  const active = JSON.parse(localStorage.getItem('cc_active_user'));
+  if (!active || active.role !== 'consumer') {
+    alert('Please login as a consumer to access marketplace.');
+    window.location.href = 'Index.html';
+    return;
+  }
 
-    if (!cart || cart.length === 0) {
-      cartContainer.innerHTML = '';
-      totalContainer.style.display = 'none';
-      emptyMessage.style.display = 'block';
-      if (checkoutBtn) checkoutBtn.disabled = true;
+  const headerUser = document.getElementById('headerUser');
+  headerUser.textContent = active.username;
+
+  // helpers
+  function listKeys(prefix){
+    const out = [];
+    for (let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if (k && k.startsWith(prefix)) out.push(k);
+    }
+    return out;
+  }
+
+  function parseJSON(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null } }
+
+  function saveKey(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
+
+  function qtyToKg(qty, unit){
+    if (!unit) return Number(qty) || 0;
+    unit = String(unit).toLowerCase();
+    if (unit === 'kg') return Number(qty) || 0;
+    if (unit === 'quintal' || unit === 'quint') return (Number(qty)||0) * 100;
+    if (unit === 'ton' || unit === 'tons' || unit === 't') return (Number(qty)||0) * 1000;
+    return Number(qty) || 0;
+  }
+
+  function formatMoney(x){ return '₹ ' + Number(x||0).toFixed(2); }
+
+  // bulk discount rules (Option A: simple tiers)
+  function getDiscountPercent(totalKg){
+    if (totalKg >= 200) return 0.10; // 10%
+    if (totalKg >= 50) return 0.05;  // 5%
+    return 0;
+  }
+
+  // load all listings from farmers
+  function loadListingsFromFarmers(){
+    const keys = listKeys('cc_user_data_farmer_');
+    const listings = [];
+    keys.forEach(k => {
+      const farmer = parseJSON(k);
+      if (!farmer || !Array.isArray(farmer.listings)) return;
+      const farmerUsername = (farmer.username || k.replace('cc_user_data_farmer_','')) ;
+      const farmerName = farmer.displayName || farmerUsername;
+      farmer.listings.forEach(l => {
+        // Normalize: accept different property names, and assume price is per kg
+        const qty = Number(l.qty ?? l.quantity ?? l.q ?? 0);
+        const unit = l.unit ?? l.u ?? (l.unitType || 'kg');
+        // Compatible with new + old farmer-update structure
+let pricePerKg = 0;
+
+if (l.pricePerKg !== undefined) pricePerKg = Number(l.pricePerKg);
+else if (l.price !== undefined) pricePerKg = Number(l.price); // old data fallback
+else if (l.rate !== undefined) pricePerKg = Number(l.rate);
+
+        const icon = l.iconId ?? l.icon ?? l.image ?? null;
+        const title = l.title ?? l.name ?? 'Untitled';
+        const id = l.id ?? ('L-'+(l.createdAt ? new Date(l.createdAt).getTime() : Date.now()) + '-' + Math.random().toString(36).slice(2,8));
+        // convert available qty to kg
+        const availableKg = qtyToKg(qty, unit);
+        if (availableKg <= 0) return; // skip empty
+        listings.push({
+          id,
+          title,
+          qty,
+          unit: unit || 'kg',
+          availableKg,
+          pricePerKg,
+          icon,
+          farmerName,
+          farmerUsername,
+          rawListingRefKey: k
+        });
+      });
+    });
+    return listings;
+  }
+
+  // state
+  let allListings = loadListingsFromFarmers();
+  let filteredListings = allListings.slice();
+  let cart = JSON.parse(localStorage.getItem('cc_cart_' + active.username)) || []; // cart stored per consumer username
+
+  // DOM refs
+  const productsContainer = document.getElementById('productsContainer');
+  const searchInput = document.getElementById('searchInput');
+  const snapshot = document.getElementById('snapshot');
+  const lastUpdate = document.getElementById('lastUpdate');
+  const cartItemsEl = document.getElementById('cartItems');
+  const cartSubtotalEl = document.getElementById('cartSubtotal');
+  const cartDiscountEl = document.getElementById('cartDiscount');
+  const cartTotalEl = document.getElementById('cartTotal');
+  const btnCheckout = document.getElementById('btnCheckout');
+  const btnClear = document.getElementById('btnClear');
+  const consumerHistoryEl = document.getElementById('consumerHistory');
+
+  // detail modal refs
+  const detailModal = document.getElementById('detailModal');
+  const detailTitle = document.getElementById('detailTitle');
+  const detailFarm = document.getElementById('detailFarm');
+  const detailAvailable = document.getElementById('detailAvailable');
+  const detailPrice = document.getElementById('detailPrice');
+  const detailQty = document.getElementById('detailQty');
+  const detailTotal = document.getElementById('detailTotal');
+  const addToCartBtn = document.getElementById('addToCartBtn');
+  const buyNowBtn = document.getElementById('buyNowBtn');
+  const detailImg = document.getElementById('detailImg');
+
+  // checkout modal
+  const checkoutModal = document.getElementById('checkoutModal');
+  const checkoutSummary = document.getElementById('checkoutSummary');
+  const checkoutForm = document.getElementById('checkoutForm');
+  const closeDetail = document.getElementById('closeDetail');
+  const closeCheckout = document.getElementById('closeCheckout');
+  const cancelCheckout = document.getElementById('cancelCheckout');
+
+  // detail state
+  let activeDetail = null;
+
+  // render functions
+  function renderSnapshot(){
+    const totalSupplyKg = allListings.reduce((s,l)=>s + (l.availableKg||0), 0);
+    snapshot.textContent = `Products: ${allListings.length} • Total supply: ${Math.round(totalSupplyKg)} kg`;
+    lastUpdate.textContent = new Date().toLocaleString();
+  }
+
+  function renderProducts(list){
+    productsContainer.innerHTML = '';
+    if (!list.length) {
+      productsContainer.innerHTML = '<div class="card" style="background:transparent; box-shadow:none; border:none;">No products currently listed by farmers.</div>';
       return;
     }
 
-    cartContainer.innerHTML = '';
-    let total = 0;
-
-    cart.forEach((item, index) => {
-      const itemTotal = item.price * item.quantity;
-      total += itemTotal;
-
-      const cartItem = document.createElement('div');
-      cartItem.className = 'cart-item';
-      cartItem.innerHTML = `
-        <div style="flex:1">
-          <h4>${item.product}</h4>
-          <p>${item.farmer}</p>
-        </div>
-        <div class="cart-item-controls">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
-            <span style="min-width:20px; text-align:center;">${item.quantity}</span>
-            <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
+    list.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <div class="product-img" data-id="${item.id}">${item.icon ? '<img src="'+item.icon+'" alt="">':'<i class="fas fa-seedling" style="font-size:36px;color:var(--accent-dark)"></i>'}</div>
+        <div class="product-body">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:800">${escapeHtml(item.title)}</div>
+              <div class="meta">${escapeHtml(item.farmerName)}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="price">${formatMoney(item.pricePerKg)} / kg</div>
+              <div class="meta">${Math.round(item.availableKg)} kg available</div>
+            </div>
           </div>
-          <div style="font-weight:700; color:var(--accent-dark); margin-left:10px;">$${itemTotal.toFixed(2)}</div>
-          <span class="remove-item" onclick="removeFromCart(${index})" title="Remove item">&times;</span>
+
+          <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+            <input class="qty-input" type="number" min="0.5" step="0.5" value="1" aria-label="quantity kg">
+            <button class="btn addBtn">Add</button>
+            <button class="btn" style="margin-left:auto" data-id="${item.id}" aria-label="details">Details</button>
+          </div>
         </div>
       `;
-      cartContainer.appendChild(cartItem);
-    });
+      // events
+      const qtyInput = card.querySelector('.qty-input');
+      const addBtn = card.querySelector('.addBtn');
+      const detailsBtn = card.querySelector('[data-id]');
 
-    document.getElementById('cart-total-price').textContent = `$${total.toFixed(2)}`;
-    totalContainer.style.display = 'block';
-    emptyMessage.style.display = 'none';
-    if (checkoutBtn) checkoutBtn.disabled = false;
-  };
-
-  function addToCart(product, price, farmer, button) {
-    const existingItem = cart.find(item => item.product === product);
-
-    if (existingItem) {
-      existingItem.quantity += quantity;
-    } else {
-      cart.push({
-        product: product,
-        price: parseFloat(price),
-        farmer: farmer,
-        quantity: quantity
+      addBtn.addEventListener('click', () => {
+        const qty = Math.max(0.5, Number(qtyInput.value) || 0.5);
+        addToCart(item, qty);
       });
-    }
 
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartDisplay();
+      card.querySelector('[aria-label="details"]').addEventListener('click', () => {
+        openDetail(item);
+      });
 
-    // Small feedback on button if present
-    if (button) {
-      const originalText = button.textContent;
-      button.textContent = 'Added!';
-      button.style.opacity = '0.95';
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.style.opacity = '';
-      }, 1300);
-    }
-
-    // Reset quantity after add-from-modal
-    quantity = 1;
-    const qEl = document.getElementById('quantity');
-    if (qEl) qEl.textContent = quantity;
+      productsContainer.appendChild(card);
+    });
   }
 
-  window.updateQuantity = function(index, change) {
-    if (!cart[index]) return;
-    cart[index].quantity += change;
-    if (cart[index].quantity <= 0) {
-      cart.splice(index, 1);
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  function addToCart(listing, qtyKg){
+    qtyKg = Number(qtyKg) || 0;
+    if (qtyKg <= 0) return alert('Enter a valid quantity (kg).');
+    if (qtyKg > listing.availableKg) return alert('Requested qty exceeds available stock.');
+
+    // find if same listing exists in cart
+    const found = cart.find(c => c.listingId === listing.id && c.farmerUsername === listing.farmerUsername);
+    if (found) found.qty += qtyKg;
+    else cart.push({
+      listingId: listing.id,
+      title: listing.title,
+      farmerName: listing.farmerName,
+      farmerUsername: listing.farmerUsername,
+      pricePerKg: Number(listing.pricePerKg),
+      qty: Number(qtyKg)
+    });
+    persistCart();
+    renderCart();
+  }
+
+  function consumerBuy(listingId, farmerUsername, qty, finalTotal, unitPrice, discountPercent) {
+    const farmerKey = `cc_user_data_${farmerUsername}`;
+    const consumerActive = JSON.parse(localStorage.getItem('cc_active_user'));
+    const consumerKey = `cc_user_data_${consumerActive.username}`;
+
+    const farmer = parseJSON(farmerKey) || { listings: [], wallet: 0 };
+    const consumer = parseJSON(consumerKey) || { role:'consumer', orders: [], wallet:0 };
+
+    // find listing by id
+    const listingIndex = (farmer.listings || []).findIndex(l => l.id === listingId);
+    if (listingIndex === -1) {
+      console.warn('Listing removed or sold out', listingId);
+      return { success:false, message: 'Listing removed' };
     }
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartDisplay();
-  };
+    const listing = farmer.listings[listingIndex];
 
-  window.removeFromCart = function(index) {
-    cart.splice(index, 1);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartDisplay();
-  };
+    // check stock (qty is in kg)
+    const availableKg = qtyToKg(listing.qty, listing.unit || 'kg');
+    if (qty > availableKg) {
+      return { success:false, message: 'Not enough stock' };
+    }
 
-  // Initialize display
-  updateCartDisplay();
+    // reduce stock (convert back to listing's original unit if needed, but store in kg)
+    const remainingKg = availableKg - qty;
+    // Store remaining in kg (canonical)
+    listing.qty = remainingKg;
+    listing.unit = 'kg'; // ensure canonical unit
+    
+    if (listing.qty <= 0) {
+      farmer.listings.splice(listingIndex, 1);
+    } else {
+      farmer.listings[listingIndex] = listing;
+    }
 
-  // Add to Cart button listeners
-  document.querySelectorAll('.add-to-cart').forEach(button => {
-    button.addEventListener('click', function(e) {
-      const product = this.getAttribute('data-product');
-      const price = this.getAttribute('data-price');
-      const farmer = this.getAttribute('data-farmer');
-      addToCart(product, price, farmer, this);
+    // credit farmer wallet by finalTotal
+    farmer.wallet = Number((Number(farmer.wallet || 0) + Number(finalTotal)).toFixed(2));
+
+    // add order to consumer records
+    consumer.orders = consumer.orders || [];
+    const order = {
+      id: 'ORD' + Date.now(),
+      listingId,
+      product: listing.title,
+      qty,
+      unitPrice,
+      discountPercent,
+      total: finalTotal,
+      time: new Date().toISOString(),
+      farmer: farmerUsername
+    };
+    consumer.orders.push(order);
+
+    // Also add to purchases array (for compatibility)
+    consumer.purchases = consumer.purchases || [];
+    consumer.purchases.push({
+      id: 'P-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+      listingId,
+      title: listing.title,
+      qty: Number(qty),
+      pricePerKg: unitPrice,
+      total: Number(finalTotal.toFixed(2)),
+      time: new Date().toISOString(),
+      farmerUsername: farmerUsername
     });
-  });
 
-  // View Details listeners
-  document.querySelectorAll('.view-details').forEach(button => {
-    button.addEventListener('click', function() {
-      const productType = this.getAttribute('data-product');
-      showProductDetails(productType);
-    });
-  });
+    // save back
+    saveKey(farmerKey, farmer);
+    saveKey(consumerKey, consumer);
 
-  // Product data (same as original demo)
-  function showProductDetails(productType) {
-    const productData = {
-      'tomatoes': {
-        title: 'Fresh Tomatoes',
-        image: 'https://images.unsplash.com/photo-1561136594-7f68413baa99?auto=format&fit=crop&w=1000&q=80',
-        farmerName: 'John Smith',
-        farm: 'Green Valley Farm',
-        price: '$3.99/kg',
-        description: 'Our juicy, vine-ripened tomatoes are grown using organic methods that prioritize soil health and biodiversity. Harvested at peak ripeness, these tomatoes are bursting with flavor and nutrients.',
-        practice: 'Certified Organic',
-        location: 'Within 50 miles',
-        harvest: 'Harvested yesterday'
-      },
-      'carrots': {
-        title: 'Organic Carrots',
-        image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=1000&q=80',
-        farmerName: 'Maria Rodriguez',
-        farm: 'Sunny Meadows',
-        price: '$2.49/kg',
-        description: 'These sweet, crunchy carrots are grown in nutrient-rich soil without synthetic pesticides or fertilizers. Our sustainable farming practices ensure each carrot is packed with vitamins and minerals.',
-        practice: 'Natural Farming',
-        location: 'Within 30 miles',
-        harvest: 'Harvested 2 days ago'
-      },
-      'apples': {
-        title: 'Fresh Apples',
-        image: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=1000&q=80',
-        farmerName: 'Robert Johnson',
-        farm: 'Organic Harvest',
-        price: '$4.99/kg',
-        description: 'Crisp, sweet apples harvested at peak ripeness from our heritage orchard. Grown using permaculture principles. Perfect for snacking, baking, or making cider.',
-        practice: 'Permaculture',
-        location: 'Within 40 miles',
-        harvest: 'Harvested this week'
-      },
-      'spinach': {
-        title: 'Fresh Spinach',
-        image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=1000&q=80',
-        farmerName: 'John Smith',
-        farm: 'Green Valley Farm',
-        price: '$2.99/bunch',
-        description: 'Tender, nutrient-packed spinach leaves grown in our greenhouse during cooler months and in open fields during spring and fall.',
-        practice: 'Certified Organic',
-        location: 'Within 50 miles',
-        harvest: 'Harvested today'
-      },
-      'peppers': {
-        title: 'Bell Peppers',
-        image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1000&q=80',
-        farmerName: 'Sarah Williams',
-        farm: 'Happy Acres',
-        price: '$4.49/kg',
-        description: 'Colorful bell peppers in red, yellow, and green varieties. Grown in our high tunnels to extend the growing season.',
-        practice: 'Sustainable',
-        location: 'Within 25 miles',
-        harvest: 'Harvested 3 days ago'
-      },
-      'cucumbers': {
-        title: 'Fresh Cucumbers',
-        image: 'https://images.unsplash.com/photo-1594282487584-6d87ac195118?auto=format&fit=crop&w=1000&q=80',
-        farmerName: 'Maria Rodriguez',
-        farm: 'Sunny Meadows',
-        price: '$1.99/each',
-        description: 'Crisp, refreshing cucumbers grown using natural farming methods. Known for thin skin and minimal seeds.',
-        practice: 'Natural Farming',
-        location: 'Within 30 miles',
-        harvest: 'Harvested yesterday'
+    // Emit market event so companies/investors react
+    try { 
+      if (window.CCMarketEngine && typeof CCMarketEngine.applyConsumerPurchase === 'function') {
+        CCMarketEngine.applyConsumerPurchase(listing.title || listingId, qty, finalTotal);
       }
-    };
+    } catch (e) { console.warn('Market engine missing', e); }
 
-    const data = productData[productType] || productData['tomatoes'];
-
-    document.getElementById('detail-title').textContent = data.title;
-    document.getElementById('detail-img').src = data.image;
-    document.getElementById('detail-farmer-name').textContent = data.farmerName;
-    document.getElementById('detail-farm').textContent = data.farm;
-    document.getElementById('detail-price').textContent = data.price;
-    document.getElementById('detail-description').textContent = data.description;
-    document.getElementById('detail-practice').textContent = data.practice;
-    document.getElementById('detail-location').textContent = data.location;
-    document.getElementById('detail-harvest').textContent = data.harvest;
-
-    currentProduct = {
-      product: data.title,
-      price: parseFloat(data.price.replace('$', '').replace('/kg', '').replace('/each', '').replace('/bunch', '')),
-      farmer: data.farm
-    };
-
-    document.getElementById('product-detail-modal').style.display = 'block';
+    return { success:true, orderId: order.id };
   }
 
-  // Modal close handlers
-  document.querySelectorAll('.close').forEach(closeBtn => {
-    closeBtn.addEventListener('click', function() {
-      this.closest('.modal').style.display = 'none';
-    });
-  });
-  window.addEventListener('click', function(event) {
-    if (event.target.classList.contains('modal')) {
-      event.target.style.display = 'none';
-    }
-  });
+  function persistCart(){
+    localStorage.setItem('cc_cart_' + active.username, JSON.stringify(cart));
+  }
 
-  // Modal quantity controls
-  document.getElementById('increase-qty').addEventListener('click', function() {
-    quantity++;
-    document.getElementById('quantity').textContent = quantity;
-  });
-
-  document.getElementById('decrease-qty').addEventListener('click', function() {
-    if (quantity > 1) {
-      quantity--;
-      document.getElementById('quantity').textContent = quantity;
-    }
-  });
-
-  // Add from modal
-  document.getElementById('detail-add-to-cart').addEventListener('click', function() {
-    if (currentProduct) {
-      addToCart(currentProduct.product, currentProduct.price, currentProduct.farmer, null);
-      document.getElementById('product-detail-modal').style.display = 'none';
-    }
-  });
-
-  // Proceed to checkout
-  document.getElementById('proceed-checkout-btn').addEventListener('click', function() {
-    if (!cart || cart.length === 0) {
-      alert('Your cart is empty. Please add items to proceed.');
+  function renderCart(){
+    if (!cart.length){
+      cartItemsEl.innerHTML = '<div class="cart-empty">Cart is empty</div>';
+      cartSubtotalEl.textContent = '₹ 0.00';
+      cartDiscountEl.textContent = '- ₹ 0.00';
+      cartTotalEl.textContent = '₹ 0.00';
+      btnCheckout.disabled = true;
       return;
     }
-
-    displayCheckoutSummary();
-
-    // Ensure card details display if card selected
-    const cardPayment = document.querySelector('input[name="payment"][value="card"]');
-    if (cardPayment && cardPayment.checked) {
-      document.getElementById('card-details').style.display = 'block';
-    }
-
-    // Show first payment method visually
-    document.querySelectorAll('.payment-method').forEach((m, i) => {
-      m.classList.remove('selected');
-      if (i === 0) m.classList.add('selected');
-    });
-
-    document.getElementById('checkout-modal').style.display = 'block';
-  });
-
-  function displayCheckoutSummary() {
-    const summaryContainer = document.getElementById('checkout-order-summary');
-    let total = 0;
-    let html = '<h3 style="margin-bottom:12px; color:var(--accent-dark)">Order Summary</h3>';
-
-    cart.forEach(item => {
-      const itemTotal = item.price * item.quantity;
-      total += itemTotal;
-      html += `
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.04);">
-          <span>${item.product} x ${item.quantity}</span>
-          <span>$${itemTotal.toFixed(2)}</span>
+    cartItemsEl.innerHTML = '';
+    let subtotal = 0;
+    let totalKg = 0;
+    cart.forEach((it, idx) => {
+      const itemTotal = it.pricePerKg * it.qty;
+      subtotal += itemTotal;
+      totalKg += it.qty;
+      const div = document.createElement('div');
+      div.className = 'cart-item';
+      div.innerHTML = `
+        <div style="flex:1">
+          <strong>${escapeHtml(it.title)}</strong>
+          <div class="meta">${escapeHtml(it.farmerName)} • ${it.qty} kg</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div style="font-weight:800; color:var(--accent-dark)">${formatMoney(itemTotal)}</div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button class="btn" data-idx="${idx}" data-op="-">-</button>
+            <span style="min-width:26px; text-align:center;">${it.qty}</span>
+            <button class="btn" data-idx="${idx}" data-op="+">+</button>
+          </div>
+          <button class="btn" data-idx="${idx}" data-op="del" style="margin-left:8px;">&times;</button>
         </div>
       `;
-    });
-
-    html += `
-      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.04);">
-        <span>Subtotal</span>
-        <span>$${total.toFixed(2)}</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.04);">
-        <span>Delivery Charges</span>
-        <span>$5.00</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; padding:10px 0; font-weight:800; color:var(--accent-dark);">
-        <span>Total</span>
-        <span>$${(total + 5).toFixed(2)}</span>
-      </div>
-    `;
-
-    summaryContainer.innerHTML = html;
-  }
-
-  // Payment method toggles
-  function handlePaymentMethodChange() {
-    document.querySelectorAll('input[name="payment"]').forEach(radio => {
-      radio.addEventListener('change', function() {
-        const cardDetails = document.getElementById('card-details');
-        if (this.value === 'card') {
-          cardDetails.style.display = 'block';
-          document.getElementById('card-number').required = true;
-          document.getElementById('expiry').required = true;
-          document.getElementById('cvv').required = true;
-          document.getElementById('card-name').required = true;
-        } else {
-          cardDetails.style.display = 'none';
-          document.getElementById('card-number').required = false;
-          document.getElementById('expiry').required = false;
-          document.getElementById('cvv').required = false;
-          document.getElementById('card-name').required = false;
-        }
+      // qty change buttons
+      div.querySelectorAll('button[data-op]').forEach(b=>{
+        b.addEventListener('click', ()=> {
+          const op = b.getAttribute('data-op');
+          const i = Number(b.getAttribute('data-idx'));
+          if (op === '+') { cart[i].qty = Number((cart[i].qty + 1).toFixed(2)); }
+          else if (op === '-') { cart[i].qty = Number((cart[i].qty - 1).toFixed(2)); if (cart[i].qty <= 0) cart.splice(i,1); }
+          else if (op === 'del') { cart.splice(i,1); }
+          persistCart(); renderCart();
+        });
       });
+
+      cartItemsEl.appendChild(div);
     });
+
+    const discountPercent = getDiscountPercent(totalKg);
+    const discountAmount = subtotal * discountPercent;
+    const finalTotal = subtotal - discountAmount;
+
+    cartSubtotalEl.textContent = formatMoney(subtotal);
+    cartDiscountEl.textContent = '- ' + formatMoney(discountAmount);
+    cartTotalEl.textContent = formatMoney(finalTotal);
+
+    btnCheckout.disabled = false;
   }
-  handlePaymentMethodChange();
 
-  // Visual selection for payment method container
-  document.querySelectorAll('.payment-method').forEach(method => {
-    method.addEventListener('click', function() {
-      document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
-      this.classList.add('selected');
-      const radio = this.querySelector('input[type="radio"]');
-      if (radio) radio.checked = true;
-      // trigger change
-      radio.dispatchEvent(new Event('change'));
+  // open detail modal
+  function openDetail(item){
+    activeDetail = item;
+    detailTitle.textContent = item.title;
+    detailFarm.textContent = item.farmerName;
+    detailAvailable.textContent = Math.round(item.availableKg) + ' kg';
+    detailPrice.textContent = formatMoney(item.pricePerKg) + ' / kg';
+    detailQty.value = 1;
+    detailTotal.textContent = formatMoney(item.pricePerKg * 1);
+    detailImg.innerHTML = item.icon ? '<img src="'+item.icon+'" alt="">' : '<i class="fas fa-seedling" style="font-size:36px;color:var(--accent-dark)"></i>';
+    detailModal.style.display = 'block';
+    detailModal.setAttribute('aria-hidden', 'false');
+  }
+
+  // update detail total
+  detailQty.addEventListener('input', ()=>{
+    const q = Math.max(0.5, Number(detailQty.value) || 0.5);
+    detailTotal.textContent = formatMoney(activeDetail.pricePerKg * q);
+  });
+
+  addToCartBtn.addEventListener('click', ()=>{
+    const q = Math.max(0.5, Number(detailQty.value) || 0.5);
+    if (!activeDetail) return;
+    if (q > activeDetail.availableKg) return alert('Quantity exceeds available stock.');
+    addToCart(activeDetail, q);
+    detailModal.style.display = 'none';
+  });
+
+  buyNowBtn.addEventListener('click', ()=>{
+    const q = Math.max(0.5, Number(detailQty.value) || 0.5);
+    if (!activeDetail) return;
+    if (q > activeDetail.availableKg) return alert('Quantity exceeds available stock.');
+    // quick buy: add to cart then open checkout
+    addToCart(activeDetail, q);
+    detailModal.style.display = 'none';
+    openCheckout();
+  });
+
+  // close modals
+  closeDetail.addEventListener('click', ()=>{ detailModal.style.display='none'; detailModal.setAttribute('aria-hidden','true');});
+  closeCheckout.addEventListener('click', ()=>{ checkoutModal.style.display='none'; checkoutModal.setAttribute('aria-hidden','true');});
+  cancelCheckout.addEventListener('click', ()=>{ checkoutModal.style.display='none'; checkoutModal.setAttribute('aria-hidden','true');});
+
+  // open checkout
+  function openCheckout(){
+    if (!cart.length) return alert('Cart is empty.');
+    // build summary
+    let subtotal = 0;
+    let totalKg = 0;
+    let html = '<div style="border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong>Items</strong></div>';
+    cart.forEach(it=>{
+      const itemTotal = it.pricePerKg * it.qty;
+      subtotal += itemTotal;
+      totalKg += it.qty;
+      html += `<div style="display:flex; justify-content:space-between; margin-bottom:6px;"><div>${escapeHtml(it.title)} <small class="meta">(${it.qty} kg)</small></div><div style="font-weight:800">${formatMoney(itemTotal)}</div></div>`;
     });
-  });
+    const discPct = getDiscountPercent(totalKg);
+    const discAmt = subtotal * discPct;
+    const finalTotal = subtotal - discAmt;
+    html += `<div style="border-top:1px dashed #eee; padding-top:8px; margin-top:8px;">
+      <div style="display:flex;justify-content:space-between"><div>Subtotal</div><div>${formatMoney(subtotal)}</div></div>
+      <div style="display:flex;justify-content:space-between"><div>Discount (${Math.round(discPct*100)}%)</div><div>- ${formatMoney(discAmt)}</div></div>
+      <div style="display:flex;justify-content:space-between; font-weight:800; margin-top:8px"><div>Total</div><div>${formatMoney(finalTotal)}</div></div>
+    </div>`;
 
-  // Format card number and expiry/cvv
-  document.getElementById('card-number').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\s/g, '');
-    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-    e.target.value = formattedValue;
-  });
-  document.getElementById('expiry').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length >= 2) {
-      value = value.substring(0, 2) + '/' + value.substring(2, 4);
-    }
-    e.target.value = value;
-  });
-  document.getElementById('cvv').addEventListener('input', function(e) {
-    e.target.value = e.target.value.replace(/\D/g, '');
-  });
+    checkoutSummary.innerHTML = html;
+    checkoutModal.style.display = 'block';
+    checkoutModal.setAttribute('aria-hidden','false');
+  }
 
-  // Checkout form submit
-  document.getElementById('checkout-form').addEventListener('submit', function(e) {
+  // handle checkout form submit
+  checkoutForm.addEventListener('submit', function(e){
     e.preventDefault();
+    if (!cart.length) return alert('Cart empty.');
 
-    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+    // simple validation
+    const name = document.getElementById('cName').value.trim();
+    const phone = document.getElementById('cPhone').value.trim();
+    const address = document.getElementById('cAddress').value.trim();
+    if (!name || !phone || !address) return alert('Fill delivery details.');
 
-    if (paymentMethod === 'card') {
-      const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
-      const expiry = document.getElementById('expiry').value;
-      const cvv = document.getElementById('cvv').value;
-      const cardName = document.getElementById('card-name').value;
-
-      if (!cardNumber || cardNumber.length < 16) {
-        alert('Please enter a valid card number');
-        return;
-      }
-      if (!expiry || expiry.length !== 5) {
-        alert('Please enter a valid expiry date (MM/YY)');
-        return;
-      }
-      if (!cvv || cvv.length < 3) {
-        alert('Please enter a valid CVV');
-        return;
-      }
-      if (!cardName) {
-        alert('Please enter the name on card');
-        return;
-      }
+    // Process each cart item using consumerBuy
+    let grandTotal = 0;
+    const results = [];
+    for (const item of cart) {
+      // Recalculate discount for this item (based on item qty, not total cart)
+      const itemDiscountPct = getDiscountPercent(item.qty);
+      const itemRawTotal = item.pricePerKg * item.qty;
+      const itemDiscount = itemRawTotal * itemDiscountPct;
+      const itemFinalTotal = itemRawTotal - itemDiscount;
+      
+      const res = consumerBuy(item.listingId, item.farmerUsername, item.qty, itemFinalTotal, item.pricePerKg, itemDiscountPct);
+      results.push(res);
+      if (res.success) grandTotal += itemFinalTotal;
     }
 
-    // Generate order ID
-    const orderId = 'ORD-' + Date.now().toString().substring(7);
+    // if any failed, show warn (but proceed where possible)
+    const failed = results.filter(r => !r.success);
+    if (failed.length) {
+      alert('Some items could not be purchased and were skipped.');
+    }
 
-    // Show success
-    document.getElementById('checkout-form-container').style.display = 'none';
-    document.getElementById('checkout-success').style.display = 'block';
-    document.getElementById('order-id').textContent = orderId;
-
-    // Clear cart
+    // Clear cart & update UI
     cart = [];
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartDisplay();
+    persistCart();
+    renderAll(); // refresh listing availability
+
+    // show confirmation and close modal
+    const orderId = 'ORD-' + Date.now();
+    alert('Order placed — Order ID: ' + orderId);
+    checkoutModal.style.display = 'none';
+    checkoutModal.setAttribute('aria-hidden','true');
   });
 
-  document.getElementById('close-checkout-btn').addEventListener('click', function() {
-    document.getElementById('checkout-modal').style.display = 'none';
-    document.getElementById('checkout-form-container').style.display = 'block';
-    document.getElementById('checkout-success').style.display = 'none';
-    document.getElementById('checkout-form').reset();
+  // clear cart
+  btnClear.addEventListener('click', ()=>{
+    if (!cart.length) return;
+    if (!confirm('Clear cart?')) return;
+    cart = [];
+    persistCart();
+    renderCart();
   });
 
-  // Filtering & search (basic)
-  document.getElementById('search').addEventListener('input', filterProducts);
-  document.getElementById('category').addEventListener('change', filterProducts);
-  document.getElementById('farm').addEventListener('change', filterProducts);
-  document.getElementById('practice').addEventListener('change', filterProducts);
-  document.getElementById('price-range').addEventListener('change', filterProducts);
-  document.getElementById('sort').addEventListener('change', sortProducts);
-  document.getElementById('global-search').addEventListener('input', function(e){
-    const q = e.target.value.trim().toLowerCase();
-    if (!q) {
-      document.querySelectorAll('.product-card').forEach(p => p.style.display = '');
+  // search
+  searchInput.addEventListener('input', ()=>{
+    const q = searchInput.value.trim().toLowerCase();
+    filteredListings = allListings.filter(l => {
+      const t = (l.title + ' ' + l.farmerName + ' ' + (l.farmerUsername||'')).toLowerCase();
+      return t.includes(q);
+    });
+    renderProducts(filteredListings);
+  });
+
+  // render consumer purchase history
+  function renderConsumerHistory(){
+    const consumerKey = 'cc_user_data_' + active.username;
+    const consumerData = parseJSON(consumerKey) || {};
+    const purchases = consumerData.purchases || [];
+    if (!purchases.length) {
+      consumerHistoryEl.innerHTML = '<div class="small">No purchases yet.</div>';
       return;
     }
-    document.querySelectorAll('.product-card').forEach(p => {
-      const text = (p.textContent || p.innerText || '').toLowerCase();
-      p.style.display = text.includes(q) ? '' : 'none';
-    });
+    const html = purchases.slice().reverse().slice(0,20).map(p => {
+      return `<div style="padding:8px 0; border-bottom:1px solid #f4f4f4;">
+        <strong>${escapeHtml(p.title)}</strong>
+        <div class="meta">Qty: ${p.qty} kg • ${formatMoney(p.total)} • ${new Date(p.time).toLocaleString()}</div>
+      </div>`;
+    }).join('');
+    consumerHistoryEl.innerHTML = html;
+  }
+
+  // render everything
+  function renderAll(){
+    // reload listings fresh from localStorage (in case farmer updated)
+    allListings = loadListingsFromFarmers();
+    filteredListings = allListings.slice();
+    renderSnapshot();
+    renderProducts(filteredListings);
+    renderCart();
+    renderConsumerHistory();
+  }
+
+  // initial render
+  renderAll();
+
+  // click outside modals close
+  window.addEventListener('click', (e)=>{
+    if (e.target === detailModal) { detailModal.style.display='none'; detailModal.setAttribute('aria-hidden','true'); }
+    if (e.target === checkoutModal) { checkoutModal.style.display='none'; checkoutModal.setAttribute('aria-hidden','true'); }
   });
 
-  function filterProducts() {
-    // Demo filtering: logs selected filters
-    const searchTerm = document.getElementById('search').value.toLowerCase();
-    const category = document.getElementById('category').value;
-    const farm = document.getElementById('farm').value;
-    const practice = document.getElementById('practice').value;
-    const priceRange = document.getElementById('price-range').value;
-    console.log('Filtering products with:', {searchTerm, category, farm, practice, priceRange});
-    // For demo, we'll perform a basic text filter using searchTerm
-    if (searchTerm) {
-      document.querySelectorAll('.product-card').forEach(p => {
-        const text = (p.textContent || p.innerText || '').toLowerCase();
-        p.style.display = text.includes(searchTerm) ? '' : 'none';
-      });
-    } else {
-      document.querySelectorAll('.product-card').forEach(p => p.style.display = '');
+  // keyboard shortcuts (optional)
+  window.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape') {
+      detailModal.style.display='none'; checkoutModal.style.display='none';
     }
-  }
-
-  function sortProducts() {
-    const sortBy = document.getElementById('sort').value;
-    console.log('Sorting products by:', sortBy);
-    // Sorting not implemented in demo — would require product array and re-render
-  }
-
-  // Simple nav-item click behavior
-  document.querySelectorAll('.nav-item').forEach(item=>{
-    item.addEventListener('click', ()=>{
-      document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
-      item.classList.add('active');
-      const link = item.dataset.link;
-      if (link) window.location.href = link;
-    });
   });
 
-  // FAQ accordion demo (if you add FAQ card later)
-  document.querySelectorAll('.faq-item').forEach(item=>{
-    const q = item.querySelector('.faq-q');
-    if(!q) return;
-    q.addEventListener('click', ()=>{
-      const a = item.querySelector('.faq-a');
-      const expanded = a.style.display === 'block';
-      document.querySelectorAll('.faq-a').forEach(n=>n.style.display='none');
-      document.querySelectorAll('.faq-q i').forEach(i=>i.style.transform='rotate(0deg)');
-      if(!expanded){
-        a.style.display='block';
-        q.querySelector('i').style.transform='rotate(180deg)';
+  // small utility: update detail total when price change (already wired)
+  // done earlier
+
+  // Expose debug helpers
+  window.CC_MARKET = {
+    loadListingsFromFarmers,
+    getCart: ()=>cart,
+    clearCart: ()=>{cart=[]; persistCart(); renderCart();}
+  };
+})();
+
+// ---------- CCMarketEngine ----------
+window.CCMarketEngine = (function() {
+  function saveMarketSnapshot(priceDelta) {
+    const KEY = 'cc_market_chart_data';
+    const arr = JSON.parse(localStorage.getItem(KEY) || '[]');
+    const point = { timestamp: Date.now(), price: Number((100 + (priceDelta||0)).toFixed(2)) }; // simplistic
+    arr.push(point);
+    localStorage.setItem(KEY, JSON.stringify(arr.slice(-200))); // keep last 200
+  }
+
+  return {
+    applyConsumerPurchase(productName, qty, total) {
+      // Basic rule: purchases increase demand -> small upward pressure
+      const priceDelta = qty * 0.02; // tune as needed
+      saveMarketSnapshot(priceDelta);
+
+      // If companies engine present, inform it
+      if (window.CCCompaniesEngine && typeof CCCompaniesEngine.applyMarketActivity === 'function') {
+        CCCompaniesEngine.applyMarketActivity(total);
       }
-    });
-  });
 
-  // Small keyboard shortcut: "/" focuses search
-  window.addEventListener('keydown', function(e){
-    if(e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){
-      e.preventDefault();
-      document.getElementById('global-search').focus();
+      // Trigger investor page render if available
+      if (window.renderAll && typeof renderAll === 'function') {
+        try { renderAll(); } catch(e){ console.warn(e); }
+      }
     }
-  });
-
+  };
+})();
 </script>
-
 </body>
 </html>
