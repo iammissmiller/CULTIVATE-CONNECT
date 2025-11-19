@@ -9,7 +9,7 @@
 **“Filling the information gaps of the agriculture sector.”**  
 The Indian agriculture ecosystem suffers from fragmented information flow—farmers lack crop insights, consumers lack reliable product knowledge, investors lack structured agri-data, and shops operate without digital linkages. CULTIVATE-CONNECT was built to solve this gap with a unified, accessible, information-driven platform.
 
-## 🌱 About the Project  
+## 🌱 About this Project  
 CULTIVATE-CONNECT is a multi-stakeholder agricultural platform developed during **HackBIOS 2025**. It provides farmers, consumers, investors, and local shops with structured information, awareness tools, and knowledge resources. The platform is fully frontend-based using HTML, CSS, and JavaScript, making it lightweight and easily deployable via GitHub Pages.
 
 ## ⭐ Key Features  
